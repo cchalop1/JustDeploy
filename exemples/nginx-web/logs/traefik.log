@@ -1,0 +1,36 @@
+_SYSTEMD_CGROUP=/system.slice/docker.service
+_SYSTEMD_UNIT=docker.service
+_SYSTEMD_SLICE=system.slice
+_CMDLINE=/usr/bin/dockerd --debug --tlsverify --tlscacert=/root/cert-docker/ca.pem --tlscert=/root/cert-docker/server-cert.pem --tlskey=/root/cert-docker/server-key.pem -H fd:// -H=0.0.0.0:2376
+_STREAM_ID=0c9eea74e4ce44328ff4a3b818fc9c93
+_PID=100751
+_SYSTEMD_INVOCATION_ID=f3e64f46b0ed4208b8411215c1dca0a8
+MESSAGE=time="2024-03-05T10:39:50.095748902Z" level=debug msg="Calling POST /v1.44/containers/create?name=traefik"
+
+__CURSOR=s=be85408c83694d81b0a94d427d1c7ad3;i=2f921;b=c54105ff9c8644ee8f419f282d00f6a6;m=5f24161869;t=612e776338362;x=5973fc28f85b7aaf
+__REALTIME_TIMESTAMP=1709635190096738
+__MONOTONIC_TIMESTAMP=408627320937
+_BOOT_ID=c54105ff9c8644ee8f419f282d00f6a6
+PRIORITY=6
+_MACHINE_ID=4b247d84948443a280a23d42ebbf652a
+_HOSTNAME=localhost
+_TRANSPORT=stdout
+SYSLOG_FACILITY=3
+SYSLOG_IDENTIFIER=dockerd
+_UID=0
+_GID=0
+_COMM=dockerd
+_EXE=/usr/bin/dockerd
+_CAP_EFFECTIVE=1ffffffffff
+_SELINUX_CONTEXT
+
+unconfined
+
+_SYSTEMD_CGROUP=/system.slice/docker.service
+_SYSTEMD_UNIT=docker.service
+_SYSTEMD_SLICE=system.slice
+_CMDLINE=/usr/bin/dockerd --debug --tlsverify --tlscacert=/root/cert-docker/ca.pem --tlscert=/root/cert-docker/server-cert.pem --tlskey=/root/cert-docker/server-key.pem -H fd:// -H=0.0.0.0:2376
+_STREAM_ID=0c9eea74e4ce44328ff4a3b818fc9c93
+_PID=100751
+_SYSTEMD_INVOCATION_ID=f3e64f46b0ed4208b8411215c1dca0a8
+MESSAGE=time="2024-03-05T10:39:50.095971035Z" level=debug msg="form data: {\"AttachStderr\":false,\"AttachStdin\":false,\"AttachStdout\":false,\"Cmd\":[\"--api.insecure=true\",\"--providers.docker=true\",\"--providers.docker.exposedbydefault=false\",\"--entrypoints.web.address=:80\",\"--entrypoints.websecure.address=:443\",\"--certificatesresolvers.myresolver.acme.tlschallenge=true\",\"--certificatesresolvers.myresolver.acme.email=clement.chalopin@gmail.com\",\"--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json\"],\"Domainname\":\"\",\"Entrypoint\":null,\"Env\":null,\"ExposedPorts\":{\"443/tcp\":{},\"80/tcp\":{},\"8080/tcp\":{}},\"HostConfig\":{\"AutoRemove\":false,\"Binds\":[\"/var/run/docker.sock:/var/run/docker.sock:ro\",\"/root/letsencrypt:/letsencrypt\"],\"BlkioDeviceReadBps\":[],\"BlkioDeviceReadIOps\":[],\"BlkioDeviceWriteBps\":[],\"BlkioDeviceWriteIOps\":[],\"BlkioWeight\":0,\"BlkioWeightDevice\":[],\"CapAdd\":null,\"CapDrop\":null,\"Cgroup\":\"\",\"CgroupParent\":\"\",\"CgroupnsMode\":\"\",\"ConsoleSize\":[49,166],\"ContainerIDFile\":\"\",\"CpuCount\":0,\"CpuPercent\":0,\"CpuPeriod\":0,\"CpuQuota\":0,\"CpuRealtimePeriod\":0,\"CpuRealtimeRuntime\":0,\"CpuShares\":0,\"CpusetCpus\":\"\",\"CpusetMems\":\"\",\"DeviceCgroupRules\":null,\"DeviceRequests\":null,\"Devices\":[],\"Dns\":[],\"DnsOptions\":[],\"DnsSearch\":[],\"ExtraHosts\":null,\"GroupAdd\":null,\"IOMaximumBandwidth\":0,\"IOMaximumIOps\":0,\"IpcMode\":\"\",\"Isolation\":\"\",\"Links\":null,\"LogConfig\":{\"Config\":{},\"Type\":\"\"},\"MaskedPaths\":null,\"Memory\":0,\"MemoryReservation\":0,\"MemorySwap\":0,\"MemorySwappiness\":-1,\"NanoCpus\":0,\"NetworkMode\":\"default\",\"OomKillDisable\":false,\"OomScoreAdj\":0,\"PidMode\":\"\",\"PidsLimit\":0,\"PortBindings\":{\"443/tcp\":[{\"HostIp\":\"\",\"HostPort\":\"443\"}],\"80/tcp\":[{\"HostIp\":\"\",\"HostPort\":\"80\"}],\"8080/tcp\":[{\"HostIp\":\"\",\"HostPort\":\"8080\"}]},\"Privileged\":false,\"PublishAllPorts\":false,\"ReadonlyPaths\":null,\"ReadonlyRootfs\":false,\"RestartPolicy\":{\"MaximumRetryCount\":0,\"Name\":\"no\"},\"SecurityOpt\":null,\"ShmSize\":0,\"UTSMode\":\"\",\"Ulimits\":[],\"UsernsMode\":\"\",\"VolumeDriver\":\"\",\"VolumesFrom\":null},\"Hostname\":\"\",\"Image\":\"traefik:v2.11\",\"Labels\":{},\"NetworkingConfig\":{\"EndpointsConfig\":{\"default\":{\"Aliases\":null,\"DNSNames\":null,\"DriverOpts\":null,\"EndpointID\":\"\",\"Gateway\":\"\",\"GlobalIPv6Address\":\"\",\"GlobalIPv6PrefixLen\":0,\"IPAMConfig\":null,\"IPAddress\":\"\",\"IPPrefixLen\":0,\"IPv6Gateway\":\"\",\"Links\":null,\"MacAddress\":\"\",\"NetworkID\":\"\"}}},\"OnBuild\":null,\"OpenStdin\":false,\"StdinOnce\":false,\"Tty\":false,\"User\":\"\",\"Volumes\":{},\"WorkingDir\":\"\"}"
