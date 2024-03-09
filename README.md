@@ -1,4 +1,4 @@
-# JustDeploy
+# JustDeploy (work in progress)
 
 JustDeploy is an open-source application designed to simplify the deployment process for developers. It allows you to deploy your simple applications on your own server with ease. JustDeploy handles server connection, Docker installation, and secure certificate generation, making the deployment process seamless and efficient.
 
@@ -10,6 +10,13 @@ One cool thing about JustDeploy is that it doesn't install anything on your serv
 - Installs Docker
 - Generates secure certificates
 - Deploys your application
+
+## TODO
+
+- [ ] password auth
+- [ ] DNS setting process
+- [ ] run part
+- [ ] From github Url
 
 ## Getting Started
 
