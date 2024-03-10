@@ -14,7 +14,7 @@ JustDeploy is that it **doesn't install anything on your server other than your 
 ## TODO
 
 - [x] password auth
-- [ ] DNS setting process
+- [x] DNS setting process
 - [ ] run part
 - [ ] From github Url
 

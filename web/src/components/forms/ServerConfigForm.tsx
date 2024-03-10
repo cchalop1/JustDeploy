@@ -22,6 +22,7 @@ import { Label } from "../ui/label";
 import { useState } from "react";
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import { ButtonStateEnum } from "@/lib/utils";
+import ModalDnsSettings from "../ModalDnsSettings";
 
 type ServerConfigFormProps = {
   fetchCurrentConfigData: () => void;
@@ -39,6 +40,7 @@ export default function ServerConfigForm({
     sshKey: "",
     user: "root",
   });
+  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
 
   async function readSSHKeyUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const target = event.target;
@@ -55,6 +57,11 @@ export default function ServerConfigForm({
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!modalIsOpen) {
+      setModalIsOpen(true);
+      return;
+    }
+    setModalIsOpen(false);
 
     if (!event.target) return;
 
@@ -170,6 +177,12 @@ export default function ServerConfigForm({
               </div>
             </div>
           </CardContent>
+          <ModalDnsSettings
+            onClick={handleSubmit}
+            open={modalIsOpen}
+            onOpenChange={setModalIsOpen}
+            domain={connectServerData.domain}
+          />
           <CardFooter className="flex justify-between">
             <Button type="submit" className="w-full">
               {connectButtonState === ButtonStateEnum.PENDING ? (
@@ -184,3 +197,9 @@ export default function ServerConfigForm({
     </div>
   );
 }
+
+<div className="pl-10 pr-10">
+  <div className="mb-2">
+    Before click to connect you server make sure you have corrcly setup your Dns
+  </div>
+</div>;
