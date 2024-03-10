@@ -16,7 +16,7 @@ JustDeploy is that it **doesn't install anything on your server other than your 
 - [x] password auth
 - [x] DNS setting process
 - [ ] persistent data
-- [ ] run part
+- [x] run part
 - [ ] From github Url
 
 ## Getting Started

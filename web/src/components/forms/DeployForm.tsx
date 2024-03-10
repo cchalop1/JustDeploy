@@ -207,7 +207,7 @@ export function AppConfigForm({ fetchCurrentConfigData }: FromToDeployProps) {
               {connectButtonState === ButtonStateEnum.PENDING ? (
                 <SpinnerIcon color="text-white" />
               ) : (
-                "Click for deploy your application"
+                "Click to deploy your application"
               )}
             </Button>
           </CardFooter>

@@ -98,8 +98,8 @@ export default function ServerConfigForm({
         <CardHeader>
           <CardTitle>Connect To Your Server</CardTitle>
           <CardDescription>
-            Before deploy your application your need to connect to the server
-            you want to deploy and setup the VM
+            Connect your server with your domain name before deploy your
+            application.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
