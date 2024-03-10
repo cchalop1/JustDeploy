@@ -1,5 +1,3 @@
-import CheckIcon from "@/assets/checkIcon";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Button } from "./ui/button";
 import { removeApplicationApi } from "@/services/removeApplication";
 import { GetDeployConfigResponse } from "@/services/getDeployConfig";

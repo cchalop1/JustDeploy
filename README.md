@@ -4,6 +4,8 @@ JustDeploy is an open-source application designed to simplify the deployment pro
 
 JustDeploy is that it **doesn't install anything on your server other than your application.** This makes it an ideal choice for small servers with limited resources or development environments
 
+![Screenshot3](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/Screenshot3.png)
+
 ## Features
 
 - Connects to your server
