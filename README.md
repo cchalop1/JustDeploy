@@ -2,7 +2,7 @@
 
 JustDeploy is an open-source application designed to simplify the deployment process for developers. It allows you to deploy your simple applications on your own server with ease. JustDeploy handles server connection, Docker installation, and secure certificate generation, making the deployment process seamless and efficient.
 
-One cool thing about JustDeploy is that it doesn't install anything on your server other than your application. This makes it an ideal choice for small servers with limited resources or development environments
+JustDeploy is that it **doesn't install anything on your server other than your application.** This makes it an ideal choice for small servers with limited resources or development environments
 
 ## Features
 
@@ -74,7 +74,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
