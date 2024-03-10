@@ -24,9 +24,7 @@ function App() {
 
   return (
     <div>
-      <div className="text-center m-5 text-4xl font-bold">
-        Deploy your application
-      </div>
+      <div className="text-center m-5 text-4xl font-bold">JustDeploy</div>
       <Steps status={deployConfig.deployFormStatus} />
       <div className="flex w-full justify-center mt-10">
         {deployConfig.deployFormStatus === "serverconfig" && (
