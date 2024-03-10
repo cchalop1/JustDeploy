@@ -18,16 +18,6 @@ func NewSshAdapter() *SshAdapter {
 	return &SshAdapter{}
 }
 
-// func getKey(keyPath string) (ssh.Signer, error) {
-// 	keyBytes, err := os.ReadFile(keyPath)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return nil, err
-// 	}
-
-// 	return ssh.ParsePrivateKey(keyBytes)
-// }
-
 func (s *SshAdapter) Connect(connectConfig domain.ConnectServerDto) {
 	signer, err := ssh.ParsePrivateKey([]byte(*connectConfig.SshKey))
 	if err != nil {
@@ -41,15 +31,11 @@ func (s *SshAdapter) Connect(connectConfig domain.ConnectServerDto) {
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	// Connect to the SSH server
 	client, err := ssh.Dial("tcp", connectConfig.Domain+":22", config)
 	if err != nil {
 		log.Fatalf("Failed to dial: %s", err)
 	}
 	s.client = client
-
-	// Defer a client close
-	// defer client.Close()
 }
 
 func (s *SshAdapter) CloseConnection() {
@@ -70,14 +56,12 @@ func (s *SshAdapter) RunCommand(command string) (string, error) {
 }
 
 func (s *SshAdapter) SaveRemoteFileContentToLocalFile(remoteFilePath string, localFilePath string) error {
-	// Execute the 'cat' command on the remote server
 	catCommand := fmt.Sprintf("cat %s", remoteFilePath)
 	content, err := s.RunCommand(catCommand)
 	if err != nil {
 		return fmt.Errorf("failed to execute 'cat' command: %v", err)
 	}
 
-	// Write the content to a local file
 	err = os.WriteFile(localFilePath, []byte(content), 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write content to local file: %v", err)

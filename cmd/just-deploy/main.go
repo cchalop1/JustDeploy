@@ -1,4 +1,3 @@
-// internal/main.go
 package main
 
 import (
@@ -13,16 +12,4 @@ func main() {
 	httpAdapter := application.NewHttpAdapter(deployConfig)
 
 	httpAdapter.StartServer(true)
-
-	// dockerAdapter := adapter.NewDockerAdapter()
-
-	// sshAdapter := adapter.NewSshAdapter()
-
-	// setupVmService := application.NewSetupVMService(sshAdapter)
-
-	// setupVmService.Setup(deployConfig)
-
-	// deployementService := application.NewDeploymentService(dockerAdapter, sshAdapter)
-
-	// deployementService.DeployApplication(deployConfig)
 }

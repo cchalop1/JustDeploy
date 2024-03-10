@@ -37,7 +37,7 @@ export default function ServerConfigForm({
     domain: "",
     password: null,
     sshKey: "",
-    user: "",
+    user: "root",
   });
 
   async function readSSHKeyUpload(event: React.ChangeEvent<HTMLInputElement>) {
@@ -105,6 +105,7 @@ export default function ServerConfigForm({
                   name="server-user"
                   placeholder="root"
                   value={connectServerData.user}
+                  disabled
                   onChange={(e) =>
                     setConnectServerData({
                       ...connectServerData,
@@ -143,27 +144,13 @@ export default function ServerConfigForm({
               </div>
               <div className="flex flex-col space-y-1.5">
                 {connectServerData.sshKey !== null && (
-                  <>
-                    <Input
-                      type="file"
-                      id="ssh-key"
-                      name="ssh-key"
-                      placeholder="Upload your ssh key"
-                      onChange={readSSHKeyUpload}
-                    ></Input>
-                    {/* <Textarea
-                      id="ssh-key"
-                      name="ssh-key"
-                      placeholder="Paste your SSH key here"
-                      value={connectServerData.sshKey}
-                      onChange={(e) =>
-                        setConnectServerData({
-                          ...connectServerData,
-                          sshKey: e.target.value,
-                        })
-                      }
-                    /> */}
-                  </>
+                  <Input
+                    type="file"
+                    id="ssh-key"
+                    name="ssh-key"
+                    placeholder="Upload your ssh key"
+                    onChange={readSSHKeyUpload}
+                  ></Input>
                 )}
                 {connectServerData.password !== null && (
                   <Input

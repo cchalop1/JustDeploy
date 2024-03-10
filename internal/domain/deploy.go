@@ -1,14 +1,5 @@
 package domain
 
-type Deploy struct {
-	Name     string
-	ServerIP string
-	Path     string
-	ZipPath  string
-	Email    string
-	Domain   string
-}
-
 type DeployConfigDto struct {
 	PathToProject    string           `json:"pathToProject"`
 	DockerFileValid  bool             `json:"dockerFileValid"`
