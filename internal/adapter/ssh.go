@@ -18,16 +18,25 @@ func NewSshAdapter() *SshAdapter {
 	return &SshAdapter{}
 }
 
-func (s *SshAdapter) Connect(connectConfig domain.ConnectServerDto) {
+func (s *SshAdapter) getAuthMethode(connectConfig domain.ConnectServerDto) []ssh.AuthMethod {
+	if connectConfig.Password != nil && connectConfig.SshKey == nil {
+		return []ssh.AuthMethod{
+			ssh.Password(*connectConfig.Password),
+		}
+	}
 	signer, err := ssh.ParsePrivateKey([]byte(*connectConfig.SshKey))
 	if err != nil {
 		log.Fatalf("Failed to parse private key: %s", err)
 	}
+	return []ssh.AuthMethod{
+		ssh.PublicKeys(signer),
+	}
+}
+
+func (s *SshAdapter) Connect(connectConfig domain.ConnectServerDto) {
 	config := &ssh.ClientConfig{
-		User: connectConfig.User,
-		Auth: []ssh.AuthMethod{
-			ssh.PublicKeys(signer),
-		},
+		User:            connectConfig.User,
+		Auth:            s.getAuthMethode(connectConfig),
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 

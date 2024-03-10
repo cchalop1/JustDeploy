@@ -13,7 +13,7 @@ One cool thing about JustDeploy is that it doesn't install anything on your serv
 
 ## TODO
 
-- [ ] password auth
+- [x] password auth
 - [ ] DNS setting process
 - [ ] run part
 - [ ] From github Url
