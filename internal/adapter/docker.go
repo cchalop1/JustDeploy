@@ -24,6 +24,8 @@ func NewDockerAdapter() *DockerAdapter {
 	return &DockerAdapter{}
 }
 
+const TRAEFIK_IMAGE = "traefik"
+
 func (d *DockerAdapter) ConnectClient(connectConfig domain.ConnectServerDto) error {
 	// TODO: get host by parameter and connect to it
 	caCertPath := "./cert-docker/ca.pem"
@@ -89,7 +91,7 @@ func (d *DockerAdapter) checkIsRouterImageIsPull() (bool, error) {
 	}
 
 	for _, image := range imageList {
-		if image.RepoTags[0] == "traefik:v2.10" {
+		if image.RepoTags[0] == TRAEFIK_IMAGE {
 			fmt.Println("Image", "treafik", "already exists")
 			return true, nil
 		}
@@ -120,7 +122,7 @@ func (d *DockerAdapter) PullTreafikImage() {
 	}
 
 	fmt.Println("Pull image", "treafik")
-	reader, err := d.client.ImagePull(context.Background(), "traefik:v2.10", types.ImagePullOptions{})
+	reader, err := d.client.ImagePull(context.Background(), TRAEFIK_IMAGE, types.ImagePullOptions{})
 
 	if err != nil {
 		fmt.Println(err)
@@ -138,7 +140,7 @@ func (d *DockerAdapter) RunRouter() {
 	email := "clement.chalopin@gmail.com"
 
 	config := container.Config{
-		Image: "traefik:v2.11",
+		Image: TRAEFIK_IMAGE,
 		Cmd: []string{
 			"--api.insecure=true",
 			"--providers.docker=true",
