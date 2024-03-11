@@ -25,15 +25,15 @@ function App() {
   return (
     <div>
       <div className="text-center m-5 text-4xl font-bold">JustDeploy</div>
-      <Steps status={deployConfig.deployFormStatus} />
+      <Steps status={deployConfig.deployStatus} />
       <div className="flex w-full justify-center mt-10">
-        {deployConfig.deployFormStatus === "serverconfig" && (
+        {deployConfig.deployStatus === "serverconfig" && (
           <ServerConfigForm fetchCurrentConfigData={fetchCurrentConfigData} />
         )}
-        {deployConfig.deployFormStatus === "appconfig" && (
+        {deployConfig.deployStatus === "appconfig" && (
           <AppConfigForm fetchCurrentConfigData={fetchCurrentConfigData} />
         )}
-        {deployConfig.deployFormStatus === "deployapp" && (
+        {deployConfig.deployStatus === "deployapp" && (
           <DeploySuccess
             fetchCurrentConfigData={fetchCurrentConfigData}
             deployConfig={deployConfig}

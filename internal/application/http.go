@@ -10,15 +10,22 @@ import (
 )
 
 type HttpAdapter struct {
-	server        *echo.Echo
-	deployConfig  domain.DeployConfigDto
-	dockerAdapter adapter.DockerAdapter
+	server          *echo.Echo
+	deployConfig    domain.DeployConfigDto
+	dockerAdapter   adapter.DockerAdapter
+	databaseAdapter adapter.DatabaseAdapter
 }
 
 func NewHttpAdapter(deployConfig domain.DeployConfigDto) *HttpAdapter {
-	return &HttpAdapter{
-		deployConfig: deployConfig,
+	HttpAdapter := HttpAdapter{
+		deployConfig:  deployConfig,
+		dockerAdapter: *adapter.NewDockerAdapter(),
 	}
+
+	if deployConfig.DeployStatus != "serverconfig" {
+		HttpAdapter.dockerAdapter = ConnectToServer(deployConfig.ServerConfig)
+	}
+	return &HttpAdapter
 }
 
 func (http *HttpAdapter) createRoutes() {
@@ -61,7 +68,8 @@ func (h *HttpAdapter) connectServerRoute(c echo.Context) error {
 
 	h.dockerAdapter = ConnectToServer(connectServerDto)
 	h.deployConfig.ServerConfig = connectServerDto
-	h.deployConfig.DeployFromStatus = "appconfig"
+	h.deployConfig.DeployStatus = "appconfig"
+	h.databaseAdapter.SaveState(h.deployConfig)
 
 	return c.JSON(http.StatusOK, domain.ResponseApi{Message: "Server is connected"})
 }
@@ -79,13 +87,14 @@ func (h *HttpAdapter) postCreateDeployementRoute(c echo.Context) error {
 	deployService := NewDeploymentService(&h.dockerAdapter)
 	deployService.DeployApplication(h.deployConfig)
 
-	h.deployConfig.DeployFromStatus = "deployapp"
+	h.deployConfig.DeployStatus = "deployapp"
 	if h.deployConfig.AppConfig.EnableTls {
 		h.deployConfig.Url = "https://" + h.dockerAdapter.ServerDomain
 	} else {
 		h.deployConfig.Url = "http://" + h.dockerAdapter.ServerDomain
 	}
 
+	h.databaseAdapter.SaveState(h.deployConfig)
 	return c.JSON(http.StatusOK, domain.ResponseApi{Message: "Application is deploy"})
 }
 
@@ -93,7 +102,9 @@ func (h *HttpAdapter) removeApplicationRoute(c echo.Context) error {
 	applicationName := c.Param("name")
 
 	RemoveApplication(applicationName, &h.dockerAdapter)
-	h.deployConfig.DeployFromStatus = "appconfig"
+	h.deployConfig.DeployStatus = "appconfig"
+
+	h.databaseAdapter.SaveState(h.deployConfig)
 	return c.JSON(http.StatusOK, domain.ResponseApi{Message: "Application is removed"})
 }
 

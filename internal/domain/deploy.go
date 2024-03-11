@@ -1,12 +1,12 @@
 package domain
 
 type DeployConfigDto struct {
-	PathToProject    string           `json:"pathToProject"`
-	DockerFileValid  bool             `json:"dockerFileValid"`
-	ServerConfig     ConnectServerDto `json:"serverConfig"`
-	AppConfig        AppConfigDto     `json:"appConfig"`
-	DeployFromStatus string           `json:"deployFormStatus"`
-	Url              string           `json:"url"`
+	PathToProject   string           `json:"pathToProject"`
+	DockerFileValid bool             `json:"dockerFileValid"`
+	ServerConfig    ConnectServerDto `json:"serverConfig"`
+	AppConfig       AppConfigDto     `json:"appConfig"`
+	DeployStatus    string           `json:"deployStatus"`
+	Url             string           `json:"url"`
 }
 
 type ConnectServerDto struct {

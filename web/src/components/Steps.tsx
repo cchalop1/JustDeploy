@@ -1,6 +1,6 @@
 import DotsCircilsIcon from "@/assets/DotsCirlcleIcon";
 import CheckIcon from "@/assets/checkIcon";
-import { DeployFormStatus } from "@/services/getDeployConfig";
+import { deployStatus } from "@/services/getDeployConfig";
 
 type StepState = "pending" | "success" | "notstarted";
 
@@ -26,7 +26,7 @@ function Step({ state, title }: StepProps) {
 }
 
 type StepsProps = {
-  status: DeployFormStatus;
+  status: deployStatus;
 };
 
 export default function Steps({ status }: StepsProps) {

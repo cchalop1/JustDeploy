@@ -5,14 +5,9 @@ import (
 	"cchalop1.com/deploy/internal/domain"
 )
 
-func GetFormDetails(filesystemAdapter *adapter.FilesystemAdapter) domain.DeployConfigDto {
-	formDetailsResponse := domain.DeployConfigDto{
-		PathToProject:    "",
-		DockerFileValid:  false,
-		DeployFromStatus: "serverconfig",
-		ServerConfig:     domain.ConnectServerDto{},
-		AppConfig:        domain.AppConfigDto{},
-	}
+func GetDeployConfig(databaseAdapter *adapter.DatabaseAdapter) domain.DeployConfigDto {
+	configDeploy := databaseAdapter.GetState()
+
 	// pathToProject := ""
 
 	// flag.StringVar(&pathToProject, "path", "", "Path to the deployment directory")
@@ -27,5 +22,5 @@ func GetFormDetails(filesystemAdapter *adapter.FilesystemAdapter) domain.DeployC
 	// formDetailsResponse.PathToProject = filesystemAdapter.GetFullPathToProject(pathToProject)
 	// formDetailsResponse.DockerFileValid = filesystemAdapter.IsWhereIsADockerFileInTheFolder(formDetailsResponse.PathToProject)
 
-	return formDetailsResponse
+	return configDeploy
 }

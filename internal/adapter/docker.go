@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 
+	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/domain"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -28,9 +29,9 @@ const TRAEFIK_IMAGE = "traefik"
 
 func (d *DockerAdapter) ConnectClient(connectConfig domain.ConnectServerDto) error {
 	// TODO: get host by parameter and connect to it
-	caCertPath := "./cert-docker/ca.pem"
-	certPath := "./cert-docker/cert.pem"
-	keyPath := "./cert-docker/key.pem"
+	caCertPath := internal.CERT_DOCKER_FOLDER + "/ca.pem"
+	certPath := internal.CERT_DOCKER_FOLDER + "/cert.pem"
+	keyPath := internal.CERT_DOCKER_FOLDER + "/key.pem"
 	d.ServerDomain = connectConfig.Domain
 
 	client, err := client.NewClientWithOpts(

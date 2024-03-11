@@ -6,9 +6,10 @@ import (
 )
 
 func main() {
-	filesystemAdapter := adapter.NewFilesystemAdapter()
+	// filesystemAdapter := adapter.NewFilesystemAdapter()
+	databaseAdapter := adapter.NewDatabaseAdapter()
 
-	deployConfig := application.GetFormDetails(filesystemAdapter)
+	deployConfig := application.GetDeployConfig(databaseAdapter)
 	httpAdapter := application.NewHttpAdapter(deployConfig)
 
 	httpAdapter.StartServer(true)

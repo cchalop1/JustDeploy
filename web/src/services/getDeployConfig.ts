@@ -2,14 +2,14 @@ import { callApi } from "./api";
 import { ConnectServerDto } from "./connectServer";
 import { PostCreateDeploymentDto } from "./postFormDetails";
 
-export type DeployFormStatus = "serverconfig" | "appconfig" | "deployapp";
+export type deployStatus = "serverconfig" | "appconfig" | "deployapp";
 
 export type GetDeployConfigResponse = {
   pathToProject: string;
   dockerFileValid: boolean;
   serverConfig: ConnectServerDto | null;
   appConfig: PostCreateDeploymentDto | null;
-  deployFormStatus: DeployFormStatus;
+  deployStatus: deployStatus;
   url: string;
 };
 

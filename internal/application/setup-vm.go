@@ -250,7 +250,6 @@ func setupDockerCertificates(sshAdapter *adapter.SshAdapter, serverHost string) 
 }
 
 func ensureCertDockerDirectory(localDir string) {
-
 	// Check if the directory exists
 	if _, err := os.Stat(localDir); os.IsNotExist(err) {
 		// Directory does not exist, create it
