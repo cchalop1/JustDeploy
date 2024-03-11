@@ -36,7 +36,11 @@ export default function ModalApplicationLogs({
           {logs === null ? (
             <SpinnerIcon color="text-black" />
           ) : (
-            logs.map((log) => <code className="w-full mb-2">{log}</code>)
+            logs.map((log, idx) => (
+              <code key={idx} className="w-full mb-2">
+                {log}
+              </code>
+            ))
           )}
         </DialogDescription>
       </DialogContent>

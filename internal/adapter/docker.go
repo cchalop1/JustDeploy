@@ -230,12 +230,16 @@ func (d *DockerAdapter) RunImage(deployConfig domain.DeployConfigDto) {
 	fmt.Println("Run image", Name)
 }
 
-func (d *DockerAdapter) Remove(appName string) {
-	d.client.ContainerStop(context.Background(), appName, container.StopOptions{})
-	d.client.ContainerStop(context.Background(), "treafik", container.StopOptions{})
+func (d *DockerAdapter) Delete(appName string, stopRouter bool) {
+	d.Stop(appName)
+	if stopRouter {
+		d.Stop("treafik")
+	}
+}
 
-	d.client.ContainerRemove(context.Background(), appName, types.ContainerRemoveOptions{})
-	d.client.ContainerRemove(context.Background(), "treafik", types.ContainerRemoveOptions{})
+func (d *DockerAdapter) Stop(appName string) {
+	d.client.ContainerStop(context.Background(), appName, container.StopOptions{})
+	d.client.ContainerRemove(context.Background(), appName, container.RemoveOptions{})
 }
 
 func (d *DockerAdapter) GetLogsOfContainer(containerName string) []string {

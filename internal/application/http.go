@@ -38,6 +38,7 @@ func (http *HttpAdapter) createRoutes() {
 	http.server.POST("/api/connect", http.connectServerRoute)
 	http.server.DELETE("/api/remove/:name", http.removeApplicationRoute)
 	http.server.GET("/api/logs/:name", http.getApplicationLogsRoute)
+	http.server.POST("/api/redeploy/:name", http.reDeployApplicationRoute)
 }
 
 func (http *HttpAdapter) StartServer(openBrowser bool) {
@@ -113,4 +114,16 @@ func (h *HttpAdapter) getApplicationLogsRoute(c echo.Context) error {
 
 	logs := GetApplicationLogs(containerName, &h.dockerAdapter)
 	return c.JSON(http.StatusOK, logs)
+}
+
+func (h *HttpAdapter) reDeployApplicationRoute(c echo.Context) error {
+	// containerName := c.Param("name")
+	// TODO: get the app with the container name when we mange multiple application
+
+	deployService := NewDeploymentService(&h.dockerAdapter)
+
+	h.dockerAdapter.Stop(h.deployConfig.AppConfig.Name)
+	deployService.DeployApplication(h.deployConfig)
+
+	return c.JSON(http.StatusOK, domain.ResponseApi{Message: "Application is redeploy"})
 }

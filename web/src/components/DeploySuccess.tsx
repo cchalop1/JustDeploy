@@ -9,6 +9,7 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import LinkIcon from "@/assets/linkIcon";
 import ModalApplicationLogs from "./modals/ModalLogs";
+import { reDeployAppApi } from "@/services/reDeployApp";
 
 type DeploySuccessProps = {
   deployConfig: GetDeployConfigResponse;
@@ -22,11 +23,16 @@ export default function DeploySuccess({
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
     ButtonStateEnum.INIT
   );
+
+  const [redeployButtonState, setReDeployButtonState] =
+    useState<ButtonStateEnum>(ButtonStateEnum.INIT);
   const [openLogs, setOpenLogs] = useState(false);
 
-  async function removeApplication() {
-    if (deployConfig.appConfig === null) return null;
+  // TODO: fix this condition should be manage in the parent compoents
+  if (!deployConfig.appConfig) return null;
 
+  async function removeApplication() {
+    if (!deployConfig.appConfig) return null;
     setConnectButtonState(ButtonStateEnum.PENDING);
     try {
       await removeApplicationApi(deployConfig.appConfig.name);
@@ -36,7 +42,17 @@ export default function DeploySuccess({
       console.error(e);
     }
   }
-  if (deployConfig.appConfig === null) return null;
+
+  async function reDeployApplication() {
+    if (!deployConfig.appConfig) return null;
+    setReDeployButtonState(ButtonStateEnum.PENDING);
+    try {
+      await reDeployAppApi(deployConfig.appConfig.name);
+      setReDeployButtonState(ButtonStateEnum.SUCESS);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   return (
     <>
@@ -57,7 +73,13 @@ export default function DeploySuccess({
               )}
             </Button>
             <Button>Stop</Button>
-            <Button variant="secondary">Redeploy</Button>
+            <Button variant="secondary" onClick={() => reDeployApplication()}>
+              {redeployButtonState === ButtonStateEnum.PENDING ? (
+                <SpinnerIcon color="text-black" />
+              ) : (
+                "Redeploy"
+              )}
+            </Button>
           </div>
         </div>
         <Badge className="bg-green-600">Runing</Badge>

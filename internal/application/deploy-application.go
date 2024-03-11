@@ -32,8 +32,3 @@ func (s *DeploymentService) DeployApplication(deployConfig domain.DeployConfigDt
 
 	return nil
 }
-
-func (s *DeploymentService) RemoveApplication(applicationName string) error {
-	s.dockerAdapter.Remove(applicationName)
-	return nil
-}
