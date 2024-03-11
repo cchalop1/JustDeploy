@@ -58,7 +58,6 @@ export default function DeploySuccess({
             </Button>
             <Button>Stop</Button>
             <Button variant="secondary">Redeploy</Button>
-            <Button variant="secondary">Edit</Button>
           </div>
         </div>
         <Badge className="bg-green-600">Runing</Badge>
