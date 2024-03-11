@@ -25,9 +25,11 @@ export default function DeploySuccess({
   const [openLogs, setOpenLogs] = useState(false);
 
   async function removeApplication() {
+    if (deployConfig.appConfig === null) return null;
+
     setConnectButtonState(ButtonStateEnum.PENDING);
     try {
-      await removeApplicationApi();
+      await removeApplicationApi(deployConfig.appConfig.name);
       setConnectButtonState(ButtonStateEnum.SUCESS);
       fetchCurrentConfigData();
     } catch (e) {
@@ -47,14 +49,14 @@ export default function DeploySuccess({
         <div className="flex justify-between">
           <div className="font-bold">{deployConfig.appConfig.name}</div>
           <div className="flex gap-2">
-            <Button onClick={removeApplication}>
+            <Button variant="destructive" onClick={removeApplication}>
               {connectButtonState === ButtonStateEnum.PENDING ? (
                 <SpinnerIcon color="text-white" />
               ) : (
-                "Stop"
+                "Delete"
               )}
             </Button>
-            <Button variant="destructive">Delete</Button>
+            <Button>Stop</Button>
             <Button variant="secondary">Redeploy</Button>
             <Button variant="secondary">Edit</Button>
           </div>

@@ -90,10 +90,10 @@ func (h *HttpAdapter) postCreateDeployementRoute(c echo.Context) error {
 }
 
 func (h *HttpAdapter) removeApplicationRoute(c echo.Context) error {
-	deployService := NewDeploymentService(&h.dockerAdapter)
-	deployService.RemoveApplication(h.deployConfig.AppConfig.Name)
-	h.deployConfig.DeployFromStatus = "appconfig"
+	applicationName := c.Param("name")
 
+	RemoveApplication(applicationName, &h.dockerAdapter)
+	h.deployConfig.DeployFromStatus = "appconfig"
 	return c.JSON(http.StatusOK, domain.ResponseApi{Message: "Application is removed"})
 }
 
