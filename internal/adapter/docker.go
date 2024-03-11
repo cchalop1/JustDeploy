@@ -236,3 +236,27 @@ func (d *DockerAdapter) Remove(appName string) {
 	d.client.ContainerRemove(context.Background(), appName, types.ContainerRemoveOptions{})
 	d.client.ContainerRemove(context.Background(), "treafik", types.ContainerRemoveOptions{})
 }
+
+func (d *DockerAdapter) GetLogsOfContainer(containerName string) []string {
+	logs, err := d.client.ContainerLogs(context.Background(), containerName, container.LogsOptions{ShowStdout: true})
+	if err != nil {
+		fmt.Println("Failed to read container logs: ", err)
+		return make([]string, 0)
+	}
+	defer logs.Close()
+
+	lines := make([]string, 0)
+	buf := make([]byte, 1024)
+
+	for {
+		n, err := logs.Read(buf)
+		if n > 0 {
+			lines = append(lines, string(buf[:n]))
+		}
+		if err != nil {
+			break
+		}
+	}
+
+	return lines
+}

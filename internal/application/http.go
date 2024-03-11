@@ -29,7 +29,8 @@ func (http *HttpAdapter) createRoutes() {
 	http.server.GET("/api/deploy", http.getFormDetails)
 	http.server.POST("/api/deploy", http.postCreateDeployementRoute)
 	http.server.POST("/api/connect", http.connectServerRoute)
-	http.server.DELETE("/api/remove", http.removeApplicationRoute)
+	http.server.DELETE("/api/remove/:name", http.removeApplicationRoute)
+	http.server.GET("/api/logs/:name", http.getApplicationLogsRoute)
 }
 
 func (http *HttpAdapter) StartServer(openBrowser bool) {
@@ -94,4 +95,11 @@ func (h *HttpAdapter) removeApplicationRoute(c echo.Context) error {
 	h.deployConfig.DeployFromStatus = "appconfig"
 
 	return c.JSON(http.StatusOK, domain.ResponseApi{Message: "Application is removed"})
+}
+
+func (h *HttpAdapter) getApplicationLogsRoute(c echo.Context) error {
+	containerName := c.Param("name")
+
+	logs := GetApplicationLogs(containerName, &h.dockerAdapter)
+	return c.JSON(http.StatusOK, logs)
 }

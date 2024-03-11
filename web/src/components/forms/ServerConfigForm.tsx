@@ -22,7 +22,7 @@ import { Label } from "../ui/label";
 import { useState } from "react";
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import { ButtonStateEnum } from "@/lib/utils";
-import ModalDnsSettings from "../ModalDnsSettings";
+import ModalDnsSettings from "../modals/ModalDnsSettings";
 
 type ServerConfigFormProps = {
   fetchCurrentConfigData: () => void;
