@@ -1,12 +1,13 @@
 package application
 
 import (
+	"embed"
 	"net/http"
 
 	"cchalop1.com/deploy/internal/adapter"
 	"cchalop1.com/deploy/internal/domain"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type HttpAdapter struct {
@@ -28,17 +29,27 @@ func NewHttpAdapter(deployConfig domain.DeployConfigDto) *HttpAdapter {
 	return &HttpAdapter
 }
 
-func (http *HttpAdapter) createRoutes() {
+//go:generate sh copyfiles.sh
+//go:embed dist
+var webAssets embed.FS
+
+func (h *HttpAdapter) createRoutes() {
 	// Render web page
-	http.server.Static("/", "web/dist")
+	// http.server.Static("/", "web/dist")
+
+	h.server.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+		HTML5:      true,
+		Root:       "dist", // because files are located in `web` directory in `webAssets` fs
+		Filesystem: http.FS(webAssets),
+	}))
 
 	// api routes
-	http.server.GET("/api/deploy", http.getFormDetails)
-	http.server.POST("/api/deploy", http.postCreateDeployementRoute)
-	http.server.POST("/api/connect", http.connectServerRoute)
-	http.server.DELETE("/api/remove/:name", http.removeApplicationRoute)
-	http.server.GET("/api/logs/:name", http.getApplicationLogsRoute)
-	http.server.POST("/api/redeploy/:name", http.reDeployApplicationRoute)
+	h.server.GET("/api/deploy", h.getFormDetails)
+	h.server.POST("/api/deploy", h.postCreateDeployementRoute)
+	h.server.POST("/api/connect", h.connectServerRoute)
+	h.server.DELETE("/api/remove/:name", h.removeApplicationRoute)
+	h.server.GET("/api/logs/:name", h.getApplicationLogsRoute)
+	h.server.POST("/api/redeploy/:name", h.reDeployApplicationRoute)
 }
 
 func (http *HttpAdapter) StartServer(openBrowser bool) {

@@ -1,7 +1,10 @@
 GOBIN = ./bin
 
-all: build-go build-web
+all: build-web copy-web-build build-go
 
+copy-web-build:
+	cp -R web/dist internal/application/
+	
 build-go:
 	@go build -o $(GOBIN)/just-deploy ./cmd/just-deploy/main.go
 
