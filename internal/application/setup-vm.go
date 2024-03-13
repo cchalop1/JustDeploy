@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/adapter"
 	"cchalop1.com/deploy/internal/domain"
 	"cchalop1.com/deploy/internal/utils"
@@ -267,11 +268,10 @@ func ensureCertDockerDirectory(localDir string) {
 
 func copyCertificates(sshAdapter *adapter.SshAdapter) error {
 	remoteFiles := []string{"ca.pem", "key.pem", "cert.pem"}
-	localDir := "./cert-docker"
-	ensureCertDockerDirectory(localDir)
+	ensureCertDockerDirectory(internal.CERT_DOCKER_FOLDER)
 
 	for _, remoteFileName := range remoteFiles {
-		err := sshAdapter.SaveRemoteFileContentToLocalFile("/root/cert-docker/"+remoteFileName, localDir+"/"+remoteFileName)
+		err := sshAdapter.SaveRemoteFileContentToLocalFile("/root/cert-docker/"+remoteFileName, internal.CERT_DOCKER_FOLDER+"/"+remoteFileName)
 		if err != nil {
 			log.Fatalf("Error saving file content: %v", err)
 		}
