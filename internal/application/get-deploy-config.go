@@ -2,10 +2,10 @@ package application
 
 import (
 	"cchalop1.com/deploy/internal/adapter"
-	"cchalop1.com/deploy/internal/domain"
+	"cchalop1.com/deploy/models"
 )
 
-func GetDeployConfig(databaseAdapter *adapter.DatabaseAdapter) domain.DeployConfigDto {
+func GetDeployConfig(databaseAdapter *adapter.DatabaseAdapter) models.DeployConfigDto {
 	configDeploy := databaseAdapter.GetState()
 
 	// pathToProject := ""

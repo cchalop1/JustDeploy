@@ -3,32 +3,29 @@ package application
 import (
 	"path/filepath"
 
-	"cchalop1.com/deploy/internal/adapter"
-	"cchalop1.com/deploy/internal/domain"
+	"cchalop1.com/deploy/internal/api/usecase"
 )
 
-type DeploymentService struct {
-	dockerAdapter *adapter.DockerAdapter
-}
-
-func NewDeploymentService(dockerAdapter *adapter.DockerAdapter) *DeploymentService {
-	return &DeploymentService{
-		dockerAdapter: dockerAdapter,
-	}
-}
-
-func (s *DeploymentService) DeployApplication(deployConfig domain.DeployConfigDto) error {
-
-	pathToDir, err := filepath.Abs(deployConfig.PathToProject)
+func DeployApplication(deployUseCase *usecase.DeployUseCase) error {
+	pathToDir, err := filepath.Abs(deployUseCase.DeployConfig.PathToProject)
 
 	if err != nil {
 		return err
 	}
 
-	s.dockerAdapter.BuildImage(deployConfig.AppConfig.Name, pathToDir)
-	s.dockerAdapter.PullTreafikImage()
-	s.dockerAdapter.RunRouter()
-	s.dockerAdapter.RunImage(deployConfig)
+	deployUseCase.DockerAdapter.BuildImage(deployUseCase.DeployConfig.AppConfig.Name, pathToDir)
+	deployUseCase.DockerAdapter.PullTreafikImage()
+	deployUseCase.DockerAdapter.RunRouter()
+	deployUseCase.DockerAdapter.RunImage(*deployUseCase.DeployConfig)
 
+	deployUseCase.DeployConfig.DeployStatus = "deployapp"
+
+	if deployUseCase.DeployConfig.AppConfig.EnableTls {
+		deployUseCase.DeployConfig.Url = "https://" + deployUseCase.DeployConfig.ServerConfig.Domain
+	} else {
+		deployUseCase.DeployConfig.Url = "http://" + deployUseCase.DeployConfig.ServerConfig.Domain
+	}
+
+	deployUseCase.DeployConfig.AppStatus = "Runing"
 	return nil
 }

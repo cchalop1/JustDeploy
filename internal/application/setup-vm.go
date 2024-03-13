@@ -7,11 +7,12 @@ import (
 
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/adapter"
-	"cchalop1.com/deploy/internal/domain"
 	"cchalop1.com/deploy/internal/utils"
+	"cchalop1.com/deploy/models"
 )
 
-func ConnectToServer(connectConfig domain.ConnectServerDto) adapter.DockerAdapter {
+func ConnectAndSetupServer(connectConfig models.ConnectServerDto) *adapter.DockerAdapter {
+	// TODO: change this adapter
 	sshAdapter := adapter.NewSshAdapter()
 	sshAdapter.Connect(connectConfig)
 
@@ -43,8 +44,7 @@ func ConnectToServer(connectConfig domain.ConnectServerDto) adapter.DockerAdapte
 	sshAdapter.CloseConnection()
 	adapterDocker := adapter.NewDockerAdapter()
 	adapterDocker.ConnectClient(connectConfig)
-
-	return *adapterDocker
+	return adapterDocker
 }
 
 func checkIfDockerIsIntalled(sshAdapter *adapter.SshAdapter) (bool, error) {

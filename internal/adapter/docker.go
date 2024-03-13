@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"cchalop1.com/deploy/internal"
-	"cchalop1.com/deploy/internal/domain"
+	"cchalop1.com/deploy/models"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -17,8 +17,7 @@ import (
 )
 
 type DockerAdapter struct {
-	client       *client.Client
-	ServerDomain string
+	client *client.Client
 }
 
 func NewDockerAdapter() *DockerAdapter {
@@ -28,12 +27,10 @@ func NewDockerAdapter() *DockerAdapter {
 const TRAEFIK_IMAGE = "traefik"
 const ROUTER_NAME = "treafik"
 
-func (d *DockerAdapter) ConnectClient(connectConfig domain.ConnectServerDto) error {
+func (d *DockerAdapter) ConnectClient(connectConfig models.ConnectServerDto) error {
 	caCertPath := internal.CERT_DOCKER_FOLDER + "/ca.pem"
 	certPath := internal.CERT_DOCKER_FOLDER + "/cert.pem"
 	keyPath := internal.CERT_DOCKER_FOLDER + "/key.pem"
-
-	d.ServerDomain = connectConfig.Domain
 
 	client, err := client.NewClientWithOpts(
 		client.WithHost("tcp://"+connectConfig.Domain+":2376"),
@@ -187,7 +184,7 @@ func (d *DockerAdapter) RunRouter() {
 
 }
 
-func envToSlice(envVars []domain.Env) []string {
+func envToSlice(envVars []models.Env) []string {
 	envSlice := make([]string, 0, len(envVars))
 	for _, value := range envVars {
 		if value.Name != "" && value.Secret != "" {
@@ -197,7 +194,7 @@ func envToSlice(envVars []domain.Env) []string {
 	return envSlice
 }
 
-func (d *DockerAdapter) RunImage(deployConfig domain.DeployConfigDto) {
+func (d *DockerAdapter) RunImage(deployConfig models.DeployConfigDto) {
 	Name := deployConfig.AppConfig.Name
 
 	Labels := map[string]string{

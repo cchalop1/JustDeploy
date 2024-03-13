@@ -7,33 +7,24 @@ import (
 	"path/filepath"
 )
 
-// FilesystemAdapter provides functions for filesystem operations.
 type FilesystemAdapter struct {
-	// Any configuration or dependencies needed for filesystem operations
 }
 
-// NewFilesystemAdapter creates a new instance of FilesystemAdapter.
 func NewFilesystemAdapter() *FilesystemAdapter {
-	// Initialize and return a new instance if needed
 	return &FilesystemAdapter{}
 }
 
-// GetFolderName returns the name of the folder given a path.
 func (fs *FilesystemAdapter) GetFolderName(path string) string {
-	// Clean the path to handle potential issues with separators
 	cleanedPath := filepath.Clean(path)
 
-	// get the absolute path to the project
 	projectName := filepath.Base(cleanedPath)
 
 	return projectName
 }
 
 func (fs *FilesystemAdapter) GetFullPathToProject(path string) string {
-	// Clean the path to handle potential issues with separators
 	cleanedPath := filepath.Clean(path)
 
-	// get the absolute path to the project
 	fullPathToProject, err := filepath.Abs(cleanedPath)
 
 	if err != nil {
