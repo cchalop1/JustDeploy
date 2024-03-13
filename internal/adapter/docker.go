@@ -26,12 +26,13 @@ func NewDockerAdapter() *DockerAdapter {
 }
 
 const TRAEFIK_IMAGE = "traefik"
+const ROUTER_NAME = "treafik"
 
 func (d *DockerAdapter) ConnectClient(connectConfig domain.ConnectServerDto) error {
-	// TODO: get host by parameter and connect to it
 	caCertPath := internal.CERT_DOCKER_FOLDER + "/ca.pem"
 	certPath := internal.CERT_DOCKER_FOLDER + "/cert.pem"
 	keyPath := internal.CERT_DOCKER_FOLDER + "/key.pem"
+
 	d.ServerDomain = connectConfig.Domain
 
 	client, err := client.NewClientWithOpts(
@@ -93,7 +94,7 @@ func (d *DockerAdapter) checkIsRouterImageIsPull() (bool, error) {
 
 	for _, image := range imageList {
 		if image.RepoTags[0] == TRAEFIK_IMAGE {
-			fmt.Println("Image", "treafik", "already exists")
+			fmt.Println("Image", TRAEFIK_IMAGE, "already exists")
 			return true, nil
 		}
 	}
@@ -109,7 +110,7 @@ func (d *DockerAdapter) checkRouterIsRuning() (bool, error) {
 
 	for _, container := range containerList {
 		if container.Names[0] == "/treafik" {
-			fmt.Println("Router", "treafik", "is already runing")
+			fmt.Println("Router", ROUTER_NAME, "is already runing")
 			return true, nil
 		}
 	}
@@ -122,7 +123,7 @@ func (d *DockerAdapter) PullTreafikImage() {
 		return
 	}
 
-	fmt.Println("Pull image", "treafik")
+	fmt.Println("Pull image", ROUTER_NAME)
 	reader, err := d.client.ImagePull(context.Background(), TRAEFIK_IMAGE, types.ImagePullOptions{})
 
 	if err != nil {
@@ -172,7 +173,7 @@ func (d *DockerAdapter) RunRouter() {
 		},
 		NetworkMode:  "default",
 		PortBindings: portMap,
-	}, nil, &v1.Platform{}, "treafik")
+	}, nil, &v1.Platform{}, ROUTER_NAME)
 
 	if err != nil {
 		fmt.Println(err)
@@ -182,7 +183,7 @@ func (d *DockerAdapter) RunRouter() {
 	d.client.ContainerStart(context.Background(), con.ID, types.ContainerStartOptions{})
 	fmt.Printf("Container %s is started", con.ID)
 
-	fmt.Println("Run image", "treafik")
+	fmt.Println("Run image", ROUTER_NAME)
 
 }
 
@@ -232,14 +233,23 @@ func (d *DockerAdapter) RunImage(deployConfig domain.DeployConfigDto) {
 
 func (d *DockerAdapter) Delete(appName string, stopRouter bool) {
 	d.Stop(appName)
+	d.Remove(appName)
 	if stopRouter {
-		d.Stop("treafik")
+		d.Stop(ROUTER_NAME)
+		d.Remove(ROUTER_NAME)
 	}
 }
 
 func (d *DockerAdapter) Stop(appName string) {
 	d.client.ContainerStop(context.Background(), appName, container.StopOptions{})
+}
+
+func (d *DockerAdapter) Remove(appName string) {
 	d.client.ContainerRemove(context.Background(), appName, container.RemoveOptions{})
+}
+
+func (d *DockerAdapter) Start(appName string) {
+	d.client.ContainerStart(context.Background(), appName, container.StartOptions{})
 }
 
 func (d *DockerAdapter) GetLogsOfContainer(containerName string) []string {

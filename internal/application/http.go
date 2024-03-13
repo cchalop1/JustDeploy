@@ -50,6 +50,8 @@ func (h *HttpAdapter) createRoutes() {
 	h.server.DELETE("/api/remove/:name", h.removeApplicationRoute)
 	h.server.GET("/api/logs/:name", h.getApplicationLogsRoute)
 	h.server.POST("/api/redeploy/:name", h.reDeployApplicationRoute)
+	h.server.POST("/api/start/:name", h.startApplicationRoute)
+	h.server.POST("/api/stop/:name", h.stopApplicationRoute)
 }
 
 func (http *HttpAdapter) StartServer(openBrowser bool) {
@@ -106,6 +108,7 @@ func (h *HttpAdapter) postCreateDeployementRoute(c echo.Context) error {
 		h.deployConfig.Url = "http://" + h.dockerAdapter.ServerDomain
 	}
 
+	h.deployConfig.AppStatus = "runing"
 	h.databaseAdapter.SaveState(h.deployConfig)
 	return c.JSON(http.StatusOK, domain.ResponseApi{Message: "Application is deploy"})
 }
@@ -133,8 +136,26 @@ func (h *HttpAdapter) reDeployApplicationRoute(c echo.Context) error {
 
 	deployService := NewDeploymentService(&h.dockerAdapter)
 
-	h.dockerAdapter.Stop(h.deployConfig.AppConfig.Name)
+	h.dockerAdapter.Delete(h.deployConfig.AppConfig.Name, false)
 	deployService.DeployApplication(h.deployConfig)
 
 	return c.JSON(http.StatusOK, domain.ResponseApi{Message: "Application is redeploy"})
+}
+
+func (h *HttpAdapter) stopApplicationRoute(c echo.Context) error {
+	containerName := c.Param("name")
+
+	h.dockerAdapter.Stop(containerName)
+	h.deployConfig.AppStatus = "Stoped"
+
+	return c.JSON(http.StatusOK, domain.ResponseApi{Message: "Application is stoped"})
+}
+
+func (h *HttpAdapter) startApplicationRoute(c echo.Context) error {
+	containerName := c.Param("name")
+
+	h.dockerAdapter.Start(containerName)
+	h.deployConfig.AppStatus = "Runing"
+
+	return c.JSON(http.StatusOK, domain.ResponseApi{Message: "Application is stoped"})
 }

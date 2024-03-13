@@ -10,6 +10,8 @@ import { Badge } from "./ui/badge";
 import LinkIcon from "@/assets/linkIcon";
 import ModalApplicationLogs from "./modals/ModalLogs";
 import { reDeployAppApi } from "@/services/reDeployApp";
+import { stopApplicationApi } from "@/services/stopApplication";
+import { startApplicationApi } from "@/services/startApplication";
 
 type DeploySuccessProps = {
   deployConfig: GetDeployConfigResponse;
@@ -23,13 +25,16 @@ export default function DeploySuccess({
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
     ButtonStateEnum.INIT
   );
-
   const [redeployButtonState, setReDeployButtonState] =
     useState<ButtonStateEnum>(ButtonStateEnum.INIT);
+  const [stopStartButtonState, setStopStartButtonState] =
+    useState<ButtonStateEnum>(ButtonStateEnum.INIT);
+
   const [openLogs, setOpenLogs] = useState(false);
 
   // TODO: fix this condition should be manage in the parent compoents
   if (!deployConfig.appConfig) return null;
+  console.log(deployConfig);
 
   async function removeApplication() {
     if (!deployConfig.appConfig) return null;
@@ -54,6 +59,22 @@ export default function DeploySuccess({
     }
   }
 
+  async function startStopApplication() {
+    if (!deployConfig.appConfig) return null;
+    setStopStartButtonState(ButtonStateEnum.PENDING);
+    try {
+      {
+        deployConfig.appStatus === "Runing"
+          ? await stopApplicationApi(deployConfig.appConfig.name)
+          : await startApplicationApi(deployConfig.appConfig.name);
+      }
+      fetchCurrentConfigData();
+      setStopStartButtonState(ButtonStateEnum.SUCESS);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   return (
     <>
       <ModalApplicationLogs
@@ -72,7 +93,15 @@ export default function DeploySuccess({
                 "Delete"
               )}
             </Button>
-            <Button>Stop</Button>
+            <Button onClick={startStopApplication}>
+              {stopStartButtonState === ButtonStateEnum.PENDING ? (
+                <SpinnerIcon color="text-white" />
+              ) : deployConfig.appStatus === "Runing" ? (
+                "Stop"
+              ) : (
+                "Start"
+              )}
+            </Button>
             <Button variant="secondary" onClick={() => reDeployApplication()}>
               {redeployButtonState === ButtonStateEnum.PENDING ? (
                 <SpinnerIcon color="text-black" />
@@ -82,7 +111,13 @@ export default function DeploySuccess({
             </Button>
           </div>
         </div>
-        <Badge className="bg-green-600">Runing</Badge>
+        <Badge
+          className={
+            deployConfig.appStatus === "Runing" ? "bg-green-600" : "bg-red-600"
+          }
+        >
+          {deployConfig.appStatus}
+        </Badge>
         <div className="flex items-center gap-2 mt-4">
           <LinkIcon />
           <a href={deployConfig.url} target="_blank" className="underline">

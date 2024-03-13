@@ -74,6 +74,7 @@ func (d *DatabaseAdapter) GetState() domain.DeployConfigDto {
 			DeployStatus:    "serverconfig",
 			ServerConfig:    domain.ConnectServerDto{},
 			AppConfig:       domain.AppConfigDto{},
+			AppStatus:       "",
 		})
 	}
 	deployConfig := d.readDeployConfigInDataBaseFile()

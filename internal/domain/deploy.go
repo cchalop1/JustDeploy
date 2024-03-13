@@ -7,6 +7,7 @@ type DeployConfigDto struct {
 	AppConfig       AppConfigDto     `json:"appConfig"`
 	DeployStatus    string           `json:"deployStatus"`
 	Url             string           `json:"url"`
+	AppStatus       string           `json:"appStatus"`
 }
 
 type ConnectServerDto struct {
