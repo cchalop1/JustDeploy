@@ -5,7 +5,9 @@ type DeployConfigDto struct {
 	AppConfig       AppConfigDto     `json:"appConfig"`
 	PathToProject   string           `json:"pathToProject"`
 	DockerFileValid bool             `json:"dockerFileValid"`
-	DeployStatus    string           `json:"deployStatus"`
-	Url             string           `json:"url"`
-	AppStatus       string           `json:"appStatus"`
+	// TODO: add enum here
+	DeployStatus string `json:"deployStatus"`
+	Url          string `json:"url"`
+	// TODO: add enum here
+	AppStatus string `json:"appStatus"`
 }
