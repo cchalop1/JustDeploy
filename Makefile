@@ -17,3 +17,4 @@ run:
 clean:
 	@rm -f $(GOBIN)/just-deploy
 	@cd web && rm -rf dist
+	@rm -r internal/application/dist
