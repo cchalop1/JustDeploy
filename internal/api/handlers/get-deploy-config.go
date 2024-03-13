@@ -3,12 +3,12 @@ package handlers
 import (
 	"net/http"
 
-	"cchalop1.com/deploy/internal/api/usecase"
+	"cchalop1.com/deploy/internal/api/service"
 	"github.com/labstack/echo/v4"
 )
 
-func GetDeployConfigHandler(deployUseCase *usecase.DeployUseCase) echo.HandlerFunc {
+func GetDeployConfigHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, deployUseCase.DeployConfig)
+		return c.JSON(http.StatusOK, deployService.DeployConfig)
 	}
 }

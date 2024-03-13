@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"cchalop1.com/deploy/models"
+	"cchalop1.com/deploy/internal/api/dto"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -18,7 +18,7 @@ func NewSshAdapter() *SshAdapter {
 	return &SshAdapter{}
 }
 
-func (s *SshAdapter) getAuthMethode(connectConfig models.ConnectServerDto) []ssh.AuthMethod {
+func (s *SshAdapter) getAuthMethode(connectConfig dto.ConnectServerDto) []ssh.AuthMethod {
 	if connectConfig.Password != nil && connectConfig.SshKey == nil {
 		return []ssh.AuthMethod{
 			ssh.Password(*connectConfig.Password),
@@ -33,7 +33,7 @@ func (s *SshAdapter) getAuthMethode(connectConfig models.ConnectServerDto) []ssh
 	}
 }
 
-func (s *SshAdapter) Connect(connectConfig models.ConnectServerDto) {
+func (s *SshAdapter) Connect(connectConfig dto.ConnectServerDto) {
 	config := &ssh.ClientConfig{
 		User:            connectConfig.User,
 		Auth:            s.getAuthMethode(connectConfig),

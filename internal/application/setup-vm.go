@@ -7,14 +7,13 @@ import (
 
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/adapter"
+	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/utils"
-	"cchalop1.com/deploy/models"
 )
 
-func ConnectAndSetupServer(connectConfig models.ConnectServerDto) *adapter.DockerAdapter {
-	// TODO: change this adapter
+func ConnectAndSetupServer(deployService *service.DeployService) *adapter.DockerAdapter {
 	sshAdapter := adapter.NewSshAdapter()
-	sshAdapter.Connect(connectConfig)
+	sshAdapter.Connect(deployService.DeployConfig.ServerConfig)
 
 	dockerIsInstalled, err := checkIfDockerIsIntalled(sshAdapter)
 	fmt.Println(err)
@@ -28,7 +27,7 @@ func ConnectAndSetupServer(connectConfig models.ConnectServerDto) *adapter.Docke
 	fmt.Println(err)
 
 	if !certificateIsCreated {
-		err = setupDockerCertificates(sshAdapter, connectConfig.Domain)
+		err = setupDockerCertificates(sshAdapter, deployService.DeployConfig.ServerConfig.Domain)
 		copyCertificates(sshAdapter)
 		fmt.Println(err)
 	}
@@ -43,7 +42,7 @@ func ConnectAndSetupServer(connectConfig models.ConnectServerDto) *adapter.Docke
 
 	sshAdapter.CloseConnection()
 	adapterDocker := adapter.NewDockerAdapter()
-	adapterDocker.ConnectClient(connectConfig)
+	adapterDocker.ConnectClient(deployService.DeployConfig.ServerConfig)
 	return adapterDocker
 }
 

@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"cchalop1.com/deploy/internal"
-	"cchalop1.com/deploy/models"
+	"cchalop1.com/deploy/internal/api/dto"
 )
 
 type DatabaseAdapter struct {
@@ -38,7 +38,7 @@ func (d *DatabaseAdapter) createFoldeJustDeployFolderIfDontExist() error {
 	return nil
 }
 
-func (d *DatabaseAdapter) writeDeployConfigInDataBaseFile(deployConfig models.DeployConfigDto) error {
+func (d *DatabaseAdapter) writeDeployConfigInDataBaseFile(deployConfig dto.DeployConfigDto) error {
 	file, err := json.MarshalIndent(deployConfig, "", "  ")
 	if err != nil {
 		log.Fatalf("Error marshaling to JSON: %v", err)
@@ -49,8 +49,8 @@ func (d *DatabaseAdapter) writeDeployConfigInDataBaseFile(deployConfig models.De
 	return err
 }
 
-func (d *DatabaseAdapter) readDeployConfigInDataBaseFile() models.DeployConfigDto {
-	deployConfig := models.DeployConfigDto{}
+func (d *DatabaseAdapter) readDeployConfigInDataBaseFile() dto.DeployConfigDto {
+	deployConfig := dto.DeployConfigDto{}
 
 	file, err := os.ReadFile(internal.DATABASE_FILE_PATH)
 
@@ -65,15 +65,15 @@ func (d *DatabaseAdapter) readDeployConfigInDataBaseFile() models.DeployConfigDt
 	return deployConfig
 }
 
-func (d *DatabaseAdapter) GetState() models.DeployConfigDto {
+func (d *DatabaseAdapter) GetState() dto.DeployConfigDto {
 	if !d.databaseFileIsCreated() {
 		d.createFoldeJustDeployFolderIfDontExist()
-		d.writeDeployConfigInDataBaseFile(models.DeployConfigDto{
+		d.writeDeployConfigInDataBaseFile(dto.DeployConfigDto{
 			PathToProject:   "",
 			DockerFileValid: false,
 			DeployStatus:    "serverconfig",
-			ServerConfig:    models.ConnectServerDto{},
-			AppConfig:       models.AppConfigDto{},
+			ServerConfig:    dto.ConnectServerDto{},
+			AppConfig:       dto.AppConfigDto{},
 			AppStatus:       "",
 		})
 	}
@@ -81,7 +81,7 @@ func (d *DatabaseAdapter) GetState() models.DeployConfigDto {
 	return deployConfig
 }
 
-func (d *DatabaseAdapter) SaveState(deployConfig models.DeployConfigDto) error {
+func (d *DatabaseAdapter) SaveState(deployConfig dto.DeployConfigDto) error {
 	d.writeDeployConfigInDataBaseFile(deployConfig)
 	return nil
 }

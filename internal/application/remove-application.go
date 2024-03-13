@@ -1,9 +1,11 @@
 package application
 
-import "cchalop1.com/deploy/internal/api/usecase"
+import (
+	"cchalop1.com/deploy/internal/api/service"
+)
 
-func RemoveApplication(applicationName string, deployUseCase *usecase.DeployUseCase) error {
-	deployUseCase.DockerAdapter.Delete(applicationName, true)
-	deployUseCase.DeployConfig.DeployStatus = "appconfig"
+func RemoveApplication(applicationName string, deployService *service.DeployService) error {
+	deployService.DockerAdapter.Delete(applicationName, true)
+	deployService.DeployConfig.DeployStatus = "appconfig"
 	return nil
 }
