@@ -18,7 +18,7 @@ JustDeploy is that it **doesn't install anything on your server other than your 
 - [x] password auth
 - [x] DNS setting process
 - [x] persistent data
-- [ ] buttons on the run part
+- [x] buttons on the run part
 - [x] logs of the containers
 - [x] embed the web build in gobinary
 - [ ] packages for release it
