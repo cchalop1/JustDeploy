@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"cchalop1.com/deploy/internal"
-	"cchalop1.com/deploy/models"
+	"cchalop1.com/deploy/internal/api/dto"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -27,7 +27,7 @@ func NewDockerAdapter() *DockerAdapter {
 const TRAEFIK_IMAGE = "traefik"
 const ROUTER_NAME = "treafik"
 
-func (d *DockerAdapter) ConnectClient(connectConfig models.ConnectServerDto) error {
+func (d *DockerAdapter) ConnectClient(connectConfig dto.ConnectServerDto) error {
 	caCertPath := internal.CERT_DOCKER_FOLDER + "/ca.pem"
 	certPath := internal.CERT_DOCKER_FOLDER + "/cert.pem"
 	keyPath := internal.CERT_DOCKER_FOLDER + "/key.pem"
@@ -90,7 +90,7 @@ func (d *DockerAdapter) checkIsRouterImageIsPull() (bool, error) {
 	}
 
 	for _, image := range imageList {
-		if image.RepoTags[0] == TRAEFIK_IMAGE {
+		if len(image.RepoTags) > 0 && image.RepoTags[0] == TRAEFIK_IMAGE {
 			fmt.Println("Image", TRAEFIK_IMAGE, "already exists")
 			return true, nil
 		}
@@ -184,7 +184,7 @@ func (d *DockerAdapter) RunRouter() {
 
 }
 
-func envToSlice(envVars []models.Env) []string {
+func envToSlice(envVars []dto.Env) []string {
 	envSlice := make([]string, 0, len(envVars))
 	for _, value := range envVars {
 		if value.Name != "" && value.Secret != "" {
@@ -194,7 +194,7 @@ func envToSlice(envVars []models.Env) []string {
 	return envSlice
 }
 
-func (d *DockerAdapter) RunImage(deployConfig models.DeployConfigDto) {
+func (d *DockerAdapter) RunImage(deployConfig dto.DeployConfigDto) {
 	Name := deployConfig.AppConfig.Name
 
 	Labels := map[string]string{

@@ -3,18 +3,18 @@ GOBIN = ./bin
 all: build-web copy-web-build build-go
 
 copy-web-build:
-	cp -R web/dist internal/web/
+	cp -R web/dist internal/web/dist/
 	
 build-go:
-	@go build -o $(GOBIN)/just-deploy ./cmd/just-deploy/main.go
+	@go build -o $(GOBIN)/justdeploy ./cmd/just-deploy/main.go
 
 build-web:
 	@cd web && pnpm install && pnpm run build
 
 run:
-	@$(GOBIN)/just-deploy
+	@$(GOBIN)/justdeploy
 
 clean:
-	@rm -f $(GOBIN)/just-deploy
+	@rm -f $(GOBIN)/justdeploy
 	@cd web && rm -rf dist
-	@rm -r internal/web
+	@rm -r internal/web/dist

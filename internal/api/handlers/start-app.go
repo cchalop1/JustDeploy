@@ -3,17 +3,17 @@ package handlers
 import (
 	"net/http"
 
-	"cchalop1.com/deploy/internal/api/usecase"
+	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/application"
-	"cchalop1.com/deploy/internal/domain"
 	"github.com/labstack/echo/v4"
 )
 
-func StartAppHandler(deployUseCase *usecase.DeployUseCase) echo.HandlerFunc {
+func StartAppHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		containerName := c.Param("name")
 
-		application.StartApplication(deployUseCase, containerName)
-		return c.JSON(http.StatusOK, domain.ResponseApi{Message: "Application is stoped"})
+		application.StartApplication(deployService, containerName)
+		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is stoped"})
 	}
 }

@@ -1,8 +1,8 @@
 package application
 
-import "cchalop1.com/deploy/internal/api/usecase"
+import "cchalop1.com/deploy/internal/api/service"
 
-func StopApplication(deployUseCase *usecase.DeployUseCase, containerName string) {
-	deployUseCase.DockerAdapter.Stop(containerName)
-	deployUseCase.DeployConfig.AppStatus = "Stopped"
+func StopApplication(deployService *service.DeployService, containerName string) {
+	deployService.DockerAdapter.Stop(containerName)
+	deployService.DeployConfig.AppStatus = "Stopped"
 }

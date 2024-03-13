@@ -3,26 +3,25 @@ package handlers
 import (
 	"net/http"
 
-	"cchalop1.com/deploy/internal/api/usecase"
+	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/application"
-	"cchalop1.com/deploy/models"
 	"github.com/labstack/echo/v4"
 )
 
-func ConnectAndSetupServerHandler(deployUseCase *usecase.DeployUseCase) echo.HandlerFunc {
+func ConnectAndSetupServerHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		connectServerDto := models.ConnectServerDto{}
+		connectServerDto := dto.ConnectServerDto{}
 
 		err := c.Bind(&connectServerDto)
 		if err != nil {
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		// TODO: move to application
-		deployUseCase.DockerAdapter = application.ConnectAndSetupServer(connectServerDto)
-		deployUseCase.DeployConfig.ServerConfig = connectServerDto
-		deployUseCase.DeployConfig.DeployStatus = "appconfig"
+		deployService.DeployConfig.ServerConfig = connectServerDto
+		deployService.DockerAdapter = application.ConnectAndSetupServer(deployService)
+		deployService.DeployConfig.DeployStatus = "appconfig"
 
-		return c.JSON(http.StatusOK, deployUseCase.DeployConfig)
+		return c.JSON(http.StatusOK, deployService.DeployConfig)
 	}
 }
