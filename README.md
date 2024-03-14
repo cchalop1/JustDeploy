@@ -71,7 +71,7 @@ make
 4. Run JustDeploy
 
 ```bash
-./bin/just-deploy
+./bin/justdeploy
 ```
 
 ## License
