@@ -12,18 +12,18 @@ arch=$(uname -m)
 if [ "$platform" == "darwin" ]; then
   if [ "$arch" == "arm64" ]; then
     zip_file="justdeploy-darwin-arm.zip"
-    binary_file="justdeploy-darwin-arm"
+    binary_file_arch="justdeploy-darwin-arm"
   else
     zip_file="justdeploy-darwin-x86.zip"
-    binary_file="justdeploy-darwin-x86"
+    binary_file_arch="justdeploy-darwin-x86"
   fi
 else
   if [ "$(expr substr $(uname -m) 1 5)" == "armv7" ] || [ "$(expr substr $(uname -m) 1 3)" == "aarch64" ]; then
     zip_file="justdeploy-linux-arm.zip"
-    binary_file="justdeploy-linux-arm"
+    binary_file_arch="justdeploy-linux-arm"
   else
     zip_file="justdeploy-linux-x86.zip"
-    binary_file="justdeploy-linux-x86"
+    binary_file_arch="justdeploy-linux-x86"
   fi
 fi
 
@@ -35,14 +35,16 @@ download_url=$(echo $response | grep -o "https://github.com/cchalop1/JustDeploy/
 curl -L -o $zip_file $download_url
 
 # Unzip binary file
-unzip $binary_file $zip_file
+unzip $zip_file
 
 # Make the binary executable
-chmod +x $binary_file
+chmod +x ./bin/$binary_file_arch
 
 # Move the binary to a system directory (e.g., /usr/local/bin)
-sudo mv $binary_file /usr/local/bin/
+sudo mv ./bin/$binary_file_arch /usr/local/bin/$binary_file
 
 rm $zip_file
+
+rm -rf ./bin
 
 echo "✨ Installation complete. You can now run $binary_file"
