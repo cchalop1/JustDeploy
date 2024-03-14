@@ -34,5 +34,3 @@ jobs:
 
       - name: Create a Release
         uses: softprops/action-gh-release@v2
-        with:
-          files: justdeploy.zip
