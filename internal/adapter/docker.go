@@ -151,16 +151,16 @@ func (d *DockerAdapter) RunRouter() {
 			"--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json",
 		},
 		ExposedPorts: nat.PortSet{
-			"80/tcp":   struct{}{},
-			"443/tcp":  struct{}{},
-			"8080/tcp": struct{}{},
+			"80/tcp":  struct{}{},
+			"443/tcp": struct{}{},
+			// "8080/tcp": struct{}{},
 		},
 	}
 
 	portMap := nat.PortMap{
-		"80/tcp":   []nat.PortBinding{{HostIP: "", HostPort: "80"}},
-		"443/tcp":  []nat.PortBinding{{HostIP: "", HostPort: "443"}},
-		"8080/tcp": []nat.PortBinding{{HostIP: "", HostPort: "8080"}},
+		"80/tcp":  []nat.PortBinding{{HostIP: "", HostPort: "80"}},
+		"443/tcp": []nat.PortBinding{{HostIP: "", HostPort: "443"}},
+		// "8080/tcp": []nat.PortBinding{{HostIP: "", HostPort: "8080"}},
 	}
 
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{
