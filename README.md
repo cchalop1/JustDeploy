@@ -6,29 +6,6 @@ JustDeploy is that it **doesn't install anything on your server other than your 
 
 ![Screenshot4](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/Screenshot4.png)
 
-## Features
-
-- Connects to your server
-- Installs Docker
-- Generates secure certificates
-- Deploys your application
-
-## TODO
-
-- [x] password auth
-- [x] DNS setting process
-- [x] persistent data
-- [x] buttons on the run part
-- [x] logs of the containers
-- [x] embed the web build in gobinary
-- [x] packages for release it
-- [x] install script
-- [ ] git hooks post-commit
-- [ ] socket
-<!-- - [ ] update status with -->
-- [ ] Usage graph on the sucess deploy page
-- [ ] From github Url
-
 ## Install
 
 ```bash
@@ -104,3 +81,28 @@ This project is licensed under the AGPLv3 License - see the [LICENSE](LICENSE) f
 ## Contact
 
 For any questions or suggestions, please open an issue or contact the project maintainer (cchalop1).
+
+<!--
+## Features
+
+- Connects to your server
+- Installs Docker
+- Generates secure certificates
+- Deploys your application
+
+## TODO
+
+- [x] password auth
+- [x] DNS setting process
+- [x] persistent data
+- [x] buttons on the run part
+- [x] logs of the containers
+- [x] embed the web build in gobinary
+- [x] packages for release it
+- [x] install script
+- [ ] git hooks post-commit
+- [ ] socket
+<!-- - [ ] update status with -->
+
+<!-- - [ ] Usage graph on the sucess deploy page
+- [ ] From github Url -->
