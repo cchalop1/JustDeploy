@@ -26,15 +26,9 @@ jobs:
         with:
           version: 8
 
-      - name: Build web
+      - name: Build application
         run: |
-          cd web
-          pnpm install
-          pnpm run build
-
-      - name: Build Go application
-        run: |
-          go build -o bin/justdeploy ./cmd/just-deploy/main.go
+          make
 
       - name: Create zip file
         run: |
