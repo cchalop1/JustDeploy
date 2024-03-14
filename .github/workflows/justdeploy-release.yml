@@ -32,8 +32,13 @@ jobs:
         run: |
           zip -r justdeploy.zip bin
 
-      - name: Create a Release
-        uses: softprops/action-gh-release@v2
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          files: justdeploy.zip
-          token: ${{ github.token }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
