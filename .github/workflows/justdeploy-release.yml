@@ -4,11 +4,9 @@ env:
   JUSTDEPLOY_VERSION: ${{ github.event.inputs.tag || github.event.release.tag_name || 'canary' }}
 on:
   push:
-    branches:
-      - "main"
-  # release:
-  #   types:
-  #     - published
+    tags:
+      - "v*"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,12 +32,7 @@ jobs:
         run: |
           zip -r justdeploy.zip bin
 
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create a Release
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./justdeploy.zip
-          asset_name: justdeploy.zip
-          asset_content_type: application/zip
+          files: justdeploy.zip
