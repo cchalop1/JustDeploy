@@ -25,13 +25,20 @@ jobs:
 
       - name: Build application
         run: |
-          make
+          make build-ci
 
       - name: Create zip file
         run: |
-          zip -r justdeploy.zip bin
+          zip -r justdeploy-linux-arm.zip bin/justdeploy-linux-arm
+          zip -r justdeploy-linux-x86.zip bin/justdeploy-linux-x86
+          zip -r justdeploy-darwin-arm.zip bin/justdeploy-darwin-arm
+          zip -r justdeploy-darwin-x86.zip bin/justdeploy-darwin-x86
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: justdeploy.zip
+          files: |
+            justdeploy-linux-arm.zip
+            justdeploy-linux-x86.zip
+            justdeploy-darwin-arm.zip
+            justdeploy-darwin-x86.zip
