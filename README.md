@@ -6,6 +6,8 @@ JustDeploy is that it **doesn't install anything on your server other than your 
 
 ![Screenshot4](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/Screenshot4.png)
 
+For now JustDeploy only support debian base VMs.
+
 ## Features
 
 - Connects to your server
