@@ -1,0 +1,62 @@
+name: Build and Release
+concurrency: release
+env:
+  JUSTDEPLOY_VERSION: ${{ github.event.inputs.tag || github.event.release.tag_name || 'canary' }}
+on:
+  push:
+    branches:
+      - "main"
+  # release:
+  #   types:
+  #     - published
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      matrix:
+        go-version: [1.22.1]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Build web
+        run: |
+          cd web
+          pnpm install
+          pnpm run build
+
+      - name: Build Go application
+        run: |
+          go build -o bin/justdeploy ./cmd/just-deploy/main.go
+
+      - name: Create zip file
+        run: |
+          zip -r justdeploy.zip bin
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./justdeploy.zip
+          asset_name: justdeploy.zip
+          asset_content_type: application/zip

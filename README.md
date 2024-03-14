@@ -22,6 +22,8 @@ JustDeploy is that it **doesn't install anything on your server other than your 
 - [x] logs of the containers
 - [x] embed the web build in gobinary
 - [ ] packages for release it
+- [ ] install script
+- [ ] git hooks
 - [ ] socket
 <!-- - [ ] update status with -->
 - [ ] Usage graph on the sucess deploy page
