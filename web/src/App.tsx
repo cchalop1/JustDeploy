@@ -31,7 +31,10 @@ function App() {
           <ServerConfigForm fetchCurrentConfigData={fetchCurrentConfigData} />
         )}
         {deployConfig.deployStatus === "appconfig" && (
-          <AppConfigForm fetchCurrentConfigData={fetchCurrentConfigData} />
+          <AppConfigForm
+            fetchCurrentConfigData={fetchCurrentConfigData}
+            deployConfig={deployConfig}
+          />
         )}
         {deployConfig.deployStatus === "deployapp" && (
           <DeploySuccess

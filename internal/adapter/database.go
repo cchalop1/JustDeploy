@@ -69,7 +69,6 @@ func (d *DatabaseAdapter) GetState() dto.DeployConfigDto {
 	if !d.databaseFileIsCreated() {
 		d.createFoldeJustDeployFolderIfDontExist()
 		d.writeDeployConfigInDataBaseFile(dto.DeployConfigDto{
-			PathToProject:   "",
 			DockerFileValid: false,
 			DeployStatus:    "serverconfig",
 			ServerConfig:    dto.ConnectServerDto{},

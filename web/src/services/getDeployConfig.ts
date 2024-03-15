@@ -6,7 +6,6 @@ export type deployStatus = "serverconfig" | "appconfig" | "deployapp";
 export type appStatus = "Stoped" | "Runing";
 
 export type GetDeployConfigResponse = {
-  pathToProject: string;
   dockerFileValid: boolean;
   serverConfig: ConnectServerDto | null;
   appConfig: PostCreateDeploymentDto | null;

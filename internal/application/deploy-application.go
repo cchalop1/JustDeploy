@@ -8,15 +8,15 @@ import (
 )
 
 func DeployApplication(deployService *service.DeployService) error {
-	pathToDir, err := filepath.Abs(deployService.DeployConfig.PathToProject)
+	pathToDir, err := filepath.Abs(deployService.DeployConfig.AppConfig.PathToSource)
 
 	if err != nil {
 		return err
 	}
 
-	deployService.DeployConfig.PathToProject = adapter.NewFilesystemAdapter().CleanPath(pathToDir)
+	deployService.DeployConfig.AppConfig.PathToSource = adapter.NewFilesystemAdapter().CleanPath(pathToDir)
 
-	deployService.DockerAdapter.BuildImage(deployService.DeployConfig.AppConfig.Name, pathToDir)
+	deployService.DockerAdapter.BuildImage(deployService.DeployConfig.AppConfig.Name, deployService.DeployConfig.AppConfig.PathToSource)
 	deployService.DockerAdapter.PullTreafikImage()
 	deployService.DockerAdapter.RunRouter()
 	deployService.DockerAdapter.RunImage(*deployService.DeployConfig)

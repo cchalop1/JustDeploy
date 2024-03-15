@@ -20,7 +20,8 @@ func GetDeployConfig(databaseAdapter *adapter.DatabaseAdapter, filesystemAdapter
 
 	currentPath, err := filesystemAdapter.GetCurrentPath()
 	if err == nil {
-		configDeploy.PathToProject = currentPath
+		configDeploy.AppConfig.PathToSource = currentPath
+
 	}
 	// formDetailsResponse.AppConfig.Name = filesystemAdapter.GetFolderName(pathToProject)
 	// formDetailsResponse.PathToProject = filesystemAdapter.GetFullPathToProject(pathToProject)

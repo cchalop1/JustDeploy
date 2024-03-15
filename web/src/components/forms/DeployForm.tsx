@@ -17,12 +17,17 @@ import {
 } from "../../services/postFormDetails";
 import { ButtonStateEnum } from "../../lib/utils";
 import SpinnerIcon from "@/assets/SpinnerIcon";
+import { GetDeployConfigResponse } from "@/services/getDeployConfig";
 
 type FromToDeployProps = {
+  deployConfig: GetDeployConfigResponse;
   fetchCurrentConfigData: () => void;
 };
 
-export function AppConfigForm({ fetchCurrentConfigData }: FromToDeployProps) {
+export function AppConfigForm({
+  fetchCurrentConfigData,
+  deployConfig,
+}: FromToDeployProps) {
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
     ButtonStateEnum.INIT
   );
@@ -31,7 +36,7 @@ export function AppConfigForm({ fetchCurrentConfigData }: FromToDeployProps) {
       name: "",
       enableTls: false,
       email: null,
-      pathToSource: "",
+      pathToSource: deployConfig.appConfig?.pathToSource || "",
       envs: [{ name: "", secret: "" }],
     });
 

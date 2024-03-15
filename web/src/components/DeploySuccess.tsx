@@ -127,7 +127,7 @@ export default function DeploySuccess({
         <div className="flex items-center gap-2 mt-4">
           <FileIcon />
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            {deployConfig.pathToProject}
+            {deployConfig.appConfig.pathToSource}
           </span>
         </div>
         <Button className="mt-4" onClick={() => setOpenLogs(!openLogs)}>
