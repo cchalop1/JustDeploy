@@ -9,7 +9,7 @@ JustDeploy is that it **doesn't install anything on your server other than your 
 ## Install
 
 ```bash
-curl -fsS https://justdeploy.app/install | bash
+curl -fsSL https://justdeploy.app/install | bash
 ```
 
 ## Usage
