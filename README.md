@@ -100,7 +100,7 @@ For any questions or suggestions, please open an issue or contact the project ma
 - [x] embed the web build in gobinary
 - [x] packages for release it
 - [x] install script
-- [ ] install url
+- [x] install url
 - [ ] git hooks post-commit
 - [ ] socket
 <!-- - [ ] update status with -->

@@ -19,7 +19,7 @@ func GetDeployConfig(databaseAdapter *adapter.DatabaseAdapter, filesystemAdapter
 	// }
 
 	currentPath, err := filesystemAdapter.GetCurrentPath()
-	if err == nil {
+	if err == nil && configDeploy.AppConfig.PathToSource == "" {
 		configDeploy.AppConfig.PathToSource = currentPath
 
 	}
