@@ -1,8 +1,16 @@
-# JustDeploy (work in progress)
+# JustDeploy
 
 JustDeploy is an open-source application designed to simplify the deployment process for developers. It allows you to deploy your simple applications on your own server with ease. JustDeploy handles server connection, Docker installation, and secure certificate generation, making the deployment process seamless and efficient.
 
 JustDeploy is that it **doesn't install anything on your server other than your application.** This makes it an ideal choice for small servers with limited resources or development environments
+
+## Features
+
+- Connects to your server
+- Installs Docker
+- Deploys your application from Dockerfile
+- Create tls certificates with let's encrypt
+- Create git hooks to deploy on every commit
 
 ![Screenshot4](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/Screenshot4.png)
 
@@ -83,25 +91,10 @@ This project is licensed under the AGPLv3 License - see the [LICENSE](LICENSE) f
 For any questions or suggestions, please open an issue or contact the project maintainer (cchalop1).
 
 <!--
-## Features
 
-- Connects to your server
-- Installs Docker
-- Generates secure certificates
-- Deploys your application
 
 ## TODO
 
-- [x] password auth
-- [x] DNS setting process
-- [x] persistent data
-- [x] buttons on the run part
-- [x] logs of the containers
-- [x] embed the web build in gobinary
-- [x] packages for release it
-- [x] install script
-- [x] install url
-- [ ] git hooks post-commit
 - [ ] socket
 <!-- - [ ] update status with -->
 
