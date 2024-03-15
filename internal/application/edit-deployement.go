@@ -11,4 +11,6 @@ func EditDeployement(deployService *service.DeployService, containerName string,
 	} else {
 		deployService.FilesystemAdapter.DeleteGitPostCommitHooks(deployService.DeployConfig.AppConfig.PathToSource)
 	}
+	deployService.DeployConfig.AppConfig.DeployOnCommit = editDeployDto.DeployOnCommit
+	deployService.DatabaseAdapter.SaveState(*deployService.DeployConfig)
 }

@@ -6,9 +6,10 @@ type Env struct {
 }
 
 type AppConfigDto struct {
-	Name         string `json:"name"`
-	EnableTls    bool   `json:"enableTls"`
-	Email        string `json:"email"`
-	PathToSource string `json:"pathToSource"`
-	Envs         []Env  `json:"envs"`
+	Name           string `json:"name"`
+	EnableTls      bool   `json:"enableTls"`
+	Email          string `json:"email"`
+	PathToSource   string `json:"pathToSource"`
+	Envs           []Env  `json:"envs"`
+	DeployOnCommit bool   `json:"deployOnCommit"`
 }

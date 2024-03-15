@@ -87,6 +87,7 @@ export default function DeploySuccess({
         },
         deployConfig.appConfig.name
       );
+      fetchCurrentConfigData();
     } catch (e) {
       console.error(e);
     }
@@ -151,6 +152,7 @@ export default function DeploySuccess({
           <Checkbox
             id="deploy-on-commit"
             name="deploy-on-commit"
+            checked={deployConfig.appConfig.deployOnCommit}
             onCheckedChange={(state) => {
               if (typeof state === "boolean") {
                 onCheckDeployOnCommit(state);

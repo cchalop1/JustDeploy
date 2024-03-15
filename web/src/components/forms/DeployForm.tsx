@@ -38,6 +38,7 @@ export function AppConfigForm({
       email: null,
       pathToSource: deployConfig.appConfig?.pathToSource || "",
       envs: [{ name: "", secret: "" }],
+      deployOnCommit: deployConfig.appConfig?.deployOnCommit || false,
     });
 
   const handleSubmit = async (event: React.FormEvent) => {

@@ -11,6 +11,7 @@ export type PostCreateDeploymentDto = {
   email: string | null;
   pathToSource: string;
   envs: Env[];
+  deployOnCommit: boolean;
 };
 
 export async function postFormDetails(
