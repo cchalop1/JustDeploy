@@ -13,7 +13,7 @@ func main() {
 
 	databaseAdapter := adapter.NewDatabaseAdapter()
 	filesystemAdapter := adapter.NewFilesystemAdapter()
-	deployConfig := application.GetDeployConfig(databaseAdapter)
+	deployConfig := application.GetDeployConfig(databaseAdapter, filesystemAdapter)
 
 	deployService := service.DeployService{
 		DeployConfig:    &deployConfig,
