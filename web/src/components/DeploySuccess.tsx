@@ -12,6 +12,9 @@ import ModalApplicationLogs from "./modals/ModalLogs";
 import { reDeployAppApi } from "@/services/reDeployApp";
 import { stopApplicationApi } from "@/services/stopApplication";
 import { startApplicationApi } from "@/services/startApplication";
+import { Checkbox } from "./ui/checkbox";
+import { Label } from "./ui/label";
+import { editDeployementApi } from "@/services/editDeploymentApi";
 
 type DeploySuccessProps = {
   deployConfig: GetDeployConfigResponse;
@@ -75,6 +78,20 @@ export default function DeploySuccess({
     }
   }
 
+  async function onCheckDeployOnCommit(checked: boolean) {
+    if (!deployConfig.appConfig) return null;
+    try {
+      await editDeployementApi(
+        {
+          deployOnCommit: checked,
+        },
+        deployConfig.appConfig.name
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   return (
     <>
       <ModalApplicationLogs
@@ -129,6 +146,23 @@ export default function DeploySuccess({
           <span className="text-sm text-gray-500 dark:text-gray-400">
             {deployConfig.appConfig.pathToSource}
           </span>
+        </div>
+        <div className="mt-4 flex items-center space-x-2">
+          <Checkbox
+            id="deploy-on-commit"
+            name="deploy-on-commit"
+            onCheckedChange={(state) => {
+              if (typeof state === "boolean") {
+                onCheckDeployOnCommit(state);
+              }
+            }}
+          />
+          <Label
+            htmlFor="deploy-on-commit"
+            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Deploy on every commit on <code>main</code> branch
+          </Label>
         </div>
         <Button className="mt-4" onClick={() => setOpenLogs(!openLogs)}>
           Logs

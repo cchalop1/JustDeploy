@@ -71,3 +71,31 @@ func (fs *FilesystemAdapter) CopyFileToRemoteServer(sourcePath string, serverIp 
 	fmt.Println(string(stdout))
 	return nil
 }
+
+func (fs *FilesystemAdapter) CreateGitPostCommitHooks(path string) error {
+	hooksFilePath := path + ".git/hooks/post-commit"
+	fileContent := []byte("#!/bin/sh\njustdeploy redeploy\n")
+
+	err := os.WriteFile(hooksFilePath, fileContent, 0755)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Create file ", path+".git/hooks/post-commit")
+	return nil
+}
+
+func (fs *FilesystemAdapter) DeleteGitPostCommitHooks(path string) error {
+	hooksFilePath := path + ".git/hooks/post-commit"
+
+	err := os.Remove(hooksFilePath)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Remove file", path+".git/hooks/post-commit")
+
+	return nil
+}

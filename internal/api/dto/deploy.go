@@ -10,3 +10,7 @@ type DeployConfigDto struct {
 	// TODO: add enum here
 	AppStatus string `json:"appStatus"`
 }
+
+type EditDeployementDto struct {
+	DeployOnCommit bool `json:"deployOnCommit"`
+}

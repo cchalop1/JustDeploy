@@ -6,7 +6,8 @@ import (
 )
 
 type DeployService struct {
-	DockerAdapter   *adapter.DockerAdapter
-	DatabaseAdapter *adapter.DatabaseAdapter
-	DeployConfig    *dto.DeployConfigDto
+	DockerAdapter     *adapter.DockerAdapter
+	DatabaseAdapter   *adapter.DatabaseAdapter
+	FilesystemAdapter *adapter.FilesystemAdapter
+	DeployConfig      *dto.DeployConfigDto
 }

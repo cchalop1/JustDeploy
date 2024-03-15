@@ -13,8 +13,7 @@ func ReDeployAppHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		containerName := c.Param("name")
 
-		application.RemoveApplication(containerName, deployService)
-		application.DeployApplication(deployService)
+		application.ReDeployApplication(deployService, containerName)
 
 		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is redeploy"})
 	}
