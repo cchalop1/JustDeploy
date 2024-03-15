@@ -14,7 +14,7 @@ func DeployApplication(deployService *service.DeployService) error {
 		return err
 	}
 
-	deployService.DeployConfig.PathToProject = adapter.NewFilesystemAdapter().CleanPath(deployService.DeployConfig.PathToProject)
+	deployService.DeployConfig.PathToProject = adapter.NewFilesystemAdapter().CleanPath(pathToDir)
 
 	deployService.DockerAdapter.BuildImage(deployService.DeployConfig.AppConfig.Name, pathToDir)
 	deployService.DockerAdapter.PullTreafikImage()
