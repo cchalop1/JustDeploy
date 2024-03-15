@@ -12,6 +12,7 @@ func main() {
 	app := api.NewApplication()
 
 	databaseAdapter := adapter.NewDatabaseAdapter()
+	filesystemAdapter := adapter.NewFilesystemAdapter()
 	deployConfig := application.GetDeployConfig(databaseAdapter)
 
 	deployService := service.DeployService{

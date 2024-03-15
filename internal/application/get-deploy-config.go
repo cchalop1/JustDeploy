@@ -5,7 +5,7 @@ import (
 	"cchalop1.com/deploy/internal/api/dto"
 )
 
-func GetDeployConfig(databaseAdapter *adapter.DatabaseAdapter) dto.DeployConfigDto {
+func GetDeployConfig(databaseAdapter *adapter.DatabaseAdapter, filesystemAdapter *adapter.FilesystemAdapter) dto.DeployConfigDto {
 	configDeploy := databaseAdapter.GetState()
 
 	// pathToProject := ""
@@ -18,6 +18,10 @@ func GetDeployConfig(databaseAdapter *adapter.DatabaseAdapter) dto.DeployConfigD
 	// 	pathToProject = filesystemAdapter.GetCurrentPath()
 	// }
 
+	currentPath, err := filesystemAdapter.GetCurrentPath()
+	if err == nil {
+		configDeploy.PathToProject = currentPath
+	}
 	// formDetailsResponse.AppConfig.Name = filesystemAdapter.GetFolderName(pathToProject)
 	// formDetailsResponse.PathToProject = filesystemAdapter.GetFullPathToProject(pathToProject)
 	// formDetailsResponse.DockerFileValid = filesystemAdapter.IsWhereIsADockerFileInTheFolder(formDetailsResponse.PathToProject)

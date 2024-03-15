@@ -41,8 +41,8 @@ func (fs *FilesystemAdapter) CleanPath(path string) string {
 	return path
 }
 
-func (fs *FilesystemAdapter) GetCurrentPath() string {
-	return filepath.Base(".")
+func (fs *FilesystemAdapter) GetCurrentPath() (string, error) {
+	return os.Getwd()
 }
 
 func (fs *FilesystemAdapter) IsWhereIsADockerFileInTheFolder(pathToFolder string) bool {
