@@ -30,7 +30,7 @@ To create a new deployment you must run the justdeploy command at the bottom of 
 justdeploy
 ```
 
-JustDeploy will create a `./just` deploy folder at the root of your project to be able to store the deployment information and the certificates that certify to communicate with the docker engine
+JustDeploy will create a `./justdeploy` folder at the root of your project to be able to store the deployment information and the certificates that certify to communicate with the docker engine
 
 For now JustDeploy only support debian base VMs.
 
