@@ -1,0 +1,12 @@
+{
+  "name": "just-deploy",
+  "sdk": "go",
+  "dependencies": [
+    {
+      "name": "golang",
+      "source": "github.com/kpenfound/dagger-modules/golang@dc54c30fd8612a43742573a17416cf54c4e5bc0d"
+    }
+  ],
+  "source": ".",
+  "engineVersion": "v0.10.2"
+}
