@@ -1,6 +1,6 @@
 package dto
 
-type ConnectServerDto struct {
+type ConnectNewServerDto struct {
 	Domain   string  `json:"domain"`
 	SshKey   *string `json:"sshKey"`
 	Password *string `json:"password"`

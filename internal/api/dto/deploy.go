@@ -1,9 +1,9 @@
 package dto
 
 type DeployConfigDto struct {
-	ServerConfig    ConnectServerDto `json:"serverConfig"`
-	AppConfig       AppConfigDto     `json:"appConfig"`
-	DockerFileValid bool             `json:"dockerFileValid"`
+	ServerConfig    ConnectNewServerDto `json:"serverConfig"`
+	AppConfig       AppConfigDto        `json:"appConfig"`
+	DockerFileValid bool                `json:"dockerFileValid"`
 	// TODO: add enum here
 	DeployStatus string `json:"deployStatus"`
 	Url          string `json:"url"`

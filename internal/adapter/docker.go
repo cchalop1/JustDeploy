@@ -27,7 +27,7 @@ func NewDockerAdapter() *DockerAdapter {
 const TRAEFIK_IMAGE = "traefik"
 const ROUTER_NAME = "treafik"
 
-func (d *DockerAdapter) ConnectClient(connectConfig dto.ConnectServerDto) error {
+func (d *DockerAdapter) ConnectClient(connectConfig dto.ConnectNewServerDto) error {
 	caCertPath := internal.CERT_DOCKER_FOLDER + "/ca.pem"
 	certPath := internal.CERT_DOCKER_FOLDER + "/cert.pem"
 	keyPath := internal.CERT_DOCKER_FOLDER + "/key.pem"

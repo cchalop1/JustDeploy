@@ -18,7 +18,7 @@ func NewSshAdapter() *SshAdapter {
 	return &SshAdapter{}
 }
 
-func (s *SshAdapter) getAuthMethode(connectConfig dto.ConnectServerDto) []ssh.AuthMethod {
+func (s *SshAdapter) getAuthMethode(connectConfig dto.ConnectNewServerDto) []ssh.AuthMethod {
 	if connectConfig.Password != nil && connectConfig.SshKey == nil {
 		return []ssh.AuthMethod{
 			ssh.Password(*connectConfig.Password),
@@ -33,7 +33,7 @@ func (s *SshAdapter) getAuthMethode(connectConfig dto.ConnectServerDto) []ssh.Au
 	}
 }
 
-func (s *SshAdapter) Connect(connectConfig dto.ConnectServerDto) {
+func (s *SshAdapter) Connect(connectConfig dto.ConnectNewServerDto) {
 	config := &ssh.ClientConfig{
 		User:            connectConfig.User,
 		Auth:            s.getAuthMethode(connectConfig),

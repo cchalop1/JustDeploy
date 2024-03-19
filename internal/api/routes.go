@@ -6,9 +6,14 @@ import (
 )
 
 func CreateRoutes(app *Application, deployService *service.DeployService) {
-	app.Echo.GET("/api/deploy", handlers.GetDeployConfigHandler(deployService))
+	// app.Echo.GET("/api/deploy", handlers.GetDeployConfigHandler(deployService))
+
 	app.Echo.POST("/api/deploy", handlers.CreateDeployementHandler(deployService))
-	app.Echo.POST("/api/connect", handlers.ConnectAndSetupServerHandler(deployService))
+	app.Echo.POST("/api/server", handlers.CreateNewServer(deployService))
+
+	app.Echo.POST("/api/deploy", handlers.CreateDeployementHandler(deployService))
+	app.Echo.POST("/api/server", handlers.CreateNewServer(deployService))
+
 	app.Echo.DELETE("/api/remove/:name", handlers.RemoveApplicationHandler(deployService))
 	app.Echo.GET("/api/logs/:name", handlers.GetLogsHandler(deployService))
 	app.Echo.POST("/api/redeploy/:name", handlers.ReDeployAppHandler(deployService))

@@ -31,6 +31,6 @@ func DeployApplication(deployService *service.DeployService) error {
 
 	deployService.DeployConfig.AppStatus = "Runing"
 
-	deployService.DatabaseAdapter.SaveState(*deployService.DeployConfig)
+	// deployService.DatabaseAdapter.SaveState(*deployService.DeployConfig)
 	return nil
 }

@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"cchalop1.com/deploy/internal"
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/domain"
 )
 
 type DatabaseAdapter struct {
@@ -38,8 +38,8 @@ func (d *DatabaseAdapter) createFoldeJustDeployFolderIfDontExist() error {
 	return nil
 }
 
-func (d *DatabaseAdapter) writeDeployConfigInDataBaseFile(deployConfig dto.DeployConfigDto) error {
-	file, err := json.MarshalIndent(deployConfig, "", "  ")
+func (d *DatabaseAdapter) writeDeployConfigInDataBaseFile(databaseModels domain.DatabaseModelsType) error {
+	file, err := json.MarshalIndent(databaseModels, "", "  ")
 	if err != nil {
 		log.Fatalf("Error marshaling to JSON: %v", err)
 	}
@@ -49,8 +49,8 @@ func (d *DatabaseAdapter) writeDeployConfigInDataBaseFile(deployConfig dto.Deplo
 	return err
 }
 
-func (d *DatabaseAdapter) readDeployConfigInDataBaseFile() dto.DeployConfigDto {
-	deployConfig := dto.DeployConfigDto{}
+func (d *DatabaseAdapter) readDeployConfigInDataBaseFile() domain.DatabaseModelsType {
+	databaseModels := domain.DatabaseModelsType{}
 
 	file, err := os.ReadFile(internal.DATABASE_FILE_PATH)
 
@@ -58,29 +58,52 @@ func (d *DatabaseAdapter) readDeployConfigInDataBaseFile() dto.DeployConfigDto {
 		log.Fatalf("Error for read the database file: %v", err)
 	}
 
-	err = json.Unmarshal(file, &deployConfig)
+	err = json.Unmarshal(file, &databaseModels)
 	if err != nil {
 		log.Fatalf("Error unmarshaling JSON: %v", err)
 	}
-	return deployConfig
+	return databaseModels
 }
 
-func (d *DatabaseAdapter) GetState() dto.DeployConfigDto {
+func (d *DatabaseAdapter) Init() {
 	if !d.databaseFileIsCreated() {
 		d.createFoldeJustDeployFolderIfDontExist()
-		d.writeDeployConfigInDataBaseFile(dto.DeployConfigDto{
-			DockerFileValid: false,
-			DeployStatus:    "serverconfig",
-			ServerConfig:    dto.ConnectServerDto{},
-			AppConfig:       dto.AppConfigDto{},
-			AppStatus:       "",
-		})
+		databaseData := domain.DatabaseModelsType{
+			Servers: []domain.Server{},
+			Deploys: []domain.Deploy{},
+		}
+		d.writeDeployConfigInDataBaseFile(databaseData)
 	}
-	deployConfig := d.readDeployConfigInDataBaseFile()
-	return deployConfig
 }
 
-func (d *DatabaseAdapter) SaveState(deployConfig dto.DeployConfigDto) error {
-	d.writeDeployConfigInDataBaseFile(deployConfig)
-	return nil
+// func (d *DatabaseAdapter) GetState() dto.DeployConfigDto {
+// 	deployConfig := d.readDeployConfigInDataBaseFile()
+// 	return deployConfig
+// }
+
+// func (d *DatabaseAdapter) SaveState(deployConfig dto.DeployConfigDto) error {
+// 	d.writeDeployConfigInDataBaseFile(deployConfig)
+// 	return nil
+// }
+
+func (d *DatabaseAdapter) SaveServer(newServer domain.Server) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	databaseModels.Servers = append(databaseModels.Servers, newServer)
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}
+
+func (d *DatabaseAdapter) GetServers() []domain.Server {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	return databaseModels.Servers
+}
+
+func (d *DatabaseAdapter) SaveDeploy(deploy domain.Deploy) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	databaseModels.Deploys = append(databaseModels.Deploys, deploy)
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}
+
+func (d *DatabaseAdapter) GetDeploys() []domain.Deploy {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	return databaseModels.Deploys
 }
