@@ -27,35 +27,54 @@ type JustDeploy struct{}
 // 	EXECUTABLE,
 // )
 
+// Fonction for build the web part of JustDeploy
 func (m *JustDeploy) BuildWeb(buildSrc *Directory) *Directory {
 	return dag.Container().
 		From("node:lts").
-		WithMountedDirectory("/mnt", buildSrc).
+		WithMountedDirectory("/mnt", buildSrc.WithoutDirectory("node_modules")).
 		WithWorkdir("/mnt").
+		// WithExec([]string{"rm", "-rf", "node_modules"}).
 		WithExec([]string{"npm", "i", "-g", "pnpm"}).
 		WithExec([]string{"pnpm", "i"}).
 		WithExec([]string{"pnpm", "run", "build"}).
 		Directory("./dist")
 }
 
-func (m *JustDeploy) BuildGoApp(distDir *Directory, source *Directory, arch string, os string) *Container {
-	if arch == "" {
-		arch = runtime.GOARCH
-	}
-	if os == "" {
-		os = runtime.GOOS
-	}
+// Function to build the binary from my golang code (distDir) is a build of my web part
+func (m *JustDeploy) BuildGoApp(distDir *Directory, source *Directory) *Container {
+	arch := runtime.GOARCH
+	os := runtime.GOOS
 	return dag.Container().
 		From("golang:latest").
 		WithWorkdir("/mnt").
 		WithMountedDirectory("/mnt", source).
 		WithMountedDirectory("/mnt/internal/web/dist", distDir).
+		WithEnvVariable("GOOS", os).
+		WithEnvVariable("GOARCH", arch).
+		WithMountedCache("/go/pkg/mod", dag.CacheVolume("go-mod-121")).
+		WithEnvVariable("GOMODCACHE", "/go/pkg/mod").
+		WithMountedCache("/go/build-cache", dag.CacheVolume("go-build-121")).
+		WithEnvVariable("GOCACHE", "/go/build-cache").
 		WithExec([]string{"go", "build", "-o", "bin/justdeploy", "./cmd/just-deploy/main.go"})
 }
 
-func (m *JustDeploy) Build(ctx context.Context, source *Directory) {
+// This function build my application
+func (m *JustDeploy) Build(ctx context.Context, source *Directory) *Directory {
 	fmt.Println("CI start !!!")
 	distWeb := m.BuildWeb(source.Directory("web"))
 	binContainer := m.BuildGoApp(distWeb, source)
-	binContainer.Export(ctx, "./bin")
+	return binContainer.Directory("./bin")
+	// return binContainer.WithEntrypoint([]string{"./bin/justdeploy"}).WithExposedPort(8080)
+	// return binContainer
+}
+
+func (m *JustDeploy) Serve(ctx context.Context, source *Directory) *Container {
+	bin := m.Build(ctx, source)
+	return dag.Container().
+		From("golang:alpine").
+		WithMountedDirectory("/app", bin).
+		WithWorkdir("/app").
+		WithEntrypoint([]string{"/app/justdeploy"}).
+		WithExposedPort(8080)
+
 }
