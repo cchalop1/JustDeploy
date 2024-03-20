@@ -9,10 +9,10 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	// app.Echo.GET("/api/deploy", handlers.GetDeployConfigHandler(deployService))
 
 	app.Echo.POST("/api/deploy", handlers.CreateDeployementHandler(deployService))
-	app.Echo.POST("/api/server", handlers.CreateNewServer(deployService))
+	app.Echo.POST("/api/server", handlers.ConnectNewServer(deployService))
 
-	app.Echo.POST("/api/deploy", handlers.CreateDeployementHandler(deployService))
-	app.Echo.POST("/api/server", handlers.CreateNewServer(deployService))
+	// app.Echo.GET("/api/deploy", handlers.CreateDeployementHandler(deployService))
+	app.Echo.GET("/api/server", handlers.GetServerListHandler(deployService))
 
 	app.Echo.DELETE("/api/remove/:name", handlers.RemoveApplicationHandler(deployService))
 	app.Echo.GET("/api/logs/:name", handlers.GetLogsHandler(deployService))

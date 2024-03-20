@@ -7,8 +7,8 @@ export type ConnectServerDto = {
   user: string;
 };
 
-export async function connectServer(
+export async function connectServerApi(
   connectServerDto: ConnectServerDto
 ): Promise<ResponseApi> {
-  return await callApi<ResponseApi>("/connect", "POST", connectServerDto);
+  return await callApi<ResponseApi>("/server", "POST", connectServerDto);
 }

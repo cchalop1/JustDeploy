@@ -5,18 +5,21 @@ import (
 
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
+	"cchalop1.com/deploy/internal/application"
 	"github.com/labstack/echo/v4"
 )
 
-func CreateNewServer(deployService *service.DeployService) echo.HandlerFunc {
+func ConnectNewServer(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		connectServerDto := dto.ConnectNewServerDto{}
+		connectNewServerDto := dto.ConnectNewServerDto{}
 
-		err := c.Bind(&connectServerDto)
+		err := c.Bind(&connectNewServerDto)
 		if err != nil {
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		return c.JSON(http.StatusOK, deployService.DeployConfig)
+		application.CreateServer(deployService, connectNewServerDto)
+
+		return c.JSON(http.StatusOK, true)
 	}
 }

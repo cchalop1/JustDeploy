@@ -1,6 +1,8 @@
 package application
 
 import (
+	"strconv"
+
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/domain"
@@ -11,9 +13,8 @@ func CreateServer(deployService *service.DeployService, createNewServer dto.Conn
 	// serverCount := deployService.DatabaseAdapter.
 	// TODO: change to get from the database
 	serverCount := 1
-	Name := "Server " + string(serverCount)
+	Name := "Server " + strconv.Itoa(serverCount)
 	server := domain.Server{
-		// TODO: change to generate a uuid
 		Id:          utils.GenerateRandomPassword(5),
 		Name:        Name,
 		Domain:      createNewServer.Domain,
@@ -21,10 +22,13 @@ func CreateServer(deployService *service.DeployService, createNewServer dto.Conn
 		SshKey:      createNewServer.SshKey,
 		Ip:          "",
 		CreatedDate: "",
+		Status:      "Installing",
 	}
 
 	deployService.DatabaseAdapter.SaveServer(server)
-	// TODO: try to connect to your server with
+
+	// TODO: try to make one ssh connection
+	// TODO: make async call to setup server
 
 	return true
 }

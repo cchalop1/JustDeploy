@@ -1,4 +1,4 @@
-import { ConnectServerDto, connectServer } from "@/services/connectServer";
+import { ConnectServerDto, connectServerApi } from "@/services/connectServer";
 import { Button } from "../ui/button";
 import {
   Card,
@@ -23,14 +23,9 @@ import { useState } from "react";
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import { ButtonStateEnum } from "@/lib/utils";
 import ModalDnsSettings from "../modals/ModalDnsSettings";
+import { useNavigate } from "react-router-dom";
 
-type ServerConfigFormProps = {
-  fetchCurrentConfigData: () => void;
-};
-
-export default function ServerConfigForm({
-  fetchCurrentConfigData,
-}: ServerConfigFormProps) {
+export default function ServerConfigForm() {
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
     ButtonStateEnum.INIT
   );
@@ -41,6 +36,7 @@ export default function ServerConfigForm({
     user: "root",
   });
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   async function readSSHKeyUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const target = event.target;
@@ -68,10 +64,9 @@ export default function ServerConfigForm({
     setConnectButtonState(ButtonStateEnum.PENDING);
 
     try {
-      const res = await connectServer(connectServerData);
-      console.log(res);
+      await connectServerApi(connectServerData);
       setConnectButtonState(ButtonStateEnum.SUCESS);
-      fetchCurrentConfigData();
+      navigate("/");
     } catch (e) {
       console.error(e);
     }
@@ -93,10 +88,10 @@ export default function ServerConfigForm({
     }
   };
   return (
-    <div className="flex">
-      <Card className="w-[500px] m-10">
+    <div className="flex justify-center mt-16">
+      <Card className="w-[500px]">
         <CardHeader>
-          <CardTitle>Connect To Your Server</CardTitle>
+          <CardTitle>Connect Your Server</CardTitle>
           <CardDescription>
             Connect your server with your domain name before deploy your
             application.
@@ -188,7 +183,7 @@ export default function ServerConfigForm({
               {connectButtonState === ButtonStateEnum.PENDING ? (
                 <SpinnerIcon color="text-white" />
               ) : (
-                "Connect and setup server"
+                "Connect server"
               )}
             </Button>
           </CardFooter>

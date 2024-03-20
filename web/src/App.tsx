@@ -1,47 +1,15 @@
-import { useEffect, useState } from "react";
-import { AppConfigForm } from "./components/forms/DeployForm";
-import {
-  GetDeployConfigResponse,
-  getDeployConfig,
-} from "./services/getDeployConfig";
-import ServerConfigForm from "./components/forms/ServerConfigForm";
-import Steps from "./components/Steps";
-import SpinnerIcon from "./assets/SpinnerIcon";
-import DeploySuccess from "./components/DeploySuccess";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./routes";
 
 function App() {
-  const [deployConfig, setDeployConfig] =
-    useState<null | GetDeployConfigResponse>(null);
-  function fetchCurrentConfigData() {
-    getDeployConfig().then(setDeployConfig);
-  }
-
-  useEffect(() => {
-    fetchCurrentConfigData();
-  }, []);
-
-  if (!deployConfig) return <SpinnerIcon color="text-black" />;
-
   return (
-    <div>
-      <div className="text-center m-5 text-4xl font-bold">JustDeploy</div>
-      <Steps status={deployConfig.deployStatus} />
-      <div className="flex w-full justify-center mt-10">
-        {deployConfig.deployStatus === "serverconfig" && (
-          <ServerConfigForm fetchCurrentConfigData={fetchCurrentConfigData} />
-        )}
-        {deployConfig.deployStatus === "appconfig" && (
-          <AppConfigForm
-            fetchCurrentConfigData={fetchCurrentConfigData}
-            deployConfig={deployConfig}
-          />
-        )}
-        {deployConfig.deployStatus === "deployapp" && (
-          <DeploySuccess
-            fetchCurrentConfigData={fetchCurrentConfigData}
-            deployConfig={deployConfig}
-          />
-        )}
+    <div className="flex justify-center">
+      <div className="w-2/3 mt-10">
+        <Header />
+        <RouterProvider router={router} />
+        <Footer />
       </div>
     </div>
   );

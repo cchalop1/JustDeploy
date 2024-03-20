@@ -17,17 +17,8 @@ import {
 } from "../../services/postFormDetails";
 import { ButtonStateEnum } from "../../lib/utils";
 import SpinnerIcon from "@/assets/SpinnerIcon";
-import { GetDeployConfigResponse } from "@/services/getDeployConfig";
 
-type FromToDeployProps = {
-  deployConfig: GetDeployConfigResponse;
-  fetchCurrentConfigData: () => void;
-};
-
-export function AppConfigForm({
-  fetchCurrentConfigData,
-  deployConfig,
-}: FromToDeployProps) {
+export function DeployConfigForm() {
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
     ButtonStateEnum.INIT
   );
@@ -36,9 +27,9 @@ export function AppConfigForm({
       name: "",
       enableTls: false,
       email: null,
-      pathToSource: deployConfig.appConfig?.pathToSource || "",
+      pathToSource: "",
       envs: [{ name: "", secret: "" }],
-      deployOnCommit: deployConfig.appConfig?.deployOnCommit || false,
+      deployOnCommit: false,
     });
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -50,7 +41,7 @@ export function AppConfigForm({
 
     await postFormDetails(createDeployement);
     setConnectButtonState(ButtonStateEnum.SUCESS);
-    fetchCurrentConfigData();
+    // fetchCurrentConfigData();
   };
 
   const addNewEnv = () => {
@@ -68,8 +59,8 @@ export function AppConfigForm({
   };
 
   return (
-    <>
-      <Card className="w-[500px] m-10">
+    <div className="flex justify-center mt-16">
+      <Card className="w-[500px]">
         <CardHeader>
           <CardTitle>Deploy project</CardTitle>
           <CardDescription>
@@ -219,6 +210,6 @@ export function AppConfigForm({
           </CardFooter>
         </form>
       </Card>
-    </>
+    </div>
   );
 }
