@@ -16,6 +16,10 @@ export default function Home() {
     navigate("server/create");
   }
 
+  function onClickNewDeploy() {
+    navigate(`deploy/create`);
+  }
+
   async function fetchServerList() {
     const serverList = await getServersListApi();
     // TODO: check error
@@ -27,6 +31,10 @@ export default function Home() {
   useEffect(() => {
     fetchServerList();
     fetchDeployList();
+    setInterval(() => {
+      fetchServerList();
+      fetchDeployList();
+    }, 2000);
   }, []);
 
   return (
@@ -41,7 +49,9 @@ export default function Home() {
       <div className="h-52">
         <div className="flex justify-between">
           <div className="text-2xl font-bold">Deploys</div>
-          <Button disabled={!canCreateDeploy}>Create Deploy</Button>
+          <Button disabled={!canCreateDeploy} onClick={onClickNewDeploy}>
+            Create Deploy
+          </Button>
         </div>
         <DeployList deployList={deployList} />
       </div>

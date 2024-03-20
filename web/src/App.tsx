@@ -6,7 +6,7 @@ import { router } from "./routes";
 function App() {
   return (
     <div className="flex justify-center">
-      <div className="w-2/3 mt-10">
+      <div className="w-2/4 mt-10">
         <Header />
         <RouterProvider router={router} />
         <Footer />

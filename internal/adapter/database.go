@@ -86,6 +86,23 @@ func (d *DatabaseAdapter) Init() {
 // 	return nil
 // }
 
+func (d *DatabaseAdapter) UpdateServer(server domain.Server) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	for i, s := range databaseModels.Servers {
+		if s.Name == server.Name {
+			databaseModels.Servers[i] = server
+			break
+		}
+	}
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}
+
+func (d *DatabaseAdapter) CountServer() int {
+	// TODO: change to get it from a index count
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	return len(databaseModels.Servers)
+}
+
 func (d *DatabaseAdapter) SaveServer(newServer domain.Server) error {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	databaseModels.Servers = append(databaseModels.Servers, newServer)

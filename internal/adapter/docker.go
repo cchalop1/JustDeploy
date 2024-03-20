@@ -27,13 +27,13 @@ func NewDockerAdapter() *DockerAdapter {
 const TRAEFIK_IMAGE = "traefik"
 const ROUTER_NAME = "treafik"
 
-func (d *DockerAdapter) ConnectClient(connectConfig dto.ConnectNewServerDto) error {
+func (d *DockerAdapter) ConnectClient(domain string) error {
 	caCertPath := internal.CERT_DOCKER_FOLDER + "/ca.pem"
 	certPath := internal.CERT_DOCKER_FOLDER + "/cert.pem"
 	keyPath := internal.CERT_DOCKER_FOLDER + "/key.pem"
 
 	client, err := client.NewClientWithOpts(
-		client.WithHost("tcp://"+connectConfig.Domain+":2376"),
+		client.WithHost("tcp://"+domain+":2376"),
 		client.WithTLSClientConfig(caCertPath, certPath, keyPath),
 	)
 

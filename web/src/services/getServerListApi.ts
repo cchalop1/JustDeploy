@@ -7,8 +7,6 @@ export type ServerDto = {
   ip: string;
   name: string;
   domain: string;
-  password: string;
-  sshKey: string;
   createdDate: string;
   status: ServerStatusType;
 };

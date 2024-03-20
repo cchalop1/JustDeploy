@@ -33,7 +33,7 @@ func (s *SshAdapter) getAuthMethode(connectConfig dto.ConnectNewServerDto) []ssh
 	}
 }
 
-func (s *SshAdapter) Connect(connectConfig dto.ConnectNewServerDto) {
+func (s *SshAdapter) Connect(connectConfig dto.ConnectNewServerDto) error {
 	config := &ssh.ClientConfig{
 		User:            connectConfig.User,
 		Auth:            s.getAuthMethode(connectConfig),
@@ -42,9 +42,10 @@ func (s *SshAdapter) Connect(connectConfig dto.ConnectNewServerDto) {
 
 	client, err := ssh.Dial("tcp", connectConfig.Domain+":22", config)
 	if err != nil {
-		log.Fatalf("Failed to dial: %s", err)
+		return err
 	}
 	s.client = client
+	return nil
 }
 
 func (s *SshAdapter) CloseConnection() {

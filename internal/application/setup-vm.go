@@ -7,13 +7,21 @@ import (
 
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/adapter"
+	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
+	"cchalop1.com/deploy/internal/domain"
 	"cchalop1.com/deploy/internal/utils"
 )
 
-func ConnectAndSetupServer(deployService *service.DeployService) *adapter.DockerAdapter {
+func ConnectAndSetupServer(deployService *service.DeployService, server domain.Server) *adapter.DockerAdapter {
 	sshAdapter := adapter.NewSshAdapter()
-	sshAdapter.Connect(deployService.DeployConfig.ServerConfig)
+
+	sshAdapter.Connect(dto.ConnectNewServerDto{
+		Domain:   server.Domain,
+		SshKey:   server.SshKey,
+		Password: server.Password,
+		User:     "root",
+	})
 
 	dockerIsInstalled, err := checkIfDockerIsIntalled(sshAdapter)
 	fmt.Println(err)
@@ -27,7 +35,7 @@ func ConnectAndSetupServer(deployService *service.DeployService) *adapter.Docker
 	fmt.Println(err)
 
 	if !certificateIsCreated {
-		err = setupDockerCertificates(sshAdapter, deployService.DeployConfig.ServerConfig.Domain)
+		err = setupDockerCertificates(sshAdapter, server.Domain)
 		copyCertificates(sshAdapter)
 		fmt.Println(err)
 	}
@@ -42,7 +50,12 @@ func ConnectAndSetupServer(deployService *service.DeployService) *adapter.Docker
 
 	sshAdapter.CloseConnection()
 	adapterDocker := adapter.NewDockerAdapter()
-	adapterDocker.ConnectClient(deployService.DeployConfig.ServerConfig)
+	adapterDocker.ConnectClient(server.Domain)
+
+	server.Status = "Runing"
+
+	deployService.DatabaseAdapter.UpdateServer(server)
+
 	return adapterDocker
 }
 

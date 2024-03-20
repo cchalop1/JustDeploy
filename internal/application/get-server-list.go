@@ -6,6 +6,5 @@ import (
 )
 
 func GetServerList(deployService *service.DeployService) []domain.Server {
-	// TODO: create a list of server response DTO
 	return deployService.DatabaseAdapter.GetServers()
 }
