@@ -2,7 +2,13 @@ package application
 
 import "cchalop1.com/deploy/internal/api/service"
 
-func StopApplication(deployService *service.DeployService, containerName string) {
-	deployService.DockerAdapter.Stop(containerName)
-	// deployService.DeployConfig.AppStatus = "Stopped"
+func StopApplication(deployService *service.DeployService, deployId string) error {
+	deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
+	if err != nil {
+		return err
+	}
+	deployService.DockerAdapter.Stop(deploy.Name)
+	deploy.Status = "Stopped"
+	deployService.DatabaseAdapter.UpdateDeploy(deploy)
+	return nil
 }

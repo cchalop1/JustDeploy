@@ -29,7 +29,6 @@ func runApplication(deployService *service.DeployService, deploy domain.Deploy, 
 
 func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDeployDto) error {
 	server, err := deployService.DatabaseAdapter.GetServerById(newDeploy.ServerId)
-
 	if err != nil {
 		return err
 	}
@@ -62,4 +61,25 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 	runApplication(deployService, deploy, server.Domain)
 
 	return nil
+}
+
+func ReDeployApplicationRun(deployService *service.DeployService, deploy domain.Deploy) error {
+	server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
+	if err != nil {
+		return err
+	}
+
+	err = deployService.DockerAdapter.ConnectClient(server)
+
+	if err != nil {
+		return err
+	}
+
+	deploy.Status = "Installing"
+
+	err = deployService.DatabaseAdapter.SaveDeploy(deploy)
+	fmt.Println(err)
+	runApplication(deployService, deploy, server.Domain)
+	return nil
+
 }

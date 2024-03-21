@@ -67,7 +67,10 @@ export default function DeployButtons({ deploy }: DeployButtonsProps) {
           "Delete"
         )}
       </Button>
-      <Button onClick={startStopApplication}>
+      <Button
+        className={deploy.status !== "Runing" ? "bg-green-600" : ""}
+        onClick={startStopApplication}
+      >
         {stopStartButtonState === ButtonStateEnum.PENDING ? (
           <SpinnerIcon color="text-white" />
         ) : deploy.status === "Runing" ? (

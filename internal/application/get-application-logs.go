@@ -1,7 +1,18 @@
 package application
 
-import "cchalop1.com/deploy/internal/adapter"
+import "cchalop1.com/deploy/internal/api/service"
 
-func GetApplicationLogs(dockerAdapter *adapter.DockerAdapter, containerName string) []string {
-	return dockerAdapter.GetLogsOfContainer(containerName)
+func GetApplicationLogs(deployService *service.DeployService, deployId string) ([]string, error) {
+	deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
+	if err != nil {
+		return []string{}, err
+	}
+
+	server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
+	if err != nil {
+		return []string{}, err
+	}
+	deployService.DockerAdapter.ConnectClient(server)
+
+	return deployService.DockerAdapter.GetLogsOfContainer(deploy.Name), nil
 }

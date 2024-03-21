@@ -4,14 +4,14 @@ import "cchalop1.com/deploy/internal/api/dto"
 
 // TODO: replace the status by a enum
 type Deploy struct {
-	Id             string
-	Name           string
-	ServerId       string
-	EnableTls      bool
-	Email          string
-	PathToSource   string
-	Envs           []dto.Env
-	DeployOnCommit bool
-	Status         string
-	Url            string
+	Id             string    `json:"id"`
+	Name           string    `json:"name"`
+	ServerId       string    `json:"serverId"`
+	EnableTls      bool      `json:"enableTls"`
+	Email          string    `json:"email"`
+	PathToSource   string    `json:"pathToSource"`
+	Envs           []dto.Env `json:"envs"`
+	DeployOnCommit bool      `json:"deployOnCommit"`
+	Status         string    `json:"status"`
+	Url            string    `json:"url"`
 }

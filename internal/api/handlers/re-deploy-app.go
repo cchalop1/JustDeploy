@@ -11,9 +11,9 @@ import (
 
 func ReDeployAppHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		containerName := c.Param("name")
+		deployId := c.Param("id")
 
-		application.ReDeployApplication(deployService, containerName)
+		application.ReDeployApplication(deployService, deployId)
 
 		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is redeploy"})
 	}

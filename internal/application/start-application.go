@@ -2,7 +2,13 @@ package application
 
 import "cchalop1.com/deploy/internal/api/service"
 
-func StartApplication(deployService *service.DeployService, containerName string) {
-	deployService.DockerAdapter.Start(containerName)
-	// deployService.DeployConfig.AppStatus = "Runing"
+func StartApplication(deployService *service.DeployService, deployId string) error {
+	deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
+	if err != nil {
+		return err
+	}
+	deployService.DockerAdapter.Start(deploy.Name)
+	deploy.Status = "Runing"
+	deployService.DatabaseAdapter.UpdateDeploy(deploy)
+	return nil
 }

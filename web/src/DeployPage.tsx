@@ -7,6 +7,7 @@ import Status from "./components/ServerStatus";
 import LinkIcon from "./assets/linkIcon";
 import FolderIcon from "./assets/FolderIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
+import DeployLogs from "./components/DeployLogs";
 
 export default function DeployPage() {
   const { id } = useParams();
@@ -59,7 +60,7 @@ export default function DeployPage() {
           <div>databases</div>
         </TabsContent>
         <TabsContent value="logs">
-          <div>logs</div>
+          <DeployLogs id={deploy.id} />
         </TabsContent>
         <TabsContent value="settings">
           <div>logs</div>

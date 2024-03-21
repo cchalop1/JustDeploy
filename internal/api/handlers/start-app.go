@@ -11,9 +11,9 @@ import (
 
 func StartAppHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		containerName := c.Param("name")
+		deployId := c.Param("id")
 
-		application.StartApplication(deployService, containerName)
+		application.StartApplication(deployService, deployId)
 		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is stoped"})
 	}
 }

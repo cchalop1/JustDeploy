@@ -15,12 +15,14 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	app.Echo.GET("/api/deploy/config", handlers.GetDeployConfigHandler(deployService))
 
 	app.Echo.POST("/api/deploy", handlers.CreateDeployementHandler(deployService))
+	app.Echo.PUT("/api/deploy", handlers.EditDeployementHandler(deployService))
 	app.Echo.POST("/api/server", handlers.ConnectNewServer(deployService))
 
 	app.Echo.DELETE("/api/remove/:id", handlers.RemoveApplicationHandler(deployService))
-	// app.Echo.GET("/api/logs/:name", handlers.GetLogsHandler(deployService))
-	// app.Echo.POST("/api/redeploy/:name", handlers.ReDeployAppHandler(deployService))
-	// app.Echo.POST("/api/start/:name", handlers.StartAppHandler(deployService))
-	// app.Echo.POST("/api/stop/:name", handlers.StopAppHandler(deployService))
-	// app.Echo.PUT("/api/deploy/:name", handlers.EditDeployementHandler(deployService))
+	app.Echo.POST("/api/deploy/start/:id", handlers.StartAppHandler(deployService))
+	app.Echo.POST("/api/deploy/stop/:id", handlers.StopAppHandler(deployService))
+	app.Echo.POST("/api/deploy/redeploy/:id", handlers.ReDeployAppHandler(deployService))
+
+	app.Echo.GET("/api/deploy/logs/:id", handlers.GetLogsHandler(deployService))
+
 }
