@@ -1,50 +1,37 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getDeployByIdApi } from "./services/getDeployById";
 import { DeployDto } from "./services/getDeployListApi";
-import SpinnerIcon from "./assets/SpinnerIcon";
+import { getDeployByIdApi } from "./services/getDeployById";
+import DeployButtons from "./components/DeployButtons";
 import Status from "./components/ServerStatus";
 import LinkIcon from "./assets/linkIcon";
 import FolderIcon from "./assets/FolderIcon";
-import DeployButtons from "./components/DeployButtons";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 
 export default function DeployPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [deploy, setDeploy] = useState<DeployDto | null>({
-    name: "fezljkn",
-    deployOnCommit: false,
-    email: "",
-    enableTls: false,
-    id: "toto",
-    pathToSource: "fkné jkf",
-    serverId: "",
-    envs: [],
-    status: "Installing",
-    url: "",
-  });
+  const [deploy, setDeploy] = useState<DeployDto | null>(null);
 
   async function fetchDeployById(id: string) {
-    const resDeploy = await getDeployByIdApi(id);
-    console.log(resDeploy);
-    setDeploy(resDeploy);
+    const res = await getDeployByIdApi(id);
+    setDeploy(res);
   }
 
   useEffect(() => {
-    if (!id) {
-      navigate("/");
-    } else {
+    if (id) {
       fetchDeployById(id);
+    } else {
+      navigate("/");
     }
   }, [id, navigate]);
 
   if (deploy === null) {
-    return <SpinnerIcon color="text-black" />;
+    return null;
   }
-  // console.log(deploy);
-  return deploy.name;
-}
-/*
+
+  console.log(deploy);
+
   return (
     <div className="mt-40">
       <div className="flex justify-between">
@@ -62,6 +49,22 @@ export default function DeployPage() {
         <FolderIcon />
         {deploy.pathToSource}
       </div>
+      <Tabs defaultValue="database-service" className="mt-20">
+        <TabsList className="w-full justify-between pl-10 pr-10">
+          <TabsTrigger value="database-service">Database Service</TabsTrigger>
+          <TabsTrigger value="logs">Logs</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
+        <TabsContent value="database-service">
+          <div>databases</div>
+        </TabsContent>
+        <TabsContent value="logs">
+          <div>logs</div>
+        </TabsContent>
+        <TabsContent value="settings">
+          <div>logs</div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-*/
+}
