@@ -9,6 +9,6 @@ import (
 
 func GetDeployConfigHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, deployService.DeployConfig)
+		return c.JSON(http.StatusOK, "ok")
 	}
 }

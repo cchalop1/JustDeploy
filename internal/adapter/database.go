@@ -86,6 +86,18 @@ func (d *DatabaseAdapter) Init() {
 // 	return nil
 // }
 
+// Server
+
+func (d *DatabaseAdapter) GetServerById(id string) *domain.Server {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	for _, s := range databaseModels.Servers {
+		if s.Id == id {
+			return &s
+		}
+	}
+	return nil
+}
+
 func (d *DatabaseAdapter) UpdateServer(server domain.Server) error {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	for i, s := range databaseModels.Servers {
@@ -114,6 +126,8 @@ func (d *DatabaseAdapter) GetServers() []domain.Server {
 	return databaseModels.Servers
 }
 
+// Deploy
+
 func (d *DatabaseAdapter) SaveDeploy(deploy domain.Deploy) error {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	databaseModels.Deploys = append(databaseModels.Deploys, deploy)
@@ -123,4 +137,15 @@ func (d *DatabaseAdapter) SaveDeploy(deploy domain.Deploy) error {
 func (d *DatabaseAdapter) GetDeploys() []domain.Deploy {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	return databaseModels.Deploys
+}
+
+func (d *DatabaseAdapter) UpdateDeploy(deploy domain.Deploy) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	for i, s := range databaseModels.Deploys {
+		if s.Id == deploy.Id {
+			databaseModels.Deploys[i] = deploy
+			break
+		}
+	}
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
 }

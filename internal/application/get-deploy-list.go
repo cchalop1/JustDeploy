@@ -1,0 +1,26 @@
+package application
+
+import (
+	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/service"
+)
+
+func GetDeployList(deployService *service.DeployService) []dto.DeployDto {
+	deployList := deployService.DatabaseAdapter.GetDeploys()
+	deployListDto := make([]dto.DeployDto, len(deployList))
+
+	for i, v := range deployList {
+		server := deployService.DatabaseAdapter.GetServerById(v.ServerId)
+		deployListDto[i] = dto.DeployDto{
+			Id:           v.Id,
+			Name:         v.Name,
+			Server:       server.ToServerDto(),
+			EnableTls:    v.EnableTls,
+			Email:        v.Email,
+			Envs:         v.Envs,
+			PathToSource: v.PathToSource,
+		}
+	}
+
+	return deployListDto
+}

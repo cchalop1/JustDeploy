@@ -8,6 +8,7 @@ import (
 
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/domain"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -194,16 +195,16 @@ func envToSlice(envVars []dto.Env) []string {
 	return envSlice
 }
 
-func (d *DockerAdapter) RunImage(deployConfig dto.DeployConfigDto) {
-	Name := deployConfig.AppConfig.Name
+func (d *DockerAdapter) RunImage(deployConfig domain.Deploy, domain string) {
+	Name := deployConfig.Name
 
 	Labels := map[string]string{
 		"traefik.enable":                                "true",
-		"traefik.http.routers." + Name + ".rule":        "Host(`" + deployConfig.ServerConfig.Domain + "`)",
+		"traefik.http.routers." + Name + ".rule":        "Host(`" + domain + "`)",
 		"traefik.http.routers." + Name + ".entrypoints": "web",
 	}
 
-	if deployConfig.AppConfig.EnableTls {
+	if deployConfig.EnableTls {
 		Labels["traefik.http.routers."+Name+".tls"] = "true"
 		Labels["traefik.http.routers."+Name+".tls.certresolver"] = "myresolver"
 		Labels["traefik.http.routers."+Name+".entrypoints"] = "websecure"
@@ -212,7 +213,7 @@ func (d *DockerAdapter) RunImage(deployConfig dto.DeployConfigDto) {
 	config := container.Config{
 		Image:  Name,
 		Labels: Labels,
-		Env:    envToSlice(deployConfig.AppConfig.Envs),
+		Env:    envToSlice(deployConfig.Envs),
 	}
 
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, nil, &v1.Platform{}, Name)

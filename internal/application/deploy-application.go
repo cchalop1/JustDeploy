@@ -1,36 +1,66 @@
 package application
 
 import (
+	"errors"
+	"fmt"
 	"path/filepath"
 
 	"cchalop1.com/deploy/internal/adapter"
+	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
+	"cchalop1.com/deploy/internal/domain"
+	"cchalop1.com/deploy/internal/utils"
 )
 
-func DeployApplication(deployService *service.DeployService) error {
-	pathToDir, err := filepath.Abs(deployService.DeployConfig.AppConfig.PathToSource)
+func runApplication(deployService *service.DeployService, deploy domain.Deploy, domain string) {
+	deployService.DockerAdapter.BuildImage(deploy.Name, deploy.PathToSource)
+	deployService.DockerAdapter.PullTreafikImage()
+	deployService.DockerAdapter.RunRouter()
+	deployService.DockerAdapter.RunImage(deploy, domain)
+
+	if deploy.EnableTls {
+		deploy.Url = "https://" + domain
+	} else {
+		deploy.Url = "http://" + domain
+	}
+
+	deploy.Status = "Runing"
+	deployService.DatabaseAdapter.UpdateDeploy(deploy)
+}
+
+func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDeployDto) error {
+	server := deployService.DatabaseAdapter.GetServerById(newDeploy.ServerId)
+
+	if server == nil {
+		return errors.New("server not found")
+	}
+
+	pathToDir, err := filepath.Abs(newDeploy.PathToSource)
 
 	if err != nil {
 		return err
 	}
 
-	deployService.DeployConfig.AppConfig.PathToSource = adapter.NewFilesystemAdapter().CleanPath(pathToDir)
+	pathToDir = adapter.NewFilesystemAdapter().CleanPath(pathToDir)
 
-	deployService.DockerAdapter.BuildImage(deployService.DeployConfig.AppConfig.Name, deployService.DeployConfig.AppConfig.PathToSource)
-	deployService.DockerAdapter.PullTreafikImage()
-	deployService.DockerAdapter.RunRouter()
-	deployService.DockerAdapter.RunImage(*deployService.DeployConfig)
+	err = deployService.DockerAdapter.ConnectClient(server.Domain)
 
-	deployService.DeployConfig.DeployStatus = "deployapp"
-
-	if deployService.DeployConfig.AppConfig.EnableTls {
-		deployService.DeployConfig.Url = "https://" + deployService.DeployConfig.ServerConfig.Domain
-	} else {
-		deployService.DeployConfig.Url = "http://" + deployService.DeployConfig.ServerConfig.Domain
+	if err != nil {
+		return err
 	}
 
-	deployService.DeployConfig.AppStatus = "Runing"
+	deploy := domain.Deploy{
+		Id:           utils.GenerateRandomPassword(5),
+		Name:         newDeploy.Name,
+		ServerId:     newDeploy.ServerId,
+		PathToSource: pathToDir,
+		Status:       "Installing",
+	}
 
-	// deployService.DatabaseAdapter.SaveState(*deployService.DeployConfig)
+	err = deployService.DatabaseAdapter.SaveDeploy(deploy)
+	fmt.Println(err)
+
+	runApplication(deployService, deploy, server.Domain)
+
 	return nil
 }

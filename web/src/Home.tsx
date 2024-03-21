@@ -4,11 +4,12 @@ import ServerList from "./components/ServerList";
 import { Button } from "./components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ServerDto, getServersListApi } from "./services/getServerListApi";
+import { DeployDto, getDeployListApi } from "./services/getDeployListApi";
 
 export default function Home() {
   const navigate = useNavigate();
   const [serverList, setServerList] = useState<Array<ServerDto>>([]);
-  const [deployList, setDeployList] = useState([]);
+  const [deployList, setDeployList] = useState<Array<DeployDto>>([]);
 
   const canCreateDeploy = serverList.length > 0;
 
@@ -26,15 +27,19 @@ export default function Home() {
     setServerList(serverList);
   }
 
-  async function fetchDeployList() {}
+  async function fetchDeployList() {
+    const deployList = await getDeployListApi();
+    // TODO: check error
+    setDeployList(deployList);
+  }
 
   useEffect(() => {
     fetchServerList();
     fetchDeployList();
-    setInterval(() => {
-      fetchServerList();
-      fetchDeployList();
-    }, 2000);
+    // setInterval(() => {
+    //   fetchServerList();
+    //   fetchDeployList();
+    // }, 2000);
   }, []);
 
   return (

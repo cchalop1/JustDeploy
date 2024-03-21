@@ -10,27 +10,54 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "../ui/checkbox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  PostCreateDeploymentDto,
-  postFormDetails,
+  CreateDeployDto,
+  createDeployApi,
 } from "../../services/postFormDetails";
 import { ButtonStateEnum } from "../../lib/utils";
 import SpinnerIcon from "@/assets/SpinnerIcon";
+import {
+  SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "../ui/select";
+import { ServerDto, getServersListApi } from "@/services/getServerListApi";
+import { useNavigate } from "react-router-dom";
+
+const createDeploymentEmptyState = (): CreateDeployDto => {
+  return {
+    serverId: "",
+    name: "",
+    enableTls: false,
+    email: null,
+    pathToSource: "",
+    envs: [{ name: "", secret: "" }],
+    deployOnCommit: false,
+  };
+};
 
 export function DeployConfigForm() {
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
     ButtonStateEnum.INIT
   );
-  const [createDeployement, setCreateDeployement] =
-    useState<PostCreateDeploymentDto>({
-      name: "",
-      enableTls: false,
-      email: null,
-      pathToSource: "",
-      envs: [{ name: "", secret: "" }],
-      deployOnCommit: false,
-    });
+  const [newDeploy, setNewDeploy] = useState<CreateDeployDto>(
+    createDeploymentEmptyState()
+  );
+  const [serverList, setServerList] = useState<Array<ServerDto>>([]);
+  const navigate = useNavigate();
+
+  async function fetchServerList() {
+    const serverList = await getServersListApi();
+    // TODO: check error
+    setServerList(serverList);
+  }
+
+  useEffect(() => {
+    fetchServerList();
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -39,22 +66,22 @@ export function DeployConfigForm() {
 
     setConnectButtonState(ButtonStateEnum.PENDING);
 
-    await postFormDetails(createDeployement);
+    await createDeployApi(newDeploy);
     setConnectButtonState(ButtonStateEnum.SUCESS);
-    // fetchCurrentConfigData();
+    navigate("/");
   };
 
   const addNewEnv = () => {
-    setCreateDeployement({
-      ...createDeployement,
-      envs: [...createDeployement.envs, { name: "", secret: "" }],
+    setNewDeploy({
+      ...newDeploy,
+      envs: [...newDeploy.envs, { name: "", secret: "" }],
     });
   };
 
   const removeEnv = (idx: number) => {
-    setCreateDeployement({
-      ...createDeployement,
-      envs: createDeployement.envs.filter((_, index) => index !== idx),
+    setNewDeploy({
+      ...newDeploy,
+      envs: newDeploy.envs.filter((_, index) => index !== idx),
     });
   };
 
@@ -71,15 +98,40 @@ export function DeployConfigForm() {
           <CardContent>
             <div className="grid w-full items-center gap-4">
               <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="auth-methode">Select server for your app</Label>
+                <Select
+                  onValueChange={(value) => {
+                    console.log(value);
+                    setNewDeploy({ ...newDeploy, serverId: value });
+                  }}
+                  defaultValue={newDeploy.serverId || ""}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        serverList.length > 0 ? serverList[0].name : "Server"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {serverList.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
                   name="name"
                   placeholder="Name of your project"
-                  value={createDeployement.name}
+                  value={newDeploy.name}
                   onChange={(e) =>
-                    setCreateDeployement({
-                      ...createDeployement,
+                    setNewDeploy({
+                      ...newDeploy,
                       name: e.target.value,
                     })
                   }
@@ -92,10 +144,10 @@ export function DeployConfigForm() {
                   name="projectPath"
                   // type="file"
                   placeholder="/path/to/your/source"
-                  value={createDeployement.pathToSource}
+                  value={newDeploy.pathToSource}
                   onChange={(e) =>
-                    setCreateDeployement({
-                      ...createDeployement,
+                    setNewDeploy({
+                      ...newDeploy,
                       pathToSource: e.target.value,
                     })
                   }
@@ -105,11 +157,11 @@ export function DeployConfigForm() {
                 <Checkbox
                   id="enable-tls"
                   name="enable-tls"
-                  value={createDeployement.enableTls.toString()}
+                  value={newDeploy.enableTls.toString()}
                   onCheckedChange={(isChecked) => {
                     if (isChecked === "indeterminate") return;
-                    setCreateDeployement({
-                      ...createDeployement,
+                    setNewDeploy({
+                      ...newDeploy,
                       enableTls: isChecked,
                       email: isChecked ? "" : null,
                     });
@@ -119,31 +171,30 @@ export function DeployConfigForm() {
                   htmlFor="enable-tls"
                   className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  Setup this application with tls connection
+                  Setup HTTPS for this deploy
                 </Label>
               </div>
-              {createDeployement.enableTls &&
-                createDeployement.email !== null && (
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="Email for tls setup"
-                      value={createDeployement.email}
-                      onChange={(e) =>
-                        setCreateDeployement({
-                          ...createDeployement,
-                          email: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                )}
+              {newDeploy.enableTls && newDeploy.email !== null && (
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Email for tls setup"
+                    value={newDeploy.email}
+                    onChange={(e) =>
+                      setNewDeploy({
+                        ...newDeploy,
+                        email: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>Env Variables</Label>
-                {createDeployement.envs.map((env, idx) => (
+                {newDeploy.envs.map((env, idx) => (
                   <div className="flex gap-4">
                     <Input
                       id="envName"
@@ -152,13 +203,13 @@ export function DeployConfigForm() {
                       placeholder="Env Name"
                       value={env.name}
                       onChange={(e) => {
-                        const updatedEnvs = [...createDeployement.envs];
+                        const updatedEnvs = [...newDeploy.envs];
                         updatedEnvs[idx] = {
                           ...updatedEnvs[idx],
                           name: e.target.value,
                         };
-                        setCreateDeployement({
-                          ...createDeployement,
+                        setNewDeploy({
+                          ...newDeploy,
                           envs: updatedEnvs,
                         });
                       }}
@@ -170,13 +221,13 @@ export function DeployConfigForm() {
                       placeholder="Env Secret"
                       value={env.secret}
                       onChange={(e) => {
-                        const updatedEnvs = [...createDeployement.envs];
+                        const updatedEnvs = [...newDeploy.envs];
                         updatedEnvs[idx] = {
                           ...updatedEnvs[idx],
                           secret: e.target.value,
                         };
-                        setCreateDeployement({
-                          ...createDeployement,
+                        setNewDeploy({
+                          ...newDeploy,
                           envs: updatedEnvs,
                         });
                       }}

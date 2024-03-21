@@ -11,16 +11,17 @@ import (
 
 func CreateDeployementHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		postCreateDeploymentRequest := dto.AppConfigDto{}
-		err := c.Bind(&postCreateDeploymentRequest)
+		newDeployDto := dto.NewDeployDto{}
+		err := c.Bind(&newDeployDto)
 		if err != nil {
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		// TODO: create a models for appConfig
-		deployService.DeployConfig.AppConfig = postCreateDeploymentRequest
+		err = application.DeployApplication(deployService, newDeployDto)
 
-		application.DeployApplication(deployService)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
 
 		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is deploy"})
 	}

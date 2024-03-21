@@ -6,6 +6,6 @@ import (
 
 func RemoveApplication(applicationName string, deployService *service.DeployService) error {
 	deployService.DockerAdapter.Delete(applicationName, true)
-	deployService.DeployConfig.DeployStatus = "appconfig"
+	// deployService.DeployConfig.DeployStatus = "appconfig"
 	return nil
 }

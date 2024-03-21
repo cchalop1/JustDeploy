@@ -11,7 +11,7 @@ import (
 )
 
 func CreateServer(deployService *service.DeployService, createNewServer dto.ConnectNewServerDto) bool {
-	serverCount := deployService.DatabaseAdapter.CountServer()
+	serverCount := deployService.DatabaseAdapter.CountServer() + 1
 	Name := "Server " + strconv.Itoa(serverCount)
 
 	server := domain.Server{

@@ -5,7 +5,8 @@ export type Env = {
   secret: string;
 };
 
-export type PostCreateDeploymentDto = {
+export type CreateDeployDto = {
+  serverId: string;
   name: string;
   enableTls: boolean;
   email: string | null;
@@ -14,8 +15,8 @@ export type PostCreateDeploymentDto = {
   deployOnCommit: boolean;
 };
 
-export async function postFormDetails(
-  postCreateDeploymentDto: PostCreateDeploymentDto
+export async function createDeployApi(
+  postCreateDeploymentDto: CreateDeployDto
 ): Promise<ResponseApi> {
   return await callApi<ResponseApi>("/deploy", "POST", postCreateDeploymentDto);
 }

@@ -18,7 +18,7 @@ func EditDeployementHandler(deployService *service.DeployService) echo.HandlerFu
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		application.EditDeployement(deployService, containerName, editDeployementDto)
+		application.EditDeploy(deployService, containerName, editDeployementDto)
 
 		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "ok"})
 	}
