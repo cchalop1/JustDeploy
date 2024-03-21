@@ -53,6 +53,9 @@ export function DeployConfigForm() {
     const serverList = await getServersListApi();
     // TODO: check error
     setServerList(serverList);
+    if (serverList.length > 0) {
+      setNewDeploy({ ...newDeploy, serverId: serverList[0].id });
+    }
   }
 
   useEffect(() => {

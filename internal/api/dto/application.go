@@ -23,4 +23,5 @@ type DeployDto struct {
 	Email        string    `json:"email"`
 	PathToSource string    `json:"pathToSource"`
 	Envs         []Env     `json:"envs"`
+	Status       string    `json:"status"`
 }

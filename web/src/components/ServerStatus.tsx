@@ -1,10 +1,11 @@
 import { ServerStatusType } from "@/services/getServerListApi";
+import { Badge } from "./ui/badge";
 
 type ServerStatusProps = {
   status: ServerStatusType;
 };
 
-export default function ServerStatus({ status }: ServerStatusProps) {
+export default function Status({ status }: ServerStatusProps) {
   let color = "";
 
   if (status === "Runing") {
@@ -15,10 +16,5 @@ export default function ServerStatus({ status }: ServerStatusProps) {
     color = "bg-red-500";
   }
 
-  return (
-    <div className="flex items-center gap-2">
-      <div className={`h-3 w-3 rounded-full ${color}`}></div>
-      <div>{status}</div>
-    </div>
-  );
+  return <Badge className={color}>{status}</Badge>;
 }

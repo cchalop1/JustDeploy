@@ -1,5 +1,6 @@
 import { DeployDto } from "@/services/getDeployListApi";
 import { Card, CardContent } from "./ui/card";
+import Status from "./ServerStatus";
 
 type DeployListProps = {
   deployList: Array<DeployDto>;
@@ -21,8 +22,11 @@ export default function DeployList({ deployList }: DeployListProps) {
           className="hover:shadow-md cursor-pointer w-80 h-full pt-4 pl-2"
           key={deploy.id}
         >
-          <CardContent>
-            <div className="font-bold">{deploy.name}</div>
+          <CardContent className="flex flex-col gap-2">
+            <div className="flex justify-between">
+              <div className="font-bold">{deploy.name}</div>
+              <Status status={deploy.status} />
+            </div>
           </CardContent>
         </Card>
       ))}
