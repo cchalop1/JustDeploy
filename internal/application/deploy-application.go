@@ -1,7 +1,6 @@
 package application
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -29,10 +28,10 @@ func runApplication(deployService *service.DeployService, deploy domain.Deploy, 
 }
 
 func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDeployDto) error {
-	server := deployService.DatabaseAdapter.GetServerById(newDeploy.ServerId)
+	server, err := deployService.DatabaseAdapter.GetServerById(newDeploy.ServerId)
 
-	if server == nil {
-		return errors.New("server not found")
+	if err != nil {
+		return err
 	}
 
 	pathToDir, err := filepath.Abs(newDeploy.PathToSource)
@@ -43,7 +42,7 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 
 	pathToDir = adapter.NewFilesystemAdapter().CleanPath(pathToDir)
 
-	err = deployService.DockerAdapter.ConnectClient(server.Domain)
+	err = deployService.DockerAdapter.ConnectClient(server)
 
 	if err != nil {
 		return err

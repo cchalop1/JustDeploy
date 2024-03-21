@@ -10,7 +10,10 @@ func GetDeployList(deployService *service.DeployService) []dto.DeployDto {
 	deployListDto := make([]dto.DeployDto, len(deployList))
 
 	for i, v := range deployList {
-		server := deployService.DatabaseAdapter.GetServerById(v.ServerId)
+		server, err := deployService.DatabaseAdapter.GetServerById(v.ServerId)
+		if err != nil {
+			continue
+		}
 		deployListDto[i] = dto.DeployDto{
 			Id:           v.Id,
 			Name:         v.Name,

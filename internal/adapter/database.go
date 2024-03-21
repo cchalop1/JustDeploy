@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -76,26 +77,16 @@ func (d *DatabaseAdapter) Init() {
 	}
 }
 
-// func (d *DatabaseAdapter) GetState() dto.DeployConfigDto {
-// 	deployConfig := d.readDeployConfigInDataBaseFile()
-// 	return deployConfig
-// }
-
-// func (d *DatabaseAdapter) SaveState(deployConfig dto.DeployConfigDto) error {
-// 	d.writeDeployConfigInDataBaseFile(deployConfig)
-// 	return nil
-// }
-
 // Server
 
-func (d *DatabaseAdapter) GetServerById(id string) *domain.Server {
+func (d *DatabaseAdapter) GetServerById(id string) (domain.Server, error) {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	for _, s := range databaseModels.Servers {
 		if s.Id == id {
-			return &s
+			return s, nil
 		}
 	}
-	return nil
+	return domain.Server{}, errors.New("server not found")
 }
 
 func (d *DatabaseAdapter) UpdateServer(server domain.Server) error {

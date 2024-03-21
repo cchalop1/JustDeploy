@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 
-	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
 	"github.com/docker/docker/api/types"
@@ -28,14 +27,16 @@ func NewDockerAdapter() *DockerAdapter {
 const TRAEFIK_IMAGE = "traefik"
 const ROUTER_NAME = "treafik"
 
-func (d *DockerAdapter) ConnectClient(domain string) error {
-	caCertPath := internal.CERT_DOCKER_FOLDER + "/ca.pem"
-	certPath := internal.CERT_DOCKER_FOLDER + "/cert.pem"
-	keyPath := internal.CERT_DOCKER_FOLDER + "/key.pem"
+func (d *DockerAdapter) ConnectClient(server domain.Server) error {
+	serverCerts := server.GetCertsPath()
 
 	client, err := client.NewClientWithOpts(
-		client.WithHost("tcp://"+domain+":2376"),
-		client.WithTLSClientConfig(caCertPath, certPath, keyPath),
+		client.WithHost("tcp://"+server.Domain+":2376"),
+		client.WithTLSClientConfig(
+			serverCerts.CaCertPath,
+			serverCerts.CertPath,
+			serverCerts.KeyPath,
+		),
 	)
 
 	if err != nil {
@@ -43,7 +44,7 @@ func (d *DockerAdapter) ConnectClient(domain string) error {
 		return err
 	}
 	d.client = client
-	fmt.Println("je suis connecter au docker")
+	fmt.Println("I'm connected to docker of the server ", server.Name, " With domain ", server.Domain)
 	return nil
 }
 

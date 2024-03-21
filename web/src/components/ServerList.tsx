@@ -27,7 +27,7 @@ export default function ServerList({ serverList }: ServerListProps) {
               <Status status={server.status} />
             </div>
             <div className="underline">{server.domain}</div>
-            <div>ip: {server.ip}</div>
+            {/* <div>ip: {server.ip}</div> */}
           </CardContent>
         </Card>
       ))}

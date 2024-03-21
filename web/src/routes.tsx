@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import Home from "./Home";
 import ServerConfigForm from "./components/forms/ServerConfigForm";
-import { DeployConfigForm } from "./components/forms/DeployConfigForm";
+import { CreateDeployForm } from "./components/forms/CreateDeployForm";
 
 export const router = createBrowserRouter([
   {
@@ -14,6 +14,6 @@ export const router = createBrowserRouter([
   },
   {
     path: "deploy/create",
-    element: <DeployConfigForm />,
+    element: <CreateDeployForm />,
   },
 ]);

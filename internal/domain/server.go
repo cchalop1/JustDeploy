@@ -1,6 +1,9 @@
 package domain
 
-import "cchalop1.com/deploy/internal/api/dto"
+import (
+	"cchalop1.com/deploy/internal"
+	"cchalop1.com/deploy/internal/api/dto"
+)
 
 type Server struct {
 	Id          string  `json:"id"`
@@ -13,6 +16,12 @@ type Server struct {
 	Status      string  `json:"status"`
 }
 
+type ServerCertsPath struct {
+	CaCertPath string
+	CertPath   string
+	KeyPath    string
+}
+
 func (s *Server) ToServerDto() dto.ServerDto {
 	return dto.ServerDto{
 		Id:          s.Id,
@@ -21,5 +30,13 @@ func (s *Server) ToServerDto() dto.ServerDto {
 		Domain:      s.Domain,
 		CreatedDate: s.CreatedDate,
 		Status:      s.Status,
+	}
+}
+
+func (s *Server) GetCertsPath() ServerCertsPath {
+	return ServerCertsPath{
+		CaCertPath: internal.CERT_DOCKER_FOLDER + "/" + s.Id + "/ca.pem",
+		CertPath:   internal.CERT_DOCKER_FOLDER + "/" + s.Id + "/cert.pem",
+		KeyPath:    internal.CERT_DOCKER_FOLDER + "/" + s.Id + "/key.pem",
 	}
 }

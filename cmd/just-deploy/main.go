@@ -12,22 +12,18 @@ func main() {
 
 	databaseAdapter := adapter.NewDatabaseAdapter()
 	filesystemAdapter := adapter.NewFilesystemAdapter()
+	dockerAdapter := adapter.NewDockerAdapter()
 
 	databaseAdapter.Init()
 
-	// deployConfig := application.GetDeployConfig(databaseAdapter, filesystemAdapter)
-
 	deployService := service.DeployService{
 		DatabaseAdapter:   databaseAdapter,
-		DockerAdapter:     adapter.NewDockerAdapter(),
+		DockerAdapter:     dockerAdapter,
 		FilesystemAdapter: filesystemAdapter,
 	}
 
-	// get the connection to the server if is exist
-	//TODO: extract to a function
-	// if deployService.DeployConfig.DeployStatus != "serverconfig" {
-	// 	deployService.DockerAdapter = application.ConnectAndSetupServer(&deployService)
-	// }
+	// TODO: try server connection
+	// TODO: do health check
 
 	// args := os.Args[1:]
 

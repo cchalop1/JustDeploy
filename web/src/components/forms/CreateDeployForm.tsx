@@ -26,6 +26,7 @@ import {
 } from "../ui/select";
 import { ServerDto, getServersListApi } from "@/services/getServerListApi";
 import { useNavigate } from "react-router-dom";
+import { getDeployConfig } from "@/services/getDeployConfig";
 
 const createDeploymentEmptyState = (): CreateDeployDto => {
   return {
@@ -39,7 +40,7 @@ const createDeploymentEmptyState = (): CreateDeployDto => {
   };
 };
 
-export function DeployConfigForm() {
+export function CreateDeployForm() {
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
     ButtonStateEnum.INIT
   );
@@ -50,15 +51,25 @@ export function DeployConfigForm() {
   const navigate = useNavigate();
 
   async function fetchServerList() {
-    const serverList = await getServersListApi();
+    const resServerList = await getServersListApi();
     // TODO: check error
-    setServerList(serverList);
-    if (serverList.length > 0) {
-      setNewDeploy({ ...newDeploy, serverId: serverList[0].id });
+    setServerList(resServerList);
+    if (resServerList.length > 0) {
+      setNewDeploy((d) => ({ ...d, serverId: resServerList[0].id }));
     }
   }
 
+  async function fetchDeployConfig() {
+    const deployConfig = await getDeployConfig();
+    setNewDeploy((d) => ({
+      ...d,
+      pathToSource: deployConfig.pathToSource,
+    }));
+    // TODO: save deployConfig
+  }
+
   useEffect(() => {
+    fetchDeployConfig();
     fetchServerList();
   }, []);
 
@@ -69,6 +80,7 @@ export function DeployConfigForm() {
 
     setConnectButtonState(ButtonStateEnum.PENDING);
 
+    console.log(newDeploy);
     await createDeployApi(newDeploy);
     setConnectButtonState(ButtonStateEnum.SUCESS);
     navigate("/");
@@ -107,7 +119,7 @@ export function DeployConfigForm() {
                     console.log(value);
                     setNewDeploy({ ...newDeploy, serverId: value });
                   }}
-                  defaultValue={newDeploy.serverId || ""}
+                  defaultValue={newDeploy.serverId}
                 >
                   <SelectTrigger>
                     <SelectValue

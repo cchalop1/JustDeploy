@@ -1,19 +1,17 @@
 import { callApi } from "./api";
-import { ConnectServerDto } from "./connectServer";
-import { CreateDeployDto } from "./postFormDetails";
+import { Env } from "./postFormDetails";
 
-export type deployStatus = "serverconfig" | "appconfig" | "deployapp";
-export type appStatus = "Stoped" | "Runing";
+type SourceType = "Github" | "Local Folder";
 
-export type GetDeployConfigResponse = {
-  dockerFileValid: boolean;
-  serverConfig: ConnectServerDto | null;
-  appConfig: CreateDeployDto | null;
-  deployStatus: deployStatus;
-  appStatus: appStatus;
-  url: string;
+export type DeployConfigDto = {
+  sourceType: SourceType;
+  pathToSource: string;
+  dockerFileFound: boolean;
+  composeFileFound: boolean;
+  envFileFound: boolean;
+  envs: Env[];
 };
 
-export async function getDeployConfig(): Promise<GetDeployConfigResponse> {
-  return await callApi<GetDeployConfigResponse>("/deploy", "GET");
+export async function getDeployConfig(): Promise<DeployConfigDto> {
+  return await callApi<DeployConfigDto>("/deploy/config", "GET");
 }

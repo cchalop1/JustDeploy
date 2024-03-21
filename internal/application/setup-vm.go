@@ -31,12 +31,12 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 		fmt.Println(err)
 	}
 
-	certificateIsCreated, err := checkIsCertificateIsCreate(sshAdapter)
+	certificateIsCreated, err := checkIsCertificateIsCreate(sshAdapter, server.Id)
 	fmt.Println(err)
 
 	if !certificateIsCreated {
-		err = setupDockerCertificates(sshAdapter, server.Domain)
-		copyCertificates(sshAdapter)
+		err = setupDockerCertificates(sshAdapter, server)
+		copyCertificates(sshAdapter, server.Id)
 		fmt.Println(err)
 	}
 
@@ -50,7 +50,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 
 	sshAdapter.CloseConnection()
 	adapterDocker := adapter.NewDockerAdapter()
-	adapterDocker.ConnectClient(server.Domain)
+	adapterDocker.ConnectClient(server)
 
 	server.Status = "Runing"
 
@@ -72,8 +72,8 @@ func checkIfDockerIsIntalled(sshAdapter *adapter.SshAdapter) (bool, error) {
 	return false, nil
 }
 
-func checkIsCertificateIsCreate(sshAdapter *adapter.SshAdapter) (bool, error) {
-	certificatePath := "/root/cert-docker"
+func checkIsCertificateIsCreate(sshAdapter *adapter.SshAdapter, serverId string) (bool, error) {
+	certificatePath := "/root/cert-docker/" + serverId
 	statCommand := fmt.Sprintf("stat -t -- \"%s\" &>/dev/null", certificatePath)
 	output, err := sshAdapter.RunCommand(statCommand)
 	if err != nil {
@@ -158,17 +158,17 @@ func installDocker(sshAdapter *adapter.SshAdapter) error {
 	return nil
 }
 
-func setupDockerCertificates(sshAdapter *adapter.SshAdapter, serverHost string) error {
+func setupDockerCertificates(sshAdapter *adapter.SshAdapter, server domain.Server) error {
 	password := utils.GenerateRandomPassword(15)
 	pathToCert := "/root/cert-docker"
 
-	_, err := sshAdapter.RunCommand("mkdir " + pathToCert)
+	_, err := sshAdapter.RunCommand("mkdir -p " + pathToCert)
 
 	if err != nil {
 		return err
 	}
 
-	cmd := fmt.Sprintf("openssl req -new -x509 -days 365 -keyout %[3]s/ca-key.pem -passout pass:%[2]s -sha256 -out %[3]s/ca.pem -subj \"/C=/ST=/L=/O=/CN=%[1]s\"", serverHost, password, pathToCert)
+	cmd := fmt.Sprintf("openssl req -new -x509 -days 365 -keyout %[3]s/ca-key.pem -passout pass:%[2]s -sha256 -out %[3]s/ca.pem -subj \"/C=/ST=/L=/O=/CN=%[1]s\"", server.Domain, password, pathToCert)
 	_, err = sshAdapter.RunCommand(cmd)
 
 	if err != nil {
@@ -182,14 +182,14 @@ func setupDockerCertificates(sshAdapter *adapter.SshAdapter, serverHost string) 
 		return err
 	}
 
-	cmd = fmt.Sprintf("openssl req -subj \"/CN=%[1]s\" -sha256 -new -key %[2]s/server-key.pem -out %[2]s/server.csr", serverHost, pathToCert)
+	cmd = fmt.Sprintf("openssl req -subj \"/CN=%[1]s\" -sha256 -new -key %[2]s/server-key.pem -out %[2]s/server.csr", server.Domain, pathToCert)
 	_, err = sshAdapter.RunCommand(cmd)
 
 	if err != nil {
 		return err
 	}
 
-	cmd = fmt.Sprintf("echo subjectAltName = DNS:%[1]s,IP:10.10.10.20,IP:127.0.0.1 >> %[2]s/extfile.cnf", serverHost, pathToCert)
+	cmd = fmt.Sprintf("echo subjectAltName = DNS:%[1]s,IP:10.10.10.20,IP:127.0.0.1 >> %[2]s/extfile.cnf", server.Domain, pathToCert)
 	_, err = sshAdapter.RunCommand(cmd)
 
 	if err != nil {
@@ -278,12 +278,14 @@ func ensureCertDockerDirectory(localDir string) {
 	}
 }
 
-func copyCertificates(sshAdapter *adapter.SshAdapter) error {
+func copyCertificates(sshAdapter *adapter.SshAdapter, serverId string) error {
 	remoteFiles := []string{"ca.pem", "key.pem", "cert.pem"}
 	ensureCertDockerDirectory(internal.CERT_DOCKER_FOLDER)
+	pathLocalCertDir := internal.CERT_DOCKER_FOLDER + "/" + serverId + "/"
+	os.Mkdir(pathLocalCertDir, 0755)
 
 	for _, remoteFileName := range remoteFiles {
-		err := sshAdapter.SaveRemoteFileContentToLocalFile("/root/cert-docker/"+remoteFileName, internal.CERT_DOCKER_FOLDER+"/"+remoteFileName)
+		err := sshAdapter.SaveRemoteFileContentToLocalFile("/root/cert-docker/"+remoteFileName, pathLocalCertDir+remoteFileName)
 		if err != nil {
 			log.Fatalf("Error saving file content: %v", err)
 		}

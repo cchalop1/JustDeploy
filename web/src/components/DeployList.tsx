@@ -1,10 +1,16 @@
 import { DeployDto } from "@/services/getDeployListApi";
 import { Card, CardContent } from "./ui/card";
 import Status from "./ServerStatus";
+import FolderIcon from "@/assets/FolderIcon";
 
 type DeployListProps = {
   deployList: Array<DeployDto>;
 };
+
+function cleanPathToSource(pathToSource: string): string {
+  const arr = pathToSource.split("/");
+  return arr.slice(arr.length - 3, arr.length - 1).join("/");
+}
 
 export default function DeployList({ deployList }: DeployListProps) {
   if (deployList.length === 0) {
@@ -26,6 +32,9 @@ export default function DeployList({ deployList }: DeployListProps) {
             <div className="flex justify-between">
               <div className="font-bold">{deploy.name}</div>
               <Status status={deploy.status} />
+            </div>
+            <div className="flex items-center gap-2">
+              <FolderIcon /> {cleanPathToSource(deploy.pathToSource)}
             </div>
           </CardContent>
         </Card>

@@ -1,12 +1,20 @@
 package application
 
-// func GetDeployConfig(databaseAdapter *adapter.DatabaseAdapter, filesystemAdapter *adapter.FilesystemAdapter) dto.DeployConfigDto {
-// 	// configDeploy := databaseAdapter.GetState()
+import (
+	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/service"
+)
 
-// 	// currentPath, err := filesystemAdapter.GetCurrentPath()
-// 	// if err == nil && configDeploy.AppConfig.PathToSource == "" {
-// 	// 	configDeploy.AppConfig.PathToSource = currentPath
+func GetDeployConfig(deployService *service.DeployService) dto.DeployConfigDto {
+	deployConfig := dto.DeployConfigDto{}
 
-// 	// }
-// 	// return configDeploy
-// }
+	currentPath, err := deployService.FilesystemAdapter.GetCurrentPath()
+
+	if err == nil {
+		deployConfig.PathToSource = currentPath
+	}
+
+	deployConfig.SourceType = "Local Folder"
+
+	return deployConfig
+}
