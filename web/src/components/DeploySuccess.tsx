@@ -39,45 +39,6 @@
 //   if (!deployConfig.appConfig) return null;
 //   console.log(deployConfig);
 
-//   async function removeApplication() {
-//     if (!deployConfig.appConfig) return null;
-//     setConnectButtonState(ButtonStateEnum.PENDING);
-//     try {
-//       await removeApplicationApi(deployConfig.appConfig.name);
-//       setConnectButtonState(ButtonStateEnum.SUCESS);
-//       fetchCurrentConfigData();
-//     } catch (e) {
-//       console.error(e);
-//     }
-//   }
-
-//   async function reDeployApplication() {
-//     if (!deployConfig.appConfig) return null;
-//     setReDeployButtonState(ButtonStateEnum.PENDING);
-//     try {
-//       await reDeployAppApi(deployConfig.appConfig.name);
-//       setReDeployButtonState(ButtonStateEnum.SUCESS);
-//     } catch (e) {
-//       console.error(e);
-//     }
-//   }
-
-//   async function startStopApplication() {
-//     if (!deployConfig.appConfig) return null;
-//     setStopStartButtonState(ButtonStateEnum.PENDING);
-//     try {
-//       {
-//         deployConfig.appStatus === "Runing"
-//           ? await stopApplicationApi(deployConfig.appConfig.name)
-//           : await startApplicationApi(deployConfig.appConfig.name);
-//       }
-//       fetchCurrentConfigData();
-//       setStopStartButtonState(ButtonStateEnum.SUCESS);
-//     } catch (e) {
-//       console.error(e);
-//     }
-//   }
-
 //   async function onCheckDeployOnCommit(checked: boolean) {
 //     if (!deployConfig.appConfig) return null;
 //     try {

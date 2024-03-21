@@ -1,5 +1,5 @@
 import { ResponseApi, callApi } from "./api";
 
-export async function reDeployAppApi(appName: string): Promise<ResponseApi> {
-  return await callApi<ResponseApi>("/redeploy/" + appName, "POST");
+export async function reDeployAppApi(id: string): Promise<ResponseApi> {
+  return await callApi<ResponseApi>("/redeploy/" + id, "POST");
 }

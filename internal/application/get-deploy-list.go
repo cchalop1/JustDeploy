@@ -23,6 +23,7 @@ func GetDeployList(deployService *service.DeployService) []dto.DeployDto {
 			Envs:         v.Envs,
 			PathToSource: v.PathToSource,
 			Status:       v.Status,
+			Url:          v.Url,
 		}
 	}
 

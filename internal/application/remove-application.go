@@ -4,8 +4,12 @@ import (
 	"cchalop1.com/deploy/internal/api/service"
 )
 
-func RemoveApplication(applicationName string, deployService *service.DeployService) error {
-	deployService.DockerAdapter.Delete(applicationName, true)
-	// deployService.DeployConfig.DeployStatus = "appconfig"
+func RemoveApplicationById(deployService *service.DeployService, deployId string) error {
+	deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
+	if err != nil {
+		return err
+	}
+	deployService.DockerAdapter.Delete(deploy.Name, true)
+	deployService.DatabaseAdapter.DeleteDeploy(deploy)
 	return nil
 }

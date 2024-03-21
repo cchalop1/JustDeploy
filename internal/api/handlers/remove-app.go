@@ -11,9 +11,9 @@ import (
 
 func RemoveApplicationHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		applicationName := c.Param("name")
+		deployId := c.Param("id")
 
-		application.RemoveApplication(applicationName, deployService)
+		application.RemoveApplicationById(deployService, deployId)
 
 		// h.databaseAdapter.SaveState(h.deployConfig)
 		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is removed"})

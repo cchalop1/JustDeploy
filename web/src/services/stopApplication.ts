@@ -1,7 +1,5 @@
 import { ResponseApi, callApi } from "./api";
 
-export async function stopApplicationApi(
-  appName: string
-): Promise<ResponseApi> {
-  return await callApi<ResponseApi>("/stop/" + appName, "POST");
+export async function stopApplicationByIdApi(id: string): Promise<ResponseApi> {
+  return await callApi<ResponseApi>("/stop/" + id, "POST");
 }

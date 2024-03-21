@@ -28,6 +28,7 @@ type DeployDto struct {
 	PathToSource string    `json:"pathToSource"`
 	Envs         []Env     `json:"envs"`
 	Status       string    `json:"status"`
+	Url          string    `json:"url"`
 }
 
 type DeployConfigDto struct {

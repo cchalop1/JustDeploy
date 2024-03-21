@@ -7,6 +7,7 @@ export type DeployDto = {
   id: string;
   name: string;
   serverId: string;
+  url: string;
   enableTls: boolean;
   email: string;
   pathToSource: string;

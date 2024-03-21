@@ -130,6 +130,16 @@ func (d *DatabaseAdapter) GetDeploys() []domain.Deploy {
 	return databaseModels.Deploys
 }
 
+func (d *DatabaseAdapter) GetDeployById(id string) (domain.Deploy, error) {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	for _, d := range databaseModels.Deploys {
+		if d.Id == id {
+			return d, nil
+		}
+	}
+	return domain.Deploy{}, errors.New("deploy not found")
+}
+
 func (d *DatabaseAdapter) UpdateDeploy(deploy domain.Deploy) error {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	for i, s := range databaseModels.Deploys {
@@ -138,5 +148,17 @@ func (d *DatabaseAdapter) UpdateDeploy(deploy domain.Deploy) error {
 			break
 		}
 	}
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}
+
+func (d *DatabaseAdapter) DeleteDeploy(deploy domain.Deploy) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	var newDeploys []domain.Deploy
+	for _, s := range databaseModels.Deploys {
+		if s.Id != deploy.Id {
+			newDeploys = append(newDeploys, s)
+		}
+	}
+	databaseModels.Deploys = newDeploys
 	return d.writeDeployConfigInDataBaseFile(databaseModels)
 }
