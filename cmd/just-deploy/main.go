@@ -38,7 +38,7 @@ func main() {
 	} else {
 		api.CreateRoutes(app, &deployService)
 		web.CreateMiddlewareWebFiles(app)
-		app.StartServer(false)
+		app.StartServer(true)
 	}
 
 }

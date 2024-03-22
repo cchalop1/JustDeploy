@@ -53,6 +53,9 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 		ServerId:     newDeploy.ServerId,
 		PathToSource: pathToDir,
 		Status:       "Installing",
+		EnableTls:    newDeploy.EnableTls,
+		Email:        newDeploy.Email,
+		Envs:         newDeploy.Envs,
 	}
 
 	err = deployService.DatabaseAdapter.SaveDeploy(deploy)

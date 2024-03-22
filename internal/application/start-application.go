@@ -7,7 +7,11 @@ func StartApplication(deployService *service.DeployService, deployId string) err
 	if err != nil {
 		return err
 	}
-	// TODO: connect to docker client
+	server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
+	if err != nil {
+		return err
+	}
+	deployService.DockerAdapter.ConnectClient(server)
 	deployService.DockerAdapter.Start(deploy.Name)
 	deploy.Status = "Runing"
 	deployService.DatabaseAdapter.UpdateDeploy(deploy)

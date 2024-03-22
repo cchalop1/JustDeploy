@@ -9,8 +9,12 @@ func RemoveApplicationById(deployService *service.DeployService, deployId string
 	if err != nil {
 		return err
 	}
-	// TODO: connect to docker client
-	deployService.DockerAdapter.Delete(deploy.Name, true)
+	server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
+	if err != nil {
+		return err
+	}
+	deployService.DockerAdapter.ConnectClient(server)
+	deployService.DockerAdapter.Delete(deploy.Name, false)
 	deployService.DatabaseAdapter.DeleteDeploy(deploy)
 	return nil
 }
