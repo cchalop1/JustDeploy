@@ -10,6 +10,8 @@ func EditDeploy(deployService *service.DeployService, editDeployDto dto.EditDepl
 	if err != nil {
 		return err
 	}
+	deploy.Envs = editDeployDto.Envs
+	deploy.SubDomain = editDeployDto.SubDomain
 	deploy.DeployOnCommit = editDeployDto.DeployOnCommit
 
 	if deploy.DeployOnCommit {

@@ -14,4 +14,5 @@ type Deploy struct {
 	DeployOnCommit bool      `json:"deployOnCommit"`
 	Status         string    `json:"status"`
 	Url            string    `json:"url"`
+	SubDomain      string    `json:"subDomain"`
 }

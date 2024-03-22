@@ -13,6 +13,7 @@ export type DeployDto = {
   pathToSource: string;
   envs: Env[];
   deployOnCommit: boolean;
+  subDomain: string;
   status: DeployStatusType;
 };
 

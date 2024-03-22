@@ -13,6 +13,7 @@ import { Checkbox } from "../ui/checkbox";
 import { useEffect, useState } from "react";
 import {
   CreateDeployDto,
+  Env,
   createDeployApi,
 } from "../../services/postFormDetails";
 import { ButtonStateEnum } from "../../lib/utils";
@@ -27,6 +28,8 @@ import {
 import { ServerDto, getServersListApi } from "@/services/getServerListApi";
 import { useNavigate } from "react-router-dom";
 import { getDeployConfig } from "@/services/getDeployConfig";
+import EnvsManagements from "./EnvsManagements";
+import { env } from "process";
 
 const createDeploymentEmptyState = (): CreateDeployDto => {
   return {
@@ -86,19 +89,9 @@ export function CreateDeployForm() {
     navigate("/");
   };
 
-  const addNewEnv = () => {
-    setNewDeploy({
-      ...newDeploy,
-      envs: [...newDeploy.envs, { name: "", secret: "" }],
-    });
-  };
-
-  const removeEnv = (idx: number) => {
-    setNewDeploy({
-      ...newDeploy,
-      envs: newDeploy.envs.filter((_, index) => index !== idx),
-    });
-  };
+  function setEnvs(envs: Array<Env>) {
+    setNewDeploy({ ...newDeploy, envs: envs });
+  }
 
   return (
     <div className="flex justify-center mt-16">
@@ -209,59 +202,7 @@ export function CreateDeployForm() {
               )}
               <div className="space-y-2">
                 <Label>Env Variables</Label>
-                {newDeploy.envs.map((env, idx) => (
-                  <div className="flex gap-4">
-                    <Input
-                      id="envName"
-                      name="envName"
-                      type="envName"
-                      placeholder="Env Name"
-                      value={env.name}
-                      onChange={(e) => {
-                        const updatedEnvs = [...newDeploy.envs];
-                        updatedEnvs[idx] = {
-                          ...updatedEnvs[idx],
-                          name: e.target.value,
-                        };
-                        setNewDeploy({
-                          ...newDeploy,
-                          envs: updatedEnvs,
-                        });
-                      }}
-                    />
-                    <Input
-                      id="envSecret"
-                      name="envSecret"
-                      type="envSecret"
-                      placeholder="Env Secret"
-                      value={env.secret}
-                      onChange={(e) => {
-                        const updatedEnvs = [...newDeploy.envs];
-                        updatedEnvs[idx] = {
-                          ...updatedEnvs[idx],
-                          secret: e.target.value,
-                        };
-                        setNewDeploy({
-                          ...newDeploy,
-                          envs: updatedEnvs,
-                        });
-                      }}
-                    />
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        if (idx === 0) {
-                          addNewEnv();
-                        } else {
-                          removeEnv(idx);
-                        }
-                      }}
-                    >
-                      {idx === 0 ? "+" : "-"}
-                    </Button>
-                  </div>
-                ))}
+                <EnvsManagements envs={newDeploy.envs} setEnvs={setEnvs} />
               </div>
             </div>
           </CardContent>

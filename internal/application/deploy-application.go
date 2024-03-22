@@ -11,20 +11,29 @@ import (
 	"cchalop1.com/deploy/internal/utils"
 )
 
-func runApplication(deployService *service.DeployService, deploy domain.Deploy, domain string) {
+func runApplication(deployService *service.DeployService, deploy *domain.Deploy, domain string) {
+	appUrl := ""
+
+	if deploy.SubDomain != "" {
+		appUrl += deploy.SubDomain + "."
+	}
+
+	appUrl += domain
+
 	deployService.DockerAdapter.BuildImage(deploy.Name, deploy.PathToSource)
 	deployService.DockerAdapter.PullTreafikImage()
 	deployService.DockerAdapter.RunRouter()
-	deployService.DockerAdapter.RunImage(deploy, domain)
+	deployService.DockerAdapter.RunImage(*deploy, appUrl)
 
 	if deploy.EnableTls {
-		deploy.Url = "https://" + domain
+		deploy.Url = "https://" + appUrl
 	} else {
-		deploy.Url = "http://" + domain
+		deploy.Url = "http://" + appUrl
 	}
 
+	fmt.Println(deploy.Url)
 	deploy.Status = "Runing"
-	deployService.DatabaseAdapter.UpdateDeploy(deploy)
+	deployService.DatabaseAdapter.UpdateDeploy(*deploy)
 }
 
 func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDeployDto) error {
@@ -56,17 +65,18 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 		EnableTls:    newDeploy.EnableTls,
 		Email:        newDeploy.Email,
 		Envs:         newDeploy.Envs,
+		SubDomain:    newDeploy.Name,
 	}
 
 	err = deployService.DatabaseAdapter.SaveDeploy(deploy)
 	fmt.Println(err)
 
-	runApplication(deployService, deploy, server.Domain)
+	runApplication(deployService, &deploy, server.Domain)
 
 	return nil
 }
 
-func ReDeployApplicationRun(deployService *service.DeployService, deploy domain.Deploy) error {
+func ReDeployApplicationRun(deployService *service.DeployService, deploy *domain.Deploy) error {
 	server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
 	if err != nil {
 		return err
@@ -80,7 +90,7 @@ func ReDeployApplicationRun(deployService *service.DeployService, deploy domain.
 
 	deploy.Status = "Installing"
 
-	err = deployService.DatabaseAdapter.UpdateDeploy(deploy)
+	err = deployService.DatabaseAdapter.UpdateDeploy(*deploy)
 	fmt.Println(err)
 	runApplication(deployService, deploy, server.Domain)
 	return nil

@@ -22,7 +22,7 @@ func ReDeployApplication(deployService *service.DeployService, deployId string) 
 	deploy.Status = "Stopped"
 	deployService.DatabaseAdapter.UpdateDeploy(deploy)
 
-	err = ReDeployApplicationRun(deployService, deploy)
+	err = ReDeployApplicationRun(deployService, &deploy)
 
 	if err != nil {
 		return err

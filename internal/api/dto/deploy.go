@@ -3,6 +3,8 @@ package dto
 type EditDeployDto struct {
 	Id             string `json:"id"`
 	DeployOnCommit bool   `json:"deployOnCommit"`
+	Envs           []Env  `json:"envs"`
+	SubDomain      string `json:"subDomain"`
 }
 
 type Env struct {

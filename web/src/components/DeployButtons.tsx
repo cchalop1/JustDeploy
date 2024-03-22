@@ -11,9 +11,13 @@ import { removeApplicationApi } from "@/services/removeApplication";
 
 type DeployButtonsProps = {
   deploy: DeployDto;
+  fetchDeployById: (deployId: string) => void;
 };
 
-export default function DeployButtons({ deploy }: DeployButtonsProps) {
+export default function DeployButtons({
+  deploy,
+  fetchDeployById,
+}: DeployButtonsProps) {
   const navigate = useNavigate();
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
     ButtonStateEnum.INIT
@@ -39,6 +43,7 @@ export default function DeployButtons({ deploy }: DeployButtonsProps) {
     try {
       await reDeployAppApi(deploy.id);
       setReDeployButtonState(ButtonStateEnum.SUCESS);
+      fetchDeployById(deploy.id);
     } catch (e) {
       console.error(e);
     }
@@ -53,6 +58,7 @@ export default function DeployButtons({ deploy }: DeployButtonsProps) {
           : await startApplicationApi(deploy.id);
       }
       setStopStartButtonState(ButtonStateEnum.SUCESS);
+      fetchDeployById(deploy.id);
     } catch (e) {
       console.error(e);
     }
