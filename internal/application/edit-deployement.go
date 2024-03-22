@@ -5,13 +5,18 @@ import (
 	"cchalop1.com/deploy/internal/api/service"
 )
 
-func EditDeploy(deployService *service.DeployService, containerName string, editDeployDto dto.EditDeployementDto) {
-	// TODO: implement this
-	// if editDeployDto.DeployOnCommit {
-	// 	deployService.FilesystemAdapter.CreateGitPostCommitHooks(deployService.DeployConfig.AppConfig.PathToSource)
-	// } else {
-	// 	deployService.FilesystemAdapter.DeleteGitPostCommitHooks(deployService.DeployConfig.AppConfig.PathToSource)
-	// }
-	// deployService.DeployConfig.AppConfig.DeployOnCommit = editDeployDto.DeployOnCommit
-	// deployService.DatabaseAdapter.SaveState(*deployService.DeployConfig)
+func EditDeploy(deployService *service.DeployService, editDeployDto dto.EditDeployDto) error {
+	deploy, err := deployService.DatabaseAdapter.GetDeployById(editDeployDto.Id)
+	if err != nil {
+		return err
+	}
+	deploy.DeployOnCommit = editDeployDto.DeployOnCommit
+
+	if deploy.DeployOnCommit {
+		deployService.FilesystemAdapter.CreateGitPostCommitHooks(deploy)
+	} else {
+		deployService.FilesystemAdapter.DeleteGitPostCommitHooks(deploy)
+	}
+	deployService.DatabaseAdapter.UpdateDeploy(deploy)
+	return nil
 }

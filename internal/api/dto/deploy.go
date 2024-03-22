@@ -1,7 +1,8 @@
 package dto
 
-type EditDeployementDto struct {
-	DeployOnCommit bool `json:"deployOnCommit"`
+type EditDeployDto struct {
+	Id             string `json:"id"`
+	DeployOnCommit bool   `json:"deployOnCommit"`
 }
 
 type Env struct {

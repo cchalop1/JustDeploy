@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"cchalop1.com/deploy/internal/domain"
 )
 
 type FilesystemAdapter struct {
@@ -72,9 +74,9 @@ func (fs *FilesystemAdapter) CopyFileToRemoteServer(sourcePath string, serverIp 
 	return nil
 }
 
-func (fs *FilesystemAdapter) CreateGitPostCommitHooks(path string) error {
-	hooksFilePath := path + ".git/hooks/post-commit"
-	fileContent := []byte("#!/bin/sh\njustdeploy redeploy\n")
+func (fs *FilesystemAdapter) CreateGitPostCommitHooks(deploy domain.Deploy) error {
+	hooksFilePath := deploy.PathToSource + ".git/hooks/post-commit"
+	fileContent := []byte("#!/bin/sh\njustdeploy redeploy " + deploy.Id + "\n")
 
 	err := os.WriteFile(hooksFilePath, fileContent, 0755)
 
@@ -82,12 +84,12 @@ func (fs *FilesystemAdapter) CreateGitPostCommitHooks(path string) error {
 		return err
 	}
 
-	fmt.Println("Create file ", path+".git/hooks/post-commit")
+	fmt.Println("Create file ", deploy.PathToSource+".git/hooks/post-commit")
 	return nil
 }
 
-func (fs *FilesystemAdapter) DeleteGitPostCommitHooks(path string) error {
-	hooksFilePath := path + ".git/hooks/post-commit"
+func (fs *FilesystemAdapter) DeleteGitPostCommitHooks(deploy domain.Deploy) error {
+	hooksFilePath := deploy.PathToSource + ".git/hooks/post-commit"
 
 	err := os.Remove(hooksFilePath)
 
@@ -95,7 +97,7 @@ func (fs *FilesystemAdapter) DeleteGitPostCommitHooks(path string) error {
 		return err
 	}
 
-	fmt.Println("Remove file", path+".git/hooks/post-commit")
+	fmt.Println("Remove file", deploy.PathToSource+".git/hooks/post-commit")
 
 	return nil
 }

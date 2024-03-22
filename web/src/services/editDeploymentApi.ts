@@ -1,16 +1,10 @@
 import { ResponseApi, callApi } from "./api";
 
-export type EditDeployementDto = {
+export type EditDeployDto = {
   deployOnCommit: boolean;
+  id: string;
 };
 
-export async function editDeployementApi(
-  editDeployementDto: EditDeployementDto,
-  appName: string
-) {
-  return await callApi<ResponseApi>(
-    "/deploy/" + appName,
-    "PUT",
-    editDeployementDto
-  );
+export async function editDeployementApi(editDeployDto: EditDeployDto) {
+  return await callApi<ResponseApi>("/deploy/edit", "PUT", editDeployDto);
 }

@@ -11,14 +11,14 @@ import (
 
 func EditDeployementHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		containerName := c.Param("name")
-		editDeployementDto := dto.EditDeployementDto{}
-		err := c.Bind(&editDeployementDto)
+		editDeployDto := dto.EditDeployDto{}
+		err := c.Bind(&editDeployDto)
+
 		if err != nil {
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		application.EditDeploy(deployService, containerName, editDeployementDto)
+		application.EditDeploy(deployService, editDeployDto)
 
 		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "ok"})
 	}

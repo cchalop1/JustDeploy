@@ -8,6 +8,9 @@ import LinkIcon from "./assets/linkIcon";
 import FolderIcon from "./assets/FolderIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import DeployLogs from "./components/DeployLogs";
+import { Checkbox } from "./components/ui/checkbox";
+import { Label } from "./components/ui/label";
+import { editDeployementApi } from "./services/editDeploymentApi";
 
 export default function DeployPage() {
   const { id } = useParams();
@@ -17,6 +20,18 @@ export default function DeployPage() {
   async function fetchDeployById(id: string) {
     const res = await getDeployByIdApi(id);
     setDeploy(res);
+  }
+
+  async function onCheckDeployOnCommit(deployOnCommit: boolean, id: string) {
+    try {
+      await editDeployementApi({
+        deployOnCommit,
+        id,
+      });
+      fetchDeployById(id);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   useEffect(() => {
@@ -30,8 +45,6 @@ export default function DeployPage() {
   if (deploy === null) {
     return null;
   }
-
-  console.log(deploy);
 
   return (
     <div className="mt-40">
@@ -49,6 +62,24 @@ export default function DeployPage() {
       <div className="flex items-center mt-2 gap-2">
         <FolderIcon />
         {deploy.pathToSource}
+      </div>
+      <div className="mt-4 flex items-center space-x-2">
+        <Checkbox
+          id="deploy-on-commit"
+          name="deploy-on-commit"
+          checked={deploy.deployOnCommit}
+          onCheckedChange={(state) => {
+            if (typeof state === "boolean" && id) {
+              onCheckDeployOnCommit(state, id);
+            }
+          }}
+        />
+        <Label
+          htmlFor="deploy-on-commit"
+          className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Deploy on every commit on <code>main</code> branch
+        </Label>
       </div>
       <Tabs defaultValue="database-service" className="mt-20">
         <TabsList className="w-full justify-between pl-10 pr-10">

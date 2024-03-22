@@ -15,7 +15,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	app.Echo.GET("/api/deploy/config", handlers.GetDeployConfigHandler(deployService))
 
 	app.Echo.POST("/api/deploy", handlers.CreateDeployementHandler(deployService))
-	app.Echo.PUT("/api/deploy", handlers.EditDeployementHandler(deployService))
+	app.Echo.PUT("/api/deploy/edit", handlers.EditDeployementHandler(deployService))
 	app.Echo.POST("/api/server", handlers.ConnectNewServer(deployService))
 
 	app.Echo.DELETE("/api/remove/:id", handlers.RemoveApplicationHandler(deployService))
