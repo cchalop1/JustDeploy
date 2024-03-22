@@ -94,7 +94,7 @@ export default function DeployPage() {
           <DeployLogs id={deploy.id} />
         </TabsContent>
         <TabsContent value="settings">
-          <div>logs</div>
+          <div>Settings</div>
         </TabsContent>
       </Tabs>
     </div>

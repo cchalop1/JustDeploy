@@ -130,6 +130,17 @@ func (d *DatabaseAdapter) GetDeploys() []domain.Deploy {
 	return databaseModels.Deploys
 }
 
+func (d *DatabaseAdapter) GetDeployByServerId(serverId string) []domain.Deploy {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	deployList := []domain.Deploy{}
+	for _, d := range databaseModels.Deploys {
+		if d.ServerId == serverId {
+			deployList = append(deployList, d)
+		}
+	}
+	return deployList
+}
+
 func (d *DatabaseAdapter) GetDeployById(id string) (domain.Deploy, error) {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	for _, d := range databaseModels.Deploys {

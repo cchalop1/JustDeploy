@@ -14,12 +14,12 @@ export default function DeployLogs({ id }: DeployLogsProps) {
   }, []);
 
   return (
-    <div>
+    <div className="flex flex-col ml-3 mr-3">
       {logs === null ? (
         <SpinnerIcon color="text-black" />
       ) : (
         logs.map((log, idx) => (
-          <code key={idx} className="w-full mb-2">
+          <code key={idx} className=" text-xs w-full mb-2">
             {log}
           </code>
         ))
