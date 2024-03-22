@@ -29,7 +29,6 @@ import { ServerDto, getServersListApi } from "@/services/getServerListApi";
 import { useNavigate } from "react-router-dom";
 import { getDeployConfig } from "@/services/getDeployConfig";
 import EnvsManagements from "./EnvsManagements";
-import { env } from "process";
 
 const createDeploymentEmptyState = (): CreateDeployDto => {
   return {
