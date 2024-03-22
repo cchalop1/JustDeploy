@@ -15,7 +15,6 @@ func RemoveApplicationHandler(deployService *service.DeployService) echo.Handler
 
 		application.RemoveApplicationById(deployService, deployId)
 
-		// h.databaseAdapter.SaveState(h.deployConfig)
 		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is removed"})
 	}
 }

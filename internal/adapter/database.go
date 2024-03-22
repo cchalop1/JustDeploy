@@ -100,6 +100,18 @@ func (d *DatabaseAdapter) UpdateServer(server domain.Server) error {
 	return d.writeDeployConfigInDataBaseFile(databaseModels)
 }
 
+func (d *DatabaseAdapter) DeleteServer(server domain.Server) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	var newServer []domain.Server
+	for _, s := range databaseModels.Servers {
+		if s.Id != server.Id {
+			newServer = append(newServer, s)
+		}
+	}
+	databaseModels.Servers = newServer
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}
+
 func (d *DatabaseAdapter) CountServer() int {
 	// TODO: change to get it from a index count
 	databaseModels := d.readDeployConfigInDataBaseFile()
