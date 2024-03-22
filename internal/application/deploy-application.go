@@ -80,7 +80,7 @@ func ReDeployApplicationRun(deployService *service.DeployService, deploy domain.
 
 	deploy.Status = "Installing"
 
-	err = deployService.DatabaseAdapter.SaveDeploy(deploy)
+	err = deployService.DatabaseAdapter.UpdateDeploy(deploy)
 	fmt.Println(err)
 	runApplication(deployService, deploy, server.Domain)
 	return nil
