@@ -133,6 +133,37 @@ func (d *DockerAdapter) PullTreafikImage() {
 	io.Copy(io.Discard, reader)
 }
 
+func (d *DockerAdapter) PullService(serviceImage string) {
+	reader, err := d.client.ImagePull(context.Background(), serviceImage, types.ImagePullOptions{})
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	io.Copy(io.Discard, reader)
+
+}
+
+func (d *DockerAdapter) RunRedis() {
+	config := container.Config{
+		Image: "redis/redis-stack:latest",
+	}
+
+	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, nil, &v1.Platform{}, "redis")
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	d.client.ContainerStart(context.Background(), con.ID, types.ContainerStartOptions{})
+	fmt.Printf("Container %s is started", con.ID)
+
+	fmt.Println("Run image redis")
+
+}
+
 func (d *DockerAdapter) RunRouter() {
 	routerIsRuning, err := d.checkRouterIsRuning()
 	if routerIsRuning || err != nil {

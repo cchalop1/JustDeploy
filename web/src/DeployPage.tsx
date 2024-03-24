@@ -11,6 +11,7 @@ import DeployLogs from "./components/DeployLogs";
 import DeploySettings from "./components/DeploySettings";
 import { ServerDto } from "./services/getServerListApi";
 import { getServerByIdApi } from "./services/getServerById";
+import DeployDatabaseServices from "./components/DeployDatabaseServices";
 
 export default function DeployPage() {
   const { id } = useParams();
@@ -64,7 +65,9 @@ export default function DeployPage() {
           <TabsTrigger value="logs">Logs</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
-        <TabsContent value="database-service"></TabsContent>
+        <TabsContent value="database-service">
+          <DeployDatabaseServices deploy={deploy} />
+        </TabsContent>
         <TabsContent value="logs">
           <DeployLogs id={deploy.id} />
         </TabsContent>

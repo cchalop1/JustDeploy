@@ -51,7 +51,7 @@ export default function Home() {
         </div>
         <ServerList serverList={serverList} />
       </div>
-      <div className="h-52">
+      <div className="h-40">
         <div className="flex justify-between">
           <div className="text-2xl font-bold">Deploys</div>
           <Button disabled={!canCreateDeploy} onClick={onClickNewDeploy}>
