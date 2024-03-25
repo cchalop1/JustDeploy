@@ -20,10 +20,10 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 
 	appUrl += domain
 
-	deployService.DockerAdapter.BuildImage(deploy.Name, deploy.PathToSource)
+	deployService.DockerAdapter.BuildImage(deploy)
 	deployService.DockerAdapter.PullTreafikImage()
 	deployService.DockerAdapter.RunRouter()
-	deployService.DockerAdapter.RunImage(*deploy, appUrl)
+	deployService.DockerAdapter.RunImage(deploy, appUrl)
 
 	if deploy.EnableTls {
 		deploy.Url = "https://" + appUrl

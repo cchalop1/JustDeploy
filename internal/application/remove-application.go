@@ -14,7 +14,7 @@ func RemoveApplicationById(deployService *service.DeployService, deployId string
 		return err
 	}
 	deployService.DockerAdapter.ConnectClient(server)
-	deployService.DockerAdapter.Delete(deploy.Name, false)
+	deployService.DockerAdapter.Delete(deploy.GetDockerName(), false)
 	deployService.DatabaseAdapter.DeleteDeploy(deploy)
 	return nil
 }

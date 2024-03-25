@@ -14,5 +14,5 @@ func GetApplicationLogs(deployService *service.DeployService, deployId string) (
 	}
 	deployService.DockerAdapter.ConnectClient(server)
 
-	return deployService.DockerAdapter.GetLogsOfContainer(deploy.Name), nil
+	return deployService.DockerAdapter.GetLogsOfContainer(deploy.GetDockerName()), nil
 }

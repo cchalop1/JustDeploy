@@ -53,17 +53,20 @@ func makeTar(pathToDir string) (io.ReadCloser, error) {
 }
 
 // BuildImage builds a Docker image from the specified Dockerfile and context directory.
-func (d *DockerAdapter) BuildImage(imageName string, dockerfilePath string) {
-	fmt.Println("Make a tar of", dockerfilePath)
-	tar, err := makeTar(dockerfilePath)
+func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) {
+	fmt.Println("Make a tar of", deploy.PathToSource)
+	tar, err := makeTar(deploy.PathToSource)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
+	DockerFileName := "Dockerfile"
+	// TODO add deploy domain
+
 	buildOptions := types.ImageBuildOptions{
-		Dockerfile: "Dockerfile",
-		Tags:       []string{imageName},
+		Dockerfile: DockerFileName,
+		Tags:       []string{deploy.GetDockerName()},
 		Remove:     true,
 	}
 
@@ -196,8 +199,8 @@ func envToSlice(envVars []dto.Env) []string {
 	return envSlice
 }
 
-func (d *DockerAdapter) RunImage(deployConfig domain.Deploy, domain string) {
-	Name := deployConfig.Name
+func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) {
+	Name := deploy.GetDockerName()
 
 	Labels := map[string]string{
 		"traefik.enable":                                "true",
@@ -205,7 +208,7 @@ func (d *DockerAdapter) RunImage(deployConfig domain.Deploy, domain string) {
 		"traefik.http.routers." + Name + ".entrypoints": "web",
 	}
 
-	if deployConfig.EnableTls {
+	if deploy.EnableTls {
 		Labels["traefik.http.routers."+Name+".tls"] = "true"
 		Labels["traefik.http.routers."+Name+".tls.certresolver"] = "myresolver"
 		Labels["traefik.http.routers."+Name+".entrypoints"] = "websecure"
@@ -214,7 +217,7 @@ func (d *DockerAdapter) RunImage(deployConfig domain.Deploy, domain string) {
 	config := container.Config{
 		Image:  Name,
 		Labels: Labels,
-		Env:    envToSlice(deployConfig.Envs),
+		Env:    envToSlice(deploy.Envs),
 	}
 
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, nil, &v1.Platform{}, Name)

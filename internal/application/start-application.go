@@ -12,7 +12,7 @@ func StartApplication(deployService *service.DeployService, deployId string) err
 		return err
 	}
 	deployService.DockerAdapter.ConnectClient(server)
-	deployService.DockerAdapter.Start(deploy.Name)
+	deployService.DockerAdapter.Start(deploy.GetDockerName())
 	deploy.Status = "Runing"
 	deployService.DatabaseAdapter.UpdateDeploy(deploy)
 	return nil

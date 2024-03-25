@@ -60,11 +60,11 @@ export default function DeployPage() {
       </div>
       <Tabs defaultValue="database-service" className="mt-20">
         <TabsList className="w-full justify-between pl-5 pr-5">
-          <TabsTrigger value="database-service">Database Service</TabsTrigger>
+          {/* <TabsTrigger value="database-service">Database Service</TabsTrigger> */}
           <TabsTrigger value="logs">Logs</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
-        <TabsContent value="database-service"></TabsContent>
+        {/* <TabsContent value="database-service"></TabsContent> */}
         <TabsContent value="logs">
           <DeployLogs id={deploy.id} />
         </TabsContent>

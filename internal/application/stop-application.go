@@ -13,7 +13,7 @@ func StopApplication(deployService *service.DeployService, deployId string) erro
 		return err
 	}
 	deployService.DockerAdapter.ConnectClient(server)
-	deployService.DockerAdapter.Stop(deploy.Name)
+	deployService.DockerAdapter.Stop(deploy.GetDockerName())
 	deploy.Status = "Stopped"
 	deployService.DatabaseAdapter.UpdateDeploy(deploy)
 	return nil
