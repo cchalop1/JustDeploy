@@ -145,7 +145,9 @@ export function CreateDeployForm() {
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="projectPath">Project foder</Label>
+                <Label htmlFor="projectPath">
+                  Path to your project folder or Dockerfile
+                </Label>
                 <Input
                   id="projectPath"
                   name="projectPath"

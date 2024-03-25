@@ -19,6 +19,7 @@ type Deploy struct {
 	Status         string    `json:"status"`
 	Url            string    `json:"url"`
 	SubDomain      string    `json:"subDomain"`
+	DockerFileName string    `json:"dockerFileName"`
 }
 
 func (d *Deploy) GetDockerName() string {

@@ -58,11 +58,11 @@ export default function DeployPage() {
         <FolderIcon />
         {deploy.pathToSource}
       </div>
-      <Tabs defaultValue="database-service" className="mt-20">
-        <TabsList className="w-full justify-between pl-5 pr-5">
+      <Tabs defaultValue="settings" className="mt-20">
+        <TabsList className="w-full justify-around pl-5 pr-5">
           {/* <TabsTrigger value="database-service">Database Service</TabsTrigger> */}
-          <TabsTrigger value="logs">Logs</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
         {/* <TabsContent value="database-service"></TabsContent> */}
         <TabsContent value="logs">

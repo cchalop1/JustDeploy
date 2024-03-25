@@ -56,16 +56,25 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 		return err
 	}
 
+	isFolder := adapter.NewFilesystemAdapter().IsFolder(pathToDir)
+	DockerFileName := "Dockerfile"
+	fmt.Println(isFolder)
+	if !isFolder {
+		DockerFileName = adapter.NewFilesystemAdapter().BaseDir(pathToDir)
+		pathToDir = adapter.NewFilesystemAdapter().GetDir(pathToDir)
+	}
+
 	deploy := domain.Deploy{
-		Id:           utils.GenerateRandomPassword(5),
-		Name:         newDeploy.Name,
-		ServerId:     newDeploy.ServerId,
-		PathToSource: pathToDir,
-		Status:       "Installing",
-		EnableTls:    newDeploy.EnableTls,
-		Email:        newDeploy.Email,
-		Envs:         newDeploy.Envs,
-		SubDomain:    newDeploy.Name,
+		Id:             utils.GenerateRandomPassword(5),
+		Name:           newDeploy.Name,
+		ServerId:       newDeploy.ServerId,
+		PathToSource:   pathToDir,
+		Status:         "Installing",
+		EnableTls:      newDeploy.EnableTls,
+		Email:          newDeploy.Email,
+		Envs:           newDeploy.Envs,
+		SubDomain:      newDeploy.Name,
+		DockerFileName: DockerFileName,
 	}
 
 	err = deployService.DatabaseAdapter.SaveDeploy(deploy)

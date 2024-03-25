@@ -61,11 +61,8 @@ func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) {
 		return
 	}
 
-	DockerFileName := "Dockerfile"
-	// TODO add deploy domain
-
 	buildOptions := types.ImageBuildOptions{
-		Dockerfile: DockerFileName,
+		Dockerfile: deploy.DockerFileName,
 		Tags:       []string{deploy.GetDockerName()},
 		Remove:     true,
 	}

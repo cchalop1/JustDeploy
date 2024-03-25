@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/domain"
@@ -106,4 +107,26 @@ func (fs *FilesystemAdapter) DeleteGitPostCommitHooks(deploy domain.Deploy) erro
 func (fs *FilesystemAdapter) RemoveDockerCertOfServer(serverId string) error {
 	pathLocalCertDir := internal.CERT_DOCKER_FOLDER + "/" + serverId + "/"
 	return os.Remove(pathLocalCertDir)
+}
+
+func (fs *FilesystemAdapter) IsFolder(path string) bool {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+
+	return fileInfo.IsDir()
+}
+
+func (fs *FilesystemAdapter) BaseDir(path string) string {
+	return filepath.Base(path)
+}
+
+func (fs *FilesystemAdapter) GetDir(path string) string {
+	arr := strings.Split(path, "/")
+	if len(arr) > 1 {
+		arr = arr[:len(arr)-2] // remove the last element
+		return strings.Join(arr, "/") + "/"
+	}
+	return "/"
 }
