@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/domain"
 )
 
@@ -100,4 +101,9 @@ func (fs *FilesystemAdapter) DeleteGitPostCommitHooks(deploy domain.Deploy) erro
 	fmt.Println("Remove file", deploy.PathToSource+".git/hooks/post-commit")
 
 	return nil
+}
+
+func (fs *FilesystemAdapter) RemoveDockerCertOfServer(serverId string) error {
+	pathLocalCertDir := internal.CERT_DOCKER_FOLDER + "/" + serverId + "/"
+	return os.Remove(pathLocalCertDir)
 }

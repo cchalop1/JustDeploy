@@ -3,6 +3,8 @@ package application
 import (
 	"errors"
 
+	"cchalop1.com/deploy/internal/adapter"
+	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
 )
 
@@ -17,8 +19,46 @@ func RemoveServerById(deployService *service.DeployService, serverId string) err
 	if len(deployList) > 0 {
 		return errors.New("you can't remove server with application on it")
 	}
-	// TODO: remove all connections fills for this server
+
+	sshAdapter := adapter.NewSshAdapter()
+	sshAdapter.Connect(dto.ConnectNewServerDto{
+		Domain:   server.Domain,
+		SshKey:   server.SshKey,
+		Password: server.Password,
+		User:     "root",
+	})
+
+	removeCertOnServer(sshAdapter)
+
+	deployService.FilesystemAdapter.RemoveDockerCertOfServer(server.Id)
 
 	deployService.DatabaseAdapter.DeleteServer(server)
+	return nil
+}
+
+func removeCertOnServer(sshAdapter *adapter.SshAdapter) error {
+	_, err := sshAdapter.RunCommand("rm -rf /root/docker-cert")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = sshAdapter.RunCommand("mkdir -p /etc/systemd/system/docker.service.d")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = sshAdapter.RunCommand("sudo systemctl daemon-reload")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = sshAdapter.RunCommand("sudo systemctl restart docker.service")
+
+	if err != nil {
+		return err
+	}
 	return nil
 }
