@@ -42,6 +42,8 @@ In this step you can connect you server and when you click on the button JustDep
 
 In this 2nd step you can configure your application with name and enable tls if you want.
 
+You can see all the process on [this video.](https://youtu.be/u2nQGLpXTxM)
+
 ### Prerequisites
 
 - Git
