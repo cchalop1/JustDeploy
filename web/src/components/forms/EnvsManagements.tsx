@@ -31,6 +31,7 @@ export default function EnvsManagements({
               name="envName"
               type="envName"
               placeholder="Env Name"
+              autoComplete="off"
               value={env.name}
               onChange={(e) => {
                 const updatedEnvs = [...envs];
@@ -46,6 +47,7 @@ export default function EnvsManagements({
               name="envSecret"
               type="envSecret"
               placeholder="Env Secret"
+              autoComplete="off"
               value={env.secret}
               onChange={(e) => {
                 const updatedEnvs = [...envs];

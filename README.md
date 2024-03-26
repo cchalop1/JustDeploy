@@ -14,7 +14,7 @@ JustDeploy is that it **doesn't install anything on your server other than your 
 
 ## Screen
 
-![Screenshot4](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/Screenshot4.png)
+![Screenshot4](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/Screen1.png)
 
 ## Install
 
@@ -40,11 +40,7 @@ it should open your browser on this page.
 
 In this step you can connect you server and when you click on the button JustDeploy install and setup everything he needs.
 
-![Screenshot](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/Screenshot.png)
-
 In this 2nd step you can configure your application with name and enable tls if you want.
-
-![Screenshot2](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/Screenshot2.png)
 
 ### Prerequisites
 

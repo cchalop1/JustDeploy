@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 cert-docker/
 bin/
-justdeploy/
+.justdeploy/
