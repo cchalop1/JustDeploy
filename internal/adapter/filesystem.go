@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	"cchalop1.com/deploy/internal"
+	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
 )
 
@@ -49,18 +51,62 @@ func (fs *FilesystemAdapter) GetCurrentPath() (string, error) {
 	return os.Getwd()
 }
 
-func (fs *FilesystemAdapter) IsWhereIsADockerFileInTheFolder(pathToFolder string) bool {
+func (fs *FilesystemAdapter) FindDockerFile(pathToFolder string) bool {
 	entries, err := os.ReadDir(pathToFolder)
 	if err != nil {
 		panic("Error to read the directory you have")
 	}
 
 	for _, e := range entries {
-		if e.Name() == "Dockerfile" {
+		if e.Name() == "Dockerfile" || strings.HasPrefix(e.Name(), "Dockerfile.") {
 			return true
 		}
 	}
 	return false
+}
+
+func (fs *FilesystemAdapter) FindDockerComposeFile(pathToFolder string) bool {
+	entries, err := os.ReadDir(pathToFolder)
+	if err != nil {
+		panic("Error to read the directory you have")
+	}
+
+	for _, e := range entries {
+		if e.Name() == "docker-compose.yml" || e.Name() == "compose.yml" {
+			return true
+		}
+	}
+	return false
+}
+
+func (fs *FilesystemAdapter) LoadEnvsFromFileSystem(pathToFolder string) []dto.Env {
+	file, err := os.Open(pathToFolder + "/.env")
+	var envs []dto.Env = []dto.Env{}
+
+	if err != nil {
+		fmt.Println("Error to read the .env file you have")
+		return envs
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) == 2 {
+			env := dto.Env{
+				Name:   strings.TrimSpace(parts[0]),
+				Secret: strings.TrimSpace(parts[1]),
+			}
+			envs = append(envs, env)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Println("Error while scanning the .env file")
+	}
+
+	return envs
 }
 
 func (fs *FilesystemAdapter) CopyFileToRemoteServer(sourcePath string, serverIp string) error {

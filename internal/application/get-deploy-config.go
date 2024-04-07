@@ -9,6 +9,13 @@ func GetDeployConfig(deployService *service.DeployService) dto.DeployConfigDto {
 	deployConfig := dto.DeployConfigDto{}
 
 	currentPath, err := deployService.FilesystemAdapter.GetCurrentPath()
+	dockerfileIsFound := deployService.FilesystemAdapter.FindDockerFile(currentPath)
+	dockercomposeIsFound := deployService.FilesystemAdapter.FindDockerComposeFile(currentPath)
+	envs := deployService.FilesystemAdapter.LoadEnvsFromFileSystem(currentPath)
+
+	deployConfig.DockerFileFound = dockerfileIsFound
+	deployConfig.ComposeFileFound = dockercomposeIsFound
+	deployConfig.Envs = envs
 
 	if err == nil {
 		deployConfig.PathToSource = currentPath

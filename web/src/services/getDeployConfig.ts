@@ -8,7 +8,7 @@ export type DeployConfigDto = {
   pathToSource: string;
   dockerFileFound: boolean;
   composeFileFound: boolean;
-  envFileFound: boolean;
+  deployName: string;
   envs: Env[];
 };
 

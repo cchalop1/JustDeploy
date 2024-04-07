@@ -78,7 +78,6 @@ func (d *DatabaseAdapter) Init() {
 }
 
 // Server
-
 func (d *DatabaseAdapter) GetServerById(id string) (domain.Server, error) {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	for _, s := range databaseModels.Servers {

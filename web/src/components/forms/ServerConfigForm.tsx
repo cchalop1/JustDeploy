@@ -88,7 +88,7 @@ export default function ServerConfigForm() {
     }
   };
   return (
-    <div className="flex justify-center mt-16">
+    <div className="mt-16 flex justify-center">
       <Card className="w-[500px]">
         <CardHeader>
           <CardTitle>Connect Your Server</CardTitle>

@@ -27,8 +27,9 @@ import {
 } from "../ui/select";
 import { ServerDto, getServersListApi } from "@/services/getServerListApi";
 import { useNavigate } from "react-router-dom";
-import { getDeployConfig } from "@/services/getDeployConfig";
+import { DeployConfigDto, getDeployConfig } from "@/services/getDeployConfig";
 import EnvsManagements from "./EnvsManagements";
+import AlertConfigDeploy from "../AlertConfigDeploy";
 
 const createDeploymentEmptyState = (): CreateDeployDto => {
   return {
@@ -50,6 +51,7 @@ export function CreateDeployForm() {
     createDeploymentEmptyState()
   );
   const [serverList, setServerList] = useState<Array<ServerDto>>([]);
+  const [config, setConfig] = useState<DeployConfigDto | null>(null);
   const navigate = useNavigate();
 
   async function fetchServerList() {
@@ -63,11 +65,14 @@ export function CreateDeployForm() {
 
   async function fetchDeployConfig() {
     const deployConfig = await getDeployConfig();
+    const envs = deployConfig.envs;
     setNewDeploy((d) => ({
       ...d,
       pathToSource: deployConfig.pathToSource,
+      envs: envs,
     }));
-    // TODO: save deployConfig
+    setConfig(deployConfig);
+    envs.push({ name: "", secret: "" });
   }
 
   useEffect(() => {
@@ -93,7 +98,8 @@ export function CreateDeployForm() {
   }
 
   return (
-    <div className="flex justify-center mt-16">
+    <div className="flex flex-col gap-4 mt-16 items-center">
+      {config && <AlertConfigDeploy config={config} />}
       <Card className="w-[500px]">
         <CardHeader>
           <CardTitle>Deploy project</CardTitle>
@@ -205,7 +211,6 @@ export function CreateDeployForm() {
                 </div>
               )}
               <div className="space-y-2">
-                <Label>Env Variables</Label>
                 <EnvsManagements envs={newDeploy.envs} setEnvs={setEnvs} />
               </div>
             </div>
