@@ -9,6 +9,7 @@ export type DeployConfigDto = {
   dockerFileFound: boolean;
   composeFileFound: boolean;
   deployName: string;
+  envFileFound: boolean;
   envs: Env[];
 };
 

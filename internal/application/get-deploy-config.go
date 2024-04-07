@@ -15,6 +15,13 @@ func GetDeployConfig(deployService *service.DeployService) dto.DeployConfigDto {
 
 	deployConfig.DockerFileFound = dockerfileIsFound
 	deployConfig.ComposeFileFound = dockercomposeIsFound
+
+	if len(envs) > 0 {
+		deployConfig.EnvFileFound = true
+	} else {
+		deployConfig.EnvFileFound = false
+	}
+
 	deployConfig.Envs = envs
 
 	if err == nil {

@@ -25,7 +25,7 @@ export default function AlertConfigDeploy({ config }: AlertConfigDeployProps) {
               <Check /> Docker compose file
             </div>
           )}
-          {config.envs.length > 0 && (
+          {config.envFileFound && (
             <div className="flex">
               <Check /> Envs load from <code>.env</code>
             </div>

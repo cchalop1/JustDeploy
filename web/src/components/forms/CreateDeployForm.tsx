@@ -226,6 +226,7 @@ export function CreateDeployForm() {
           </CardFooter>
         </form>
       </Card>
+      {config && config.composeFileFound && <Card>fjlkze</Card>}
     </div>
   );
 }

@@ -40,5 +40,6 @@ type DeployConfigDto struct {
 	PathToSource     string `json:"pathToSource"`
 	DockerFileFound  bool   `json:"dockerFileFound"`
 	ComposeFileFound bool   `json:"composeFileFound"`
+	EnvFileFound     bool   `json:"envFileFound"`
 	Envs             []Env  `json:"envs"`
 }
