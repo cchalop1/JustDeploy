@@ -11,7 +11,7 @@ export default function Home() {
   const [serverList, setServerList] = useState<Array<ServerDto>>([]);
   const [deployList, setDeployList] = useState<Array<DeployDto>>([]);
 
-  const canCreateDeploy = serverList.length > 0;
+  const serverIsReady = serverList.length > 0;
 
   function onClickNewServer() {
     navigate("server/create");
@@ -54,11 +54,17 @@ export default function Home() {
       <div className="h-52">
         <div className="flex justify-between">
           <div className="text-2xl font-bold">Deploys</div>
-          <Button disabled={!canCreateDeploy} onClick={onClickNewDeploy}>
+          <Button disabled={!serverIsReady} onClick={onClickNewDeploy}>
             Create Deploy
           </Button>
         </div>
         <DeployList deployList={deployList} />
+      </div>
+      <div className="h-52">
+        <div className="flex justify-between">
+          <div className="text-2xl font-bold">Databases</div>
+        </div>
+        {/* TODO: add database list */}
       </div>
     </>
   );

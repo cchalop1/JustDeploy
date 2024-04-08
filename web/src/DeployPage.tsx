@@ -11,6 +11,7 @@ import DeployLogs from "./components/DeployLogs";
 import DeploySettings from "./components/DeploySettings";
 import { ServerDto } from "./services/getServerListApi";
 import { getServerByIdApi } from "./services/getServerById";
+import AddService from "./components/AddServices";
 
 export default function DeployPage() {
   const { id } = useParams();
@@ -58,13 +59,15 @@ export default function DeployPage() {
         <FolderIcon />
         {deploy.pathToSource}
       </div>
-      <Tabs defaultValue="settings" className="mt-20">
+      <Tabs defaultValue="database-service" className="mt-20">
         <TabsList className="w-full justify-around pl-5 pr-5">
-          {/* <TabsTrigger value="database-service">Database Service</TabsTrigger> */}
+          <TabsTrigger value="database-service">Database Service</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
-        {/* <TabsContent value="database-service"></TabsContent> */}
+        <TabsContent value="database-service">
+          <AddService dockerComposeIsFound={true} />
+        </TabsContent>
         <TabsContent value="logs">
           <DeployLogs id={deploy.id} />
         </TabsContent>
