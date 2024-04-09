@@ -2,7 +2,7 @@ import { callApi } from "./api";
 
 export type ServiceDto = {
   name: string;
-  image: string;
+  icon: string;
 };
 
 export async function getServiceListApi(): Promise<Array<ServiceDto>> {

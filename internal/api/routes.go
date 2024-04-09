@@ -27,6 +27,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	app.Echo.GET("/api/deploy/logs/:id", handlers.GetLogsHandler(deployService))
 
-	app.Echo.GET("/api/service", handlers.GetServicesList(deployService))
+	app.Echo.GET("/api/service", handlers.GetServicesListHandler(deployService))
+	app.Echo.POST("/api/deploy/:deployId/service/:serviceName", handlers.CreateServiceHandler(deployService))
 
 }

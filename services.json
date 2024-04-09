@@ -1,0 +1,42 @@
+[
+  {
+    "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/640px-Postgresql_elephant.svg.png",
+    "name": "Postgres",
+    "image": "postgres:latest",
+    "volume": "/var/lib/postgresql/data",
+    "port": "5432",
+    "env": ["POSTGRES_PASSWORD", "POSTGRES_USER", "POSTGRES_DB"]
+  },
+  {
+    "icon": "https://grafikart.fr/uploads/icons/redis.svg",
+    "name": "Redis",
+    "image": "redis:latest",
+    "port": "6379",
+    "env": ["REDIS_PASSWORD"],
+    "volume": "/data"
+  },
+  {
+    "icon": "https://upload.wikimedia.org/wikipedia/fr/thumb/4/45/MongoDB-Logo.svg/1280px-MongoDB-Logo.svg.png",
+    "name": "mongo",
+    "image": "mongo:latest",
+    "port": "27017",
+    "env": ["MONGO_INITDB_ROOT_USERNAME", "MONGO_INITDB_ROOT_PASSWORD"],
+    "volume": "/data/db"
+  },
+  {
+    "icon": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/62/MySQL.svg/1200px-MySQL.svg.png",
+    "name": "mysql",
+    "image": "mysql:latest",
+    "port": "3306",
+    "env": ["MYSQL_ROOT_PASSWORD", "MYSQL_DATABASE"],
+    "volume": "/var/lib/mysql"
+  },
+  {
+    "icon": "https://www.keycloak.org/resources/images/logo.svg",
+    "name": "keycloak",
+    "image": "jboss/keycloak",
+    "port": "8080",
+    "env": ["KEYCLOAK_USER", "KEYCLOAK_PASSWORD"],
+    "volume": "/opt/jboss/keycloak/standalone/data"
+  }
+]

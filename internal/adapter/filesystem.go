@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -175,4 +176,22 @@ func (fs *FilesystemAdapter) GetDir(path string) string {
 		return strings.Join(arr, "/") + "/"
 	}
 	return "/"
+}
+
+func (fs *FilesystemAdapter) GetServicesListConfig() []dto.ServiceDto {
+	data, err := os.ReadFile("services.json") // replace "services.json" with your file path
+	if err != nil {
+		fmt.Println(err)
+		return []dto.ServiceDto{}
+	}
+
+	// Unmarshal the JSON data into a slice of ServiceConfig
+	var services []dto.ServiceDto
+	err = json.Unmarshal(data, &services)
+	if err != nil {
+		fmt.Println(err)
+		return []dto.ServiceDto{}
+	}
+
+	return services
 }

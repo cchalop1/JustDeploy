@@ -66,7 +66,7 @@ export default function DeployPage() {
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
         <TabsContent value="database-service">
-          <AddService dockerComposeIsFound={true} />
+          <AddService dockerComposeIsFound={true} deployId={deploy.id} />
         </TabsContent>
         <TabsContent value="logs">
           <DeployLogs id={deploy.id} />

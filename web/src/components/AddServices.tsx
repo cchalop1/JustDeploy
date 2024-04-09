@@ -7,9 +7,13 @@ import { Database } from "lucide-react";
 
 type AddServiceProps = {
   dockerComposeIsFound: boolean;
+  deployId: string;
 };
 
-export default function AddService({ dockerComposeIsFound }: AddServiceProps) {
+export default function AddService({
+  dockerComposeIsFound,
+  deployId,
+}: AddServiceProps) {
   const [services, setServices] = useState<Array<ServiceDto>>([]);
 
   async function getServices() {
@@ -23,9 +27,6 @@ export default function AddService({ dockerComposeIsFound }: AddServiceProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      {services.map((s) => (
-        <DatabaseCard service={s} />
-      ))}
       {dockerComposeIsFound && (
         <Card className="flex justify-between p-3">
           <div className="flex items-center gap-3">
@@ -39,6 +40,10 @@ export default function AddService({ dockerComposeIsFound }: AddServiceProps) {
           </div>
         </Card>
       )}
+
+      {services.map((s) => (
+        <DatabaseCard key={s.name} service={s} deployId={deployId} />
+      ))}
     </div>
   );
 }
