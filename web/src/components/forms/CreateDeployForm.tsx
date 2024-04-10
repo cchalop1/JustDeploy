@@ -157,7 +157,6 @@ export function CreateDeployForm() {
                 </Label>
                 <Input
                   id="projectPath"
-                  autoComplete="off"
                   name="projectPath"
                   // type="file"
                   placeholder="/path/to/your/source"
@@ -198,7 +197,6 @@ export function CreateDeployForm() {
                     id="email"
                     name="email"
                     type="email"
-                    autoComplete="off"
                     placeholder="Email for tls setup"
                     value={newDeploy.email}
                     onChange={(e) =>

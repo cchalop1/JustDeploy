@@ -10,6 +10,7 @@ import (
 	"cchalop1.com/deploy/internal/domain"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/go-connections/nat"
@@ -122,8 +123,12 @@ func (d *DockerAdapter) PullTreafikImage() {
 		return
 	}
 
-	fmt.Println("Pull image", ROUTER_NAME)
-	reader, err := d.client.ImagePull(context.Background(), TRAEFIK_IMAGE, types.ImagePullOptions{})
+	d.PullImage(TRAEFIK_IMAGE)
+}
+
+func (d *DockerAdapter) PullImage(image string) {
+	fmt.Println("Pull image", image)
+	reader, err := d.client.ImagePull(context.Background(), image, types.ImagePullOptions{})
 
 	if err != nil {
 		fmt.Println(err)
@@ -138,7 +143,10 @@ func (d *DockerAdapter) RunRouter() {
 	if routerIsRuning || err != nil {
 		return
 	}
+	// TODO: change and get it from deploy config
 	email := "clement.chalopin@gmail.com"
+
+	d.client.NetworkCreate(context.Background(), "databases_default", types.NetworkCreate{})
 
 	config := container.Config{
 		Image: TRAEFIK_IMAGE,
@@ -172,7 +180,11 @@ func (d *DockerAdapter) RunRouter() {
 		},
 		NetworkMode:  "default",
 		PortBindings: portMap,
-	}, nil, &v1.Platform{}, ROUTER_NAME)
+	}, &network.NetworkingConfig{
+		EndpointsConfig: map[string]*network.EndpointSettings{
+			"databases_default": {},
+		},
+	}, &v1.Platform{}, ROUTER_NAME)
 
 	if err != nil {
 		fmt.Println(err)
@@ -217,7 +229,11 @@ func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) {
 		Env:    envToSlice(deploy.Envs),
 	}
 
-	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, nil, &v1.Platform{}, Name)
+	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, &network.NetworkingConfig{
+		EndpointsConfig: map[string]*network.EndpointSettings{
+			"databases_default": {},
+		},
+	}, &v1.Platform{}, Name)
 
 	if err != nil {
 		fmt.Println(err)
@@ -273,4 +289,28 @@ func (d *DockerAdapter) GetLogsOfContainer(containerName string) []string {
 	}
 
 	return lines
+}
+
+func (d *DockerAdapter) RunService(service dto.ServiceDto, envs []dto.Env) {
+	config := container.Config{
+		Image: service.Image,
+		Env:   envToSlice(envs),
+	}
+
+	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{},
+		&network.NetworkingConfig{
+			EndpointsConfig: map[string]*network.EndpointSettings{
+				"databases_default": {},
+			},
+		}, &v1.Platform{}, service.Name)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	d.client.ContainerStart(context.Background(), con.ID, types.ContainerStartOptions{})
+	fmt.Printf("Container %s is started", con.ID)
+
+	fmt.Println("Run image", service.Name)
 }

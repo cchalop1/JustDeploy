@@ -5,14 +5,17 @@
     "image": "postgres:latest",
     "volume": "/var/lib/postgresql/data",
     "port": "5432",
-    "env": ["POSTGRES_PASSWORD", "POSTGRES_USER", "POSTGRES_DB"]
+    "envs": ["POSTGRES_USER", "POSTGRES_DB"],
+    "secrets": ["POSTGRES_PASSWORD"],
+    "connect_url": "postgres://POSTGRES_USER:POSTGRES_PASSWORD@localhost:5432/POSTGRES_DB"
   },
   {
     "icon": "https://grafikart.fr/uploads/icons/redis.svg",
     "name": "Redis",
     "image": "redis:latest",
     "port": "6379",
-    "env": ["REDIS_PASSWORD"],
+    "envs": [],
+    "secrets": ["REDIS_PASSWORD"],
     "volume": "/data"
   },
   {
@@ -20,7 +23,8 @@
     "name": "mongo",
     "image": "mongo:latest",
     "port": "27017",
-    "env": ["MONGO_INITDB_ROOT_USERNAME", "MONGO_INITDB_ROOT_PASSWORD"],
+    "envs": ["MONGO_INITDB_ROOT_USERNAME"],
+    "secrets": ["MONGO_INITDB_ROOT_PASSWORD"],
     "volume": "/data/db"
   },
   {
@@ -28,7 +32,8 @@
     "name": "mysql",
     "image": "mysql:latest",
     "port": "3306",
-    "env": ["MYSQL_ROOT_PASSWORD", "MYSQL_DATABASE"],
+    "envs": ["MYSQL_DATABASE"],
+    "secrets": ["MYSQL_ROOT_PASSWORD"],
     "volume": "/var/lib/mysql"
   },
   {
@@ -36,7 +41,8 @@
     "name": "keycloak",
     "image": "jboss/keycloak",
     "port": "8080",
-    "env": ["KEYCLOAK_USER", "KEYCLOAK_PASSWORD"],
+    "envs": ["KEYCLOAK_USER"],
+    "secrets": ["KEYCLOAK_PASSWORD"],
     "volume": "/opt/jboss/keycloak/standalone/data"
   }
 ]

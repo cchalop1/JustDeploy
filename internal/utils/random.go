@@ -24,7 +24,3 @@ func GenerateRandomPassword(length int) string {
 
 	return string(password)
 }
-
-func GenerateRandomId() {
-
-}
