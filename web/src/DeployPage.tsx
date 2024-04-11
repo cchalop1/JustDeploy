@@ -12,6 +12,7 @@ import DeploySettings from "./components/DeploySettings";
 import { ServerDto } from "./services/getServerListApi";
 import { getServerByIdApi } from "./services/getServerById";
 import AddService from "./components/AddServices";
+import ServiceListDeploy from "./components/ServiceListDeploy";
 
 export default function DeployPage() {
   const { id } = useParams();
@@ -66,6 +67,7 @@ export default function DeployPage() {
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
         <TabsContent value="database-service">
+          <ServiceListDeploy deployId={deploy.id} />
           <AddService dockerComposeIsFound={true} deployId={deploy.id} />
         </TabsContent>
         <TabsContent value="logs">

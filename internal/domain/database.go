@@ -1,6 +1,7 @@
 package domain
 
 type DatabaseModelsType struct {
-	Servers []Server
-	Deploys []Deploy
+	Servers  []Server
+	Deploys  []Deploy
+	Services []Service
 }

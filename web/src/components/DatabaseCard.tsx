@@ -26,7 +26,7 @@ export default function DatabaseCard({ service, deployId }: DatabaseCardProps) {
   }
 
   return (
-    <Card className="flex justify-between p-3">
+    <Card className="flex justify-between p-3 w-1/3">
       <div className="flex items-center gap-3">
         <img className="w-10" src={service.icon} />
         <div className="text-xl font-bold">{service.name}</div>

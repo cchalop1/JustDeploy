@@ -1,18 +1,17 @@
 import pg from "pg";
 
-const client = new pg.Client({
-  host: Bun.env.POSTGRES_HOST,
-  database: Bun.env.POSTGRES_DB,
-  user: Bun.env.POSTGRES_USER,
-  password: Bun.env.POSTGRES_PASSWORD,
-});
-
-await client.connect();
-
 Bun.serve({
   port: 80,
   async fetch(req) {
     try {
+      const client = new pg.Client({
+        host: Bun.env.POSTGRES_HOST,
+        database: Bun.env.POSTGRES_DB,
+        user: Bun.env.POSTGRES_USER,
+        password: Bun.env.POSTGRES_PASSWORD,
+      });
+
+      await client.connect();
       const result = await client.query("SELECT NOW()");
       console.log(result);
 

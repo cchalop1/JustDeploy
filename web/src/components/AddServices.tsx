@@ -40,9 +40,11 @@ export default function AddService({
           </div>
         </Card>
       )}
-      {services.map((s) => (
-        <DatabaseCard key={s.name} service={s} deployId={deployId} />
-      ))}
+      <div className="flex flex-wrap gap-2">
+        {services.map((s) => (
+          <DatabaseCard key={s.name} service={s} deployId={deployId} />
+        ))}
+      </div>
     </div>
   );
 }

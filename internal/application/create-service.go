@@ -6,6 +6,7 @@ import (
 
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
+	"cchalop1.com/deploy/internal/domain"
 	"cchalop1.com/deploy/internal/utils"
 )
 
@@ -31,7 +32,6 @@ func generateEnvs(service dto.ServiceDto) []dto.Env {
 	for _, secret := range service.Secrets {
 		envs = append(envs, dto.Env{Name: secret, Secret: utils.GenerateRandomPassword(12)})
 	}
-	envs = append(envs, dto.Env{Name: "POSTGRES_HOST", Secret: "Postgres"})
 
 	return envs
 }
@@ -64,12 +64,25 @@ func CreateService(deployService *service.DeployService, deployId string, servic
 
 	envs := generateEnvs(service)
 
-	// service.ConnectUrl = replaceConnectUrl(service.ConnectUrl, envs)
+	containerHostname := strings.ToLower(service.Name) + "-db-" + deployId
 
-	deployService.DockerAdapter.RunService(service, envs)
+	deployService.DockerAdapter.RunService(service, envs, containerHostname)
+
+	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_HOST", Secret: containerHostname})
+
 	// TODO: add volume
 
-	// TODO: save database in database
+	domainService := domain.Service{
+		Id:          utils.GenerateRandomPassword(5),
+		DeployId:    deployId,
+		Name:        containerHostname,
+		Envs:        envs,
+		VolumsNames: []string{},
+		Status:      "Runing",
+		ImageName:   service.Image,
+	}
+
+	deployService.DatabaseAdapter.SaveService(domainService)
 
 	EditDeploy(deployService, dto.EditDeployDto{Id: deploy.Id, Envs: envs, SubDomain: deploy.SubDomain, DeployOnCommit: deploy.DeployOnCommit})
 

@@ -291,7 +291,7 @@ func (d *DockerAdapter) GetLogsOfContainer(containerName string) []string {
 	return lines
 }
 
-func (d *DockerAdapter) RunService(service dto.ServiceDto, envs []dto.Env) {
+func (d *DockerAdapter) RunService(service dto.ServiceDto, envs []dto.Env, containerHostName string) {
 	config := container.Config{
 		Image: service.Image,
 		Env:   envToSlice(envs),
@@ -302,7 +302,7 @@ func (d *DockerAdapter) RunService(service dto.ServiceDto, envs []dto.Env) {
 			EndpointsConfig: map[string]*network.EndpointSettings{
 				"databases_default": {},
 			},
-		}, &v1.Platform{}, service.Name)
+		}, &v1.Platform{}, containerHostName)
 
 	if err != nil {
 		fmt.Println(err)

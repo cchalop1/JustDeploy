@@ -13,6 +13,7 @@ func RemoveApplicationById(deployService *service.DeployService, deployId string
 	if err != nil {
 		return err
 	}
+	// TODO: remove services on deploy if there is
 	deployService.DockerAdapter.ConnectClient(server)
 	deployService.DockerAdapter.Delete(deploy.GetDockerName(), false)
 	deployService.DatabaseAdapter.DeleteDeploy(deploy)
