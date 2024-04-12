@@ -24,6 +24,7 @@ export default function DeployPage() {
   const [deploy, setDeploy] = useState<DeployDto | null>(null);
   const [server, setServer] = useState<ServerDto | null>(null);
   const [services, setServices] = useState<Service[]>([]);
+  const [loadingNewService, setLoadingNewService] = useState(false);
 
   async function fetchDeployById(id: string) {
     const res = await getDeployByIdApi(id);
@@ -79,11 +80,13 @@ export default function DeployPage() {
         <TabsContent value="database-service">
           <AddService
             deployId={deploy.id}
+            setLoading={setLoadingNewService}
             fetchServiceList={fetchServiceList}
           />
           <ServiceListDeploy
             deployId={deploy.id}
             services={services}
+            loadingNewService={loadingNewService}
             fetchServiceList={fetchServiceList}
           />
         </TabsContent>

@@ -17,12 +17,14 @@ import { createServiceApi } from "@/services/createServiceApi";
 
 type AddServiceProps = {
   deployId: string;
+  setLoading: (loading: boolean) => void;
   fetchServiceList: (deployId: string) => Promise<void>;
 };
 
 export default function AddService({
   deployId,
   fetchServiceList,
+  setLoading,
 }: AddServiceProps) {
   const [services, setServices] = useState<Array<ServiceDto>>([]);
   const [open, setOpen] = useState(false);
@@ -46,12 +48,14 @@ export default function AddService({
 
   async function createService(serviceName: string) {
     try {
+      setLoading(true);
       setOpen(false);
       await createServiceApi(serviceName, deployId);
       await fetchServiceList(deployId);
     } catch (e) {
       console.error(e);
     }
+    setLoading(false);
   }
 
   return (
@@ -81,6 +85,7 @@ export default function AddService({
             {services.map((s) => (
               <DatabaseCard key={s.name} service={s} onSelect={createService} />
             ))}
+            {/* TODO: command item to add new service link to github issue template */}
           </CommandGroup>
         </CommandList>
       </CommandDialog>

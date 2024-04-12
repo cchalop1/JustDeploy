@@ -11,16 +11,19 @@ import {
 } from "./ui/dialog";
 import { deleteServiceApi } from "@/services/deleteServiceApi";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type ServiceListDeployProps = {
   deployId: string;
   services: Service[];
+  loadingNewService: boolean;
   fetchServiceList: (deployId: string) => Promise<void>;
 };
 
 export default function ServiceListDeploy({
   deployId,
   services,
+  loadingNewService,
   fetchServiceList,
 }: ServiceListDeployProps) {
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
@@ -38,7 +41,7 @@ export default function ServiceListDeploy({
 
   useEffect(() => {
     fetchServiceList(deployId);
-  }, [deployId, fetchServiceList]);
+  }, [deployId]);
 
   return (
     <div className="flex flex-col">
@@ -73,7 +76,7 @@ export default function ServiceListDeploy({
         </DialogContent>
       </Dialog>
       {services.map((s) => (
-        <Card className="flex justify-between p-3">
+        <Card className="flex justify-between p-3 mb-3 h-24">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-5">
               <div className="text-xl font-bold">{s.name}</div>
@@ -88,6 +91,17 @@ export default function ServiceListDeploy({
           </div>
         </Card>
       ))}
+      {loadingNewService && (
+        <Card className="flex justify-between p-3 h-24">
+          <div className="flex flex-col gap-3 w-full">
+            <div className="flex justify-between">
+              <Skeleton className="w-44 h-6" />
+              <Skeleton className="w-24 h-10" />
+            </div>
+            <Skeleton className="w-20 h-3" />
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
