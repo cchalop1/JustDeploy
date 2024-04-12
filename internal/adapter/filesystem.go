@@ -2,6 +2,7 @@ package adapter
 
 import (
 	"bufio"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -178,8 +179,11 @@ func (fs *FilesystemAdapter) GetDir(path string) string {
 	return "/"
 }
 
+//go:embed services.json
+var embedServiceJsonFile embed.FS
+
 func (fs *FilesystemAdapter) GetServicesListConfig() []dto.ServiceDto {
-	data, err := os.ReadFile("services.json") // replace "services.json" with your file path
+	data, err := embedServiceJsonFile.ReadFile("services.json") // replace "services.json" with your file path
 	if err != nil {
 		fmt.Println(err)
 		return []dto.ServiceDto{}

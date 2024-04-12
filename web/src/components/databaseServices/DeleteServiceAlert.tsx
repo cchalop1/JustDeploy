@@ -8,6 +8,14 @@ import {
 import { DialogFooter, DialogHeader } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Service } from "@/services/getServicesByDeployId";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 
 type DeleteServiceAlertProps = {
   deployId: string;
@@ -38,7 +46,7 @@ export default function DeleteServiceAlert({
   }
 
   return (
-    <Dialog
+    <AlertDialog
       open={serviceToDelete !== null}
       onOpenChange={(open) => {
         if (open) {
@@ -48,25 +56,25 @@ export default function DeleteServiceAlert({
         }
       }}
     >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
             Are you sure you want to delete this service?
-          </DialogTitle>
-        </DialogHeader>
-        <DialogDescription>
+          </AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogDescription>
           <div>
             This action is irreversible. Deleting this service will remove all
             data associated with it.
           </div>
-        </DialogDescription>
-        <DialogFooter>
+        </AlertDialogDescription>
+        <AlertDialogFooter>
           <Button onClick={() => setServiceToDelete(null)}>Cancel</Button>
           <Button variant="destructive" onClick={deleteService}>
             Delete
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
