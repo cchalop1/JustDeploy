@@ -1,24 +1,14 @@
 import { ServiceDto, getServiceListApi } from "@/services/getServicesApi";
 import { useEffect, useState } from "react";
-import DatabaseCard from "./DatabaseCard";
-import { Button } from "./ui/button";
-import { FileSlidersIcon } from "lucide-react";
+import { Button } from "../ui/button";
 
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "./ui/command";
 import { createServiceApi } from "@/services/createServiceApi";
+import CommandModal from "./CommandModal";
 
 type AddServiceProps = {
   deployId: string;
   setLoading: (loading: boolean) => void;
-  fetchServiceList: (deployId: string) => Promise<void>;
+  fetchServiceList: () => Promise<void>;
 };
 
 export default function AddService({
@@ -51,7 +41,7 @@ export default function AddService({
       setLoading(true);
       setOpen(false);
       await createServiceApi(serviceName, deployId);
-      await fetchServiceList(deployId);
+      await fetchServiceList();
     } catch (e) {
       console.error(e);
     }
@@ -70,25 +60,12 @@ export default function AddService({
           <span className="text-xs">⌘</span>K
         </kbd>
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Type to search and lauch a service in the list..." />
-        <CommandList onSelect={() => setOpen(false)}>
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Local Config">
-            <CommandItem className="flex gap-3" value="compose">
-              <FileSlidersIcon className="w-5"></FileSlidersIcon>
-              <span className="h-4">From your docker-compose file</span>
-            </CommandItem>
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading="Other sercices">
-            {services.map((s) => (
-              <DatabaseCard key={s.name} service={s} onSelect={createService} />
-            ))}
-            {/* TODO: command item to add new service link to github issue template */}
-          </CommandGroup>
-        </CommandList>
-      </CommandDialog>
+      <CommandModal
+        open={open}
+        setOpen={setOpen}
+        services={services}
+        createService={createService}
+      />
     </>
   );
 }

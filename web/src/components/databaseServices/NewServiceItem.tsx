@@ -1,12 +1,15 @@
 import { ServiceDto } from "@/services/getServicesApi";
-import { CommandItem } from "./ui/command";
+import { CommandItem } from "../ui/command";
 
 type DatabaseCardProps = {
   service: ServiceDto;
   onSelect: (serviceId: string) => void;
 };
 
-export default function DatabaseCard({ service, onSelect }: DatabaseCardProps) {
+export default function NewServiceItem({
+  service,
+  onSelect,
+}: DatabaseCardProps) {
   return (
     <CommandItem
       onSelect={() => onSelect(service.name)}

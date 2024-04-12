@@ -21,6 +21,7 @@ func DeleteService(deployService *service.DeployService, serviceId string) error
 	}
 	deployService.DockerAdapter.ConnectClient(server)
 	deployService.DockerAdapter.Delete(s.Name, false)
+	// TODO: remove envs of the service on the deploymeent
 
 	err = deployService.DatabaseAdapter.DeleteServiceById(serviceId)
 	return err

@@ -11,30 +11,18 @@ import DeployLogs from "./components/DeployLogs";
 import DeploySettings from "./components/DeploySettings";
 import { ServerDto } from "./services/getServerListApi";
 import { getServerByIdApi } from "./services/getServerById";
-import AddService from "./components/AddServices";
-import ServiceListDeploy from "./components/ServiceListDeploy";
-import {
-  Service,
-  getServicesByDeployIdApi,
-} from "./services/getServicesByDeployId";
+import ServicesManagements from "./components/databaseServices/ServicesManagements";
 
 export default function DeployPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [deploy, setDeploy] = useState<DeployDto | null>(null);
   const [server, setServer] = useState<ServerDto | null>(null);
-  const [services, setServices] = useState<Service[]>([]);
-  const [loadingNewService, setLoadingNewService] = useState(false);
 
   async function fetchDeployById(id: string) {
     const res = await getDeployByIdApi(id);
     setDeploy(res);
     return res;
-  }
-
-  async function fetchServiceList(deployId: string) {
-    const res = await getServicesByDeployIdApi(deployId);
-    setServices(res);
   }
 
   async function fetchServer(serverId: string) {
@@ -78,17 +66,7 @@ export default function DeployPage() {
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
         <TabsContent value="database-service">
-          <AddService
-            deployId={deploy.id}
-            setLoading={setLoadingNewService}
-            fetchServiceList={fetchServiceList}
-          />
-          <ServiceListDeploy
-            deployId={deploy.id}
-            services={services}
-            loadingNewService={loadingNewService}
-            fetchServiceList={fetchServiceList}
-          />
+          <ServicesManagements deployId={deploy.id} />
         </TabsContent>
         <TabsContent value="logs">
           <DeployLogs id={deploy.id} />
