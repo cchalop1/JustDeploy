@@ -246,6 +246,7 @@ func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) {
 	fmt.Println("Run image", Name)
 }
 
+// TODO: remove stop router
 func (d *DockerAdapter) Delete(appName string, stopRouter bool) {
 	d.Stop(appName)
 	d.Remove(appName)

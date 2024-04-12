@@ -13,17 +13,24 @@ import { ServerDto } from "./services/getServerListApi";
 import { getServerByIdApi } from "./services/getServerById";
 import AddService from "./components/AddServices";
 import ServiceListDeploy from "./components/ServiceListDeploy";
+import { getServicesByDeployIdApi } from "./services/getServicesByDeployId";
 
 export default function DeployPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [deploy, setDeploy] = useState<DeployDto | null>(null);
   const [server, setServer] = useState<ServerDto | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
 
   async function fetchDeployById(id: string) {
     const res = await getDeployByIdApi(id);
     setDeploy(res);
     return res;
+  }
+
+  async function fetchServiceList(deployId: string) {
+    const res = await getServicesByDeployIdApi(deployId);
+    setServices(res);
   }
 
   async function fetchServer(serverId: string) {
@@ -67,8 +74,15 @@ export default function DeployPage() {
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
         <TabsContent value="database-service">
-          <ServiceListDeploy deployId={deploy.id} />
-          <AddService dockerComposeIsFound={true} deployId={deploy.id} />
+          <AddService
+            deployId={deploy.id}
+            fetchServiceList={fetchServiceList}
+          />
+          <ServiceListDeploy
+            deployId={deploy.id}
+            services={services}
+            fetchServiceList={fetchServiceList}
+          />
         </TabsContent>
         <TabsContent value="logs">
           <DeployLogs id={deploy.id} />

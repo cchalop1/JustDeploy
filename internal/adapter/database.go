@@ -203,3 +203,25 @@ func (d *DatabaseAdapter) GetServiceByDeployId(deployId string) []domain.Service
 	}
 	return serviceList
 }
+
+func (d *DatabaseAdapter) GetServiceById(id string) (domain.Service, error) {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	for _, s := range databaseModels.Services {
+		if s.Id == id {
+			return s, nil
+		}
+	}
+	return domain.Service{}, errors.New("service not found")
+}
+
+func (d *DatabaseAdapter) DeleteServiceById(id string) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	var newServices []domain.Service
+	for _, s := range databaseModels.Services {
+		if s.Id != id {
+			newServices = append(newServices, s)
+		}
+	}
+	databaseModels.Services = newServices
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}
