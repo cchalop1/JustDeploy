@@ -13,7 +13,10 @@ import { ServerDto } from "./services/getServerListApi";
 import { getServerByIdApi } from "./services/getServerById";
 import AddService from "./components/AddServices";
 import ServiceListDeploy from "./components/ServiceListDeploy";
-import { getServicesByDeployIdApi } from "./services/getServicesByDeployId";
+import {
+  Service,
+  getServicesByDeployIdApi,
+} from "./services/getServicesByDeployId";
 
 export default function DeployPage() {
   const { id } = useParams();

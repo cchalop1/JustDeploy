@@ -36,10 +36,6 @@ export default function Home() {
   useEffect(() => {
     fetchServerList();
     fetchDeployList();
-    // setInterval(() => {
-    //   fetchServerList();
-    //   fetchDeployList();
-    // }, 2000);
   }, []);
 
   return (
@@ -59,12 +55,6 @@ export default function Home() {
           </Button>
         </div>
         <DeployList deployList={deployList} />
-      </div>
-      <div className="h-52">
-        <div className="flex justify-between">
-          <div className="text-2xl font-bold">Databases</div>
-        </div>
-        {/* TODO: add database list */}
       </div>
     </>
   );

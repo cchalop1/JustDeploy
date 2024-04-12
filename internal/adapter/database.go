@@ -193,7 +193,7 @@ func (d *DatabaseAdapter) SaveService(service domain.Service) error {
 	return d.writeDeployConfigInDataBaseFile(databaseModels)
 }
 
-func (d *DatabaseAdapter) GetServiceByDeployId(deployId string) []domain.Service {
+func (d *DatabaseAdapter) GetServicesByDeployId(deployId string) []domain.Service {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	serviceList := []domain.Service{}
 	for _, s := range databaseModels.Services {

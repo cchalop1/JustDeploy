@@ -22,7 +22,7 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 
 	deployService.DockerAdapter.BuildImage(deploy)
 	deployService.DockerAdapter.PullTreafikImage()
-	deployService.DockerAdapter.RunRouter()
+	deployService.DockerAdapter.RunRouter(deploy.Email)
 	deployService.DockerAdapter.RunImage(deploy, appUrl)
 
 	if deploy.EnableTls {

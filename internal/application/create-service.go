@@ -86,7 +86,6 @@ func CreateService(deployService *service.DeployService, deployId string, servic
 
 	EditDeploy(deployService, dto.EditDeployDto{Id: deploy.Id, Envs: envs, SubDomain: deploy.SubDomain, DeployOnCommit: deploy.DeployOnCommit})
 
-	// TODO: check if i can't add env went the application is runing
 	ReDeployApplication(deployService, deploy.Id)
 
 	return nil

@@ -138,13 +138,11 @@ func (d *DockerAdapter) PullImage(image string) {
 	io.Copy(io.Discard, reader)
 }
 
-func (d *DockerAdapter) RunRouter() {
+func (d *DockerAdapter) RunRouter(email string) {
 	routerIsRuning, err := d.checkRouterIsRuning()
 	if routerIsRuning || err != nil {
 		return
 	}
-	// TODO: change and get it from deploy config
-	email := "clement.chalopin@gmail.com"
 
 	d.client.NetworkCreate(context.Background(), "databases_default", types.NetworkCreate{})
 

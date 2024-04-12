@@ -6,5 +6,5 @@ import (
 )
 
 func GetServicesByDeployId(deployService *service.DeployService, deployId string) []domain.Service {
-	return deployService.DatabaseAdapter.GetServiceByDeployId(deployId)
+	return deployService.DatabaseAdapter.GetServicesByDeployId(deployId)
 }
