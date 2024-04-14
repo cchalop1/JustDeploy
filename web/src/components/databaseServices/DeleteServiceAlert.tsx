@@ -1,11 +1,4 @@
 import { deleteServiceApi } from "@/services/deleteServiceApi";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@radix-ui/react-dialog";
-import { DialogFooter, DialogHeader } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Service } from "@/services/getServicesByDeployId";
 import {
