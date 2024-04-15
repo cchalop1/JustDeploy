@@ -60,7 +60,10 @@ export default function DeployPage() {
         {deploy.pathToSource}
       </div>
       <Tabs defaultValue="database-service" className="mt-20">
-        <TabsList className="w-full justify-around pl-5 pr-5">
+        <TabsList
+          className="w-full justify-around pl-5 pr-5"
+          onClickCapture={() => fetchDeployById(deploy.id)}
+        >
           <TabsTrigger value="database-service">Database Service</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>

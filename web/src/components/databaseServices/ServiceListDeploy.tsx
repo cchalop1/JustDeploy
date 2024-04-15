@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import DeleteServiceAlert from "./DeleteServiceAlert";
+import ModalDeleteService from "./ModalDeleteService";
 
 type ServiceListDeployProps = {
   deployId: string;
@@ -26,7 +26,7 @@ export default function ServiceListDeploy({
 
   return (
     <>
-      <DeleteServiceAlert
+      <ModalDeleteService
         deployId={deployId}
         serviceToDelete={serviceToDelete}
         fetchServiceList={fetchServiceList}
@@ -34,7 +34,7 @@ export default function ServiceListDeploy({
       />
       <div className="flex flex-col">
         {services.map((s) => (
-          <Card className="flex justify-between p-3 mb-3 h-24">
+          <Card key={s.name} className="flex justify-between p-3 mb-3 h-24">
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-5">
                 <div className="text-xl font-bold">{s.name}</div>

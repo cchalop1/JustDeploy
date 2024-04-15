@@ -64,7 +64,7 @@ func CreateService(deployService *service.DeployService, deployId string, servic
 
 	envs := generateEnvs(service)
 
-	containerHostname := strings.ToLower(service.Name) + "-db-" + deployId
+	containerHostname := strings.ToLower(service.Name) + "-db-" + deployId + "-" + utils.GenerateRandomPassword(5)
 
 	deployService.DockerAdapter.RunService(service, envs, containerHostname)
 
@@ -84,7 +84,7 @@ func CreateService(deployService *service.DeployService, deployId string, servic
 
 	deployService.DatabaseAdapter.SaveService(domainService)
 
-	EditDeploy(deployService, dto.EditDeployDto{Id: deploy.Id, Envs: envs, SubDomain: deploy.SubDomain, DeployOnCommit: deploy.DeployOnCommit})
+	EditDeploy(deployService, dto.EditDeployDto{Id: deploy.Id, Envs: append(envs, deploy.Envs...), SubDomain: deploy.SubDomain, DeployOnCommit: deploy.DeployOnCommit})
 
 	ReDeployApplication(deployService, deploy.Id)
 

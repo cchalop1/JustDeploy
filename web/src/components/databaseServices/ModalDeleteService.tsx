@@ -9,6 +9,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
+import { useState } from "react";
+import { ButtonStateEnum } from "@/lib/utils";
+import SpinnerIcon from "@/assets/SpinnerIcon";
 
 type DeleteServiceAlertProps = {
   deployId: string;
@@ -17,21 +20,26 @@ type DeleteServiceAlertProps = {
   setServiceToDelete: (service: Service | null) => void;
 };
 
-export default function DeleteServiceAlert({
+export default function ModalDeleteService({
   deployId,
   serviceToDelete,
   fetchServiceList,
   setServiceToDelete,
 }: DeleteServiceAlertProps) {
+  const [btnIsLoading, setBtnIsLoading] = useState<ButtonStateEnum>(
+    ButtonStateEnum.INIT
+  );
   async function deleteService() {
     const serviceId = serviceToDelete?.id;
 
     if (!serviceId) {
       return;
     }
+    setBtnIsLoading(ButtonStateEnum.PENDING);
     try {
       await deleteServiceApi(deployId, serviceId);
       await fetchServiceList();
+      setBtnIsLoading(ButtonStateEnum.SUCESS);
     } catch (e) {
       console.error(e);
     }
@@ -56,15 +64,17 @@ export default function DeleteServiceAlert({
           </AlertDialogTitle>
         </AlertDialogHeader>
         <AlertDialogDescription>
-          <div>
-            This action is irreversible. Deleting this service will remove all
-            data associated with it.
-          </div>
+          This action is irreversible. Deleting this service will remove all
+          data associated with it.
         </AlertDialogDescription>
         <AlertDialogFooter>
           <Button onClick={() => setServiceToDelete(null)}>Cancel</Button>
           <Button variant="destructive" onClick={deleteService}>
-            Delete
+            {btnIsLoading === ButtonStateEnum.PENDING ? (
+              <SpinnerIcon color="text-white" />
+            ) : (
+              "Delete"
+            )}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

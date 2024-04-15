@@ -25,7 +25,7 @@ export default function EnvsManagements({
       <Label>Env Variables</Label>
       <div className="flex flex-col gap-2">
         {envs.map((env, idx) => (
-          <div className="flex gap-4">
+          <div className="flex gap-4" key={idx}>
             <Input
               id="envName"
               name="envName"
