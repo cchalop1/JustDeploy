@@ -7,6 +7,7 @@ import {
   editDeployementApi,
 } from "@/services/editDeploymentApi";
 import { Checkbox } from "./ui/checkbox";
+import { Env } from "@/services/postFormDetails";
 
 type DeploySettingsProps = {
   deploy: DeployDto;
@@ -19,9 +20,11 @@ export default function DeploySettings({
   serverDomain,
   fetchDeployById,
 }: DeploySettingsProps) {
+  const envs: Env[] =
+    deploy.envs.length === 0 ? [{ name: "", secret: "" }] : deploy.envs;
   const deploySetting: EditDeployDto = {
     deployOnCommit: deploy.deployOnCommit,
-    envs: deploy.envs,
+    envs: envs,
     id: deploy.id,
     subDomain: deploy.subDomain,
   };
@@ -72,7 +75,7 @@ export default function DeploySettings({
         </div>
       </div>
       <EnvsManagements
-        envs={deploy.envs}
+        envs={deploySetting.envs}
         setEnvs={(newEnvs) => editDeploy({ ...deploySetting, envs: newEnvs })}
       />
     </div>
