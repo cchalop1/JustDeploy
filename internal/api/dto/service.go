@@ -8,7 +8,6 @@ type ServiceDto struct {
 	Envs        []string `json:"envs"`
 	Secrets     []string `json:"secrets"`
 	VolumsNames []string `json:"volumsNames"`
-	ConnectUrl  string   `json:"connect_url"`
 }
 
 type CreateServiceDto struct {

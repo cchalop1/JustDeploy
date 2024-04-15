@@ -59,6 +59,21 @@ export default function AddService({
     setLoading(false);
   }
 
+  async function createServiceFromCompose() {
+    try {
+      setLoading(true);
+      setOpen(false);
+      await createServiceApi(deployId, {
+        serviceName: "",
+        fromDockerCompose: true,
+      });
+      await fetchServiceList();
+    } catch (e) {
+      console.error(e);
+    }
+    setLoading(false);
+  }
+
   return (
     <>
       <Button
@@ -76,6 +91,7 @@ export default function AddService({
         setOpen={setOpen}
         services={services}
         createService={createService}
+        createServiceFromCompose={createServiceFromCompose}
         composeFileFound={config?.composeFileFound}
       />
     </>

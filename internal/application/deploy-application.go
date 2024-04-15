@@ -58,7 +58,7 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 
 	isFolder := adapter.NewFilesystemAdapter().IsFolder(pathToDir)
 	DockerFileName := "Dockerfile"
-	fmt.Println(isFolder)
+
 	if !isFolder {
 		DockerFileName = adapter.NewFilesystemAdapter().BaseDir(pathToDir)
 		pathToDir = adapter.NewFilesystemAdapter().GetDir(pathToDir)
@@ -79,6 +79,8 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 
 	err = deployService.DatabaseAdapter.SaveDeploy(deploy)
 	fmt.Println(err)
+
+	// TODO: add fetch to docker compose file
 
 	runApplication(deployService, &deploy, server.Domain)
 

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -13,6 +14,7 @@ import (
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
+	"gopkg.in/yaml.v3"
 )
 
 type FilesystemAdapter struct {
@@ -197,4 +199,65 @@ func (fs *FilesystemAdapter) GetServicesListConfig() []dto.ServiceDto {
 	}
 
 	return services
+}
+
+// Get docker compose config from the file
+
+type serviceConfig struct {
+	Image       string            `yaml:"image"`
+	Ports       []string          `yaml:"ports"`
+	Environment map[string]string `yaml:"environment"`
+	Volumes     []string          `yaml:"volumes"`
+	Name        string            `yaml:"container_name"`
+}
+
+type composeConfig struct {
+	Services map[string]serviceConfig `yaml:"services"`
+}
+
+func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) (dto.ServiceDto, error) {
+	pathToCompose := pathToSource + "/docker-compose.yml"
+	service := dto.ServiceDto{}
+
+	file, err := os.ReadFile(pathToCompose)
+
+	if err != nil {
+		return service, err
+	}
+
+	var cfg composeConfig
+
+	yaml.Unmarshal(file, &cfg)
+
+	if len(cfg.Services) == 0 {
+		return service, errors.New("No services found in the docker-compose.yml")
+	}
+
+	listServicesConfig := []serviceConfig{}
+
+	for _, value := range cfg.Services {
+		listServicesConfig = append(listServicesConfig, value)
+	}
+
+	serviceFromCompose := listServicesConfig[0]
+
+	envs := []string{}
+
+	for key := range serviceFromCompose.Environment {
+		envs = append(envs, key)
+	}
+
+	volumes := []string{}
+
+	for _, volume := range serviceFromCompose.Volumes {
+		volumes = append(volumes, strings.Split(volume, ":")[1])
+	}
+
+	service.Name = serviceFromCompose.Name
+	service.Image = serviceFromCompose.Image
+	service.Envs = envs
+	service.Port = strings.Split(serviceFromCompose.Ports[0], ":")[1]
+	service.VolumsNames = volumes
+
+	return service, nil
 }

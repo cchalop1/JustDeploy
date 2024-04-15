@@ -16,6 +16,7 @@ type CommandModalProps = {
   services: ServiceDto[];
   setOpen: (open: boolean) => void;
   createService: (serviceId: string) => void;
+  createServiceFromCompose: () => void;
   composeFileFound?: boolean;
 };
 
@@ -24,6 +25,7 @@ export default function CommandModal({
   setOpen,
   services,
   createService,
+  createServiceFromCompose,
   composeFileFound,
 }: CommandModalProps) {
   return (
@@ -33,7 +35,11 @@ export default function CommandModal({
         <CommandEmpty>No results found.</CommandEmpty>
         {composeFileFound && (
           <CommandGroup heading="Local Config">
-            <CommandItem className="flex gap-3" value="compose">
+            <CommandItem
+              className="flex gap-3"
+              value="compose"
+              onSelect={createServiceFromCompose}
+            >
               <FileSlidersIcon className="w-5"></FileSlidersIcon>
               <span className="h-4">From your docker-compose file</span>
             </CommandItem>

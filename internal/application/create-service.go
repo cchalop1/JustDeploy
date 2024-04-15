@@ -2,7 +2,6 @@ package application
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"cchalop1.com/deploy/internal/api/dto"
@@ -45,20 +44,23 @@ func replaceConnectUrl(connectUrl string, envs []dto.Env) string {
 }
 
 func CreateService(deployService *service.DeployService, deployId string, createServiceDto dto.CreateServiceDto) error {
-	// if createServiceDto.FromDockerCompose {
-	// }
-	fmt.Println("CreateService", deployId, createServiceDto)
-	service, err := findServiceByName(deployService, createServiceDto.ServiceName)
-
-	if err != nil {
-		return err
-	}
-
 	deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
 	if err != nil {
 		return err
 	}
 	server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
+	if err != nil {
+		return err
+	}
+
+	service := dto.ServiceDto{}
+
+	if createServiceDto.FromDockerCompose {
+		service, err = deployService.FilesystemAdapter.GetComposeConfigOfDeploy(deploy.PathToSource)
+	} else {
+		service, err = findServiceByName(deployService, createServiceDto.ServiceName)
+	}
+
 	if err != nil {
 		return err
 	}
