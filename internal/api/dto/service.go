@@ -10,3 +10,8 @@ type ServiceDto struct {
 	VolumsNames []string `json:"volumsNames"`
 	ConnectUrl  string   `json:"connect_url"`
 }
+
+type CreateServiceDto struct {
+	ServiceName       string `json:"serviceName"`
+	FromDockerCompose bool   `json:"fromDockerCompose"`
+}

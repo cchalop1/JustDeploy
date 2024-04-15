@@ -45,10 +45,10 @@ const createDeploymentEmptyState = (): CreateDeployDto => {
 
 export function CreateDeployForm() {
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
-    ButtonStateEnum.INIT
+    ButtonStateEnum.INIT,
   );
   const [newDeploy, setNewDeploy] = useState<CreateDeployDto>(
-    createDeploymentEmptyState()
+    createDeploymentEmptyState(),
   );
   const [serverList, setServerList] = useState<Array<ServerDto>>([]);
   const [config, setConfig] = useState<DeployConfigDto | null>(null);
@@ -87,7 +87,6 @@ export function CreateDeployForm() {
 
     setConnectButtonState(ButtonStateEnum.PENDING);
 
-    console.log(newDeploy);
     await createDeployApi(newDeploy);
     setConnectButtonState(ButtonStateEnum.SUCESS);
     navigate("/");
@@ -114,7 +113,6 @@ export function CreateDeployForm() {
                 <Label htmlFor="auth-methode">Select server for your app</Label>
                 <Select
                   onValueChange={(value) => {
-                    console.log(value);
                     setNewDeploy({ ...newDeploy, serverId: value });
                   }}
                   defaultValue={newDeploy.serverId}

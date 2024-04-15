@@ -2,6 +2,7 @@ package application
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"cchalop1.com/deploy/internal/api/dto"
@@ -43,8 +44,11 @@ func replaceConnectUrl(connectUrl string, envs []dto.Env) string {
 	return connectUrl
 }
 
-func CreateService(deployService *service.DeployService, deployId string, serviceName string) error {
-	service, err := findServiceByName(deployService, serviceName)
+func CreateService(deployService *service.DeployService, deployId string, createServiceDto dto.CreateServiceDto) error {
+	// if createServiceDto.FromDockerCompose {
+	// }
+	fmt.Println("CreateService", deployId, createServiceDto)
+	service, err := findServiceByName(deployService, createServiceDto.ServiceName)
 
 	if err != nil {
 		return err

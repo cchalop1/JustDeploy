@@ -86,7 +86,6 @@ func (fs *FilesystemAdapter) LoadEnvsFromFileSystem(pathToFolder string) []dto.E
 	var envs []dto.Env = []dto.Env{}
 
 	if err != nil {
-		fmt.Println("Error to read the .env file you have")
 		return envs
 	}
 	defer file.Close()

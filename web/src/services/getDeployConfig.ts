@@ -13,6 +13,11 @@ export type DeployConfigDto = {
   envs: Env[];
 };
 
-export async function getDeployConfig(): Promise<DeployConfigDto> {
-  return await callApi<DeployConfigDto>("/deploy/config", "GET");
+export async function getDeployConfig(
+  deployId?: string,
+): Promise<DeployConfigDto> {
+  if (!deployId) {
+    deployId = "";
+  }
+  return await callApi<DeployConfigDto>(`/deploy/config/${deployId}`, "GET");
 }

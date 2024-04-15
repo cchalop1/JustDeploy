@@ -5,10 +5,20 @@ import (
 	"cchalop1.com/deploy/internal/api/service"
 )
 
-func GetDeployConfig(deployService *service.DeployService) dto.DeployConfigDto {
+func GetDeployConfig(deployService *service.DeployService, deployId string) dto.DeployConfigDto {
 	deployConfig := dto.DeployConfigDto{}
 
 	currentPath, err := deployService.FilesystemAdapter.GetCurrentPath()
+
+	if deployId != "" {
+		deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
+
+		if err != nil {
+			return dto.DeployConfigDto{}
+		}
+		currentPath = deploy.PathToSource
+	}
+
 	dockerfileIsFound := deployService.FilesystemAdapter.FindDockerFile(currentPath)
 	dockercomposeIsFound := deployService.FilesystemAdapter.FindDockerComposeFile(currentPath)
 	envs := deployService.FilesystemAdapter.LoadEnvsFromFileSystem(currentPath)

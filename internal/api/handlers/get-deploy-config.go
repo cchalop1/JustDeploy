@@ -10,6 +10,7 @@ import (
 
 func GetDeployConfigHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, application.GetDeployConfig(deployService))
+		deployId := c.Param("deployId")
+		return c.JSON(http.StatusOK, application.GetDeployConfig(deployService, deployId))
 	}
 }

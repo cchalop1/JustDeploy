@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 
 import { createServiceApi } from "@/services/createServiceApi";
 import CommandModal from "./CommandModal";
+import { DeployConfigDto, getDeployConfig } from "@/services/getDeployConfig";
 
 type AddServiceProps = {
   deployId: string;
@@ -18,14 +19,21 @@ export default function AddService({
 }: AddServiceProps) {
   const [services, setServices] = useState<Array<ServiceDto>>([]);
   const [open, setOpen] = useState(false);
+  const [config, setConfig] = useState<DeployConfigDto | null>(null);
 
   async function getServices() {
     const res = await getServiceListApi();
     setServices(res);
   }
 
+  async function getConfig() {
+    const res = await getDeployConfig(deployId);
+    setConfig(res);
+  }
+
   useEffect(() => {
     getServices();
+    getConfig();
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -40,7 +48,10 @@ export default function AddService({
     try {
       setLoading(true);
       setOpen(false);
-      await createServiceApi(serviceName, deployId);
+      await createServiceApi(deployId, {
+        serviceName,
+        fromDockerCompose: false,
+      });
       await fetchServiceList();
     } catch (e) {
       console.error(e);
@@ -65,6 +76,7 @@ export default function AddService({
         setOpen={setOpen}
         services={services}
         createService={createService}
+        composeFileFound={config?.composeFileFound}
       />
     </>
   );

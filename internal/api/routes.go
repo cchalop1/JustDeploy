@@ -13,7 +13,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	app.Echo.GET("/api/server/:id", handlers.GetServerByIdHandler(deployService))
 	app.Echo.GET("/api/server/:id/deploy", handlers.GetDeployByServerIdHandler(deployService))
 
-	app.Echo.GET("/api/deploy/config", handlers.GetDeployConfigHandler(deployService))
+	app.Echo.GET("/api/deploy/config/:deployId", handlers.GetDeployConfigHandler(deployService))
 
 	app.Echo.POST("/api/deploy", handlers.CreateDeployementHandler(deployService))
 	app.Echo.PUT("/api/deploy/edit", handlers.EditDeployementHandler(deployService))
@@ -28,7 +28,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	app.Echo.GET("/api/deploy/logs/:id", handlers.GetLogsHandler(deployService))
 
 	app.Echo.GET("/api/service", handlers.GetServicesListHandler(deployService))
-	app.Echo.POST("/api/deploy/:deployId/service/:serviceName", handlers.CreateServiceHandler(deployService))
+	app.Echo.POST("/api/deploy/:deployId/service", handlers.CreateServiceHandler(deployService))
 	app.Echo.GET("/api/deploy/:deployId/service", handlers.GetServicesByDeployIdHandler(deployService))
 	app.Echo.DELETE("/api/deploy/:deployId/service/:serviceId", handlers.DeleteServiceHandler(deployService))
 

@@ -12,9 +12,15 @@ import (
 func CreateServiceHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		deployId := c.Param("deployId")
-		serviceName := c.Param("serviceName")
+		createServiceDto := dto.CreateServiceDto{}
 
-		err := application.CreateService(deployService, deployId, serviceName)
+		err := c.Bind(&createServiceDto)
+
+		if err != nil {
+			return c.String(http.StatusBadRequest, "bad request")
+		}
+
+		err = application.CreateService(deployService, deployId, createServiceDto)
 
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, dto.ResponseApi{Message: err.Error()})
