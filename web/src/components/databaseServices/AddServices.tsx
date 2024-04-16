@@ -1,10 +1,17 @@
-import { ServiceDto, getServiceListApi } from "@/services/getServicesApi";
+import {
+  ServiceDto,
+  getPreConfiguredServiceListApi,
+} from "@/services/getServicesApi";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 
 import { createServiceApi } from "@/services/createServiceApi";
 import CommandModal from "./CommandModal";
 import { DeployConfigDto, getDeployConfig } from "@/services/getDeployConfig";
+import {
+  ResponseServiceFromDockerComposeDto,
+  getServicesFromDockerComposeApi,
+} from "@/services/getServicesFromDockerCompose";
 
 type AddServiceProps = {
   deployId: string;
@@ -17,23 +24,27 @@ export default function AddService({
   fetchServiceList,
   setLoading,
 }: AddServiceProps) {
-  const [services, setServices] = useState<Array<ServiceDto>>([]);
+  const [preConfiguredServices, setPreConfiguredServices] = useState<
+    Array<ServiceDto>
+  >([]);
+  const [serviceFromDockerCompose, setServiceFromDockerCompose] =
+    useState<ResponseServiceFromDockerComposeDto>(null);
+
   const [open, setOpen] = useState(false);
-  const [config, setConfig] = useState<DeployConfigDto | null>(null);
 
   async function getServices() {
-    const res = await getServiceListApi();
-    setServices(res);
+    const res = await getPreConfiguredServiceListApi();
+    setPreConfiguredServices(res);
   }
 
-  async function getConfig() {
-    const res = await getDeployConfig(deployId);
-    setConfig(res);
+  async function getServicesFromDockerCompose() {
+    const res = await getServicesFromDockerComposeApi(deployId);
+    setServiceFromDockerCompose(res);
   }
 
   useEffect(() => {
     getServices();
-    getConfig();
+    getServicesFromDockerCompose();
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -44,28 +55,16 @@ export default function AddService({
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  async function createService(serviceName: string) {
+  async function createService(
+    serviceName: string,
+    fromDockerCompose: boolean,
+  ) {
     try {
       setLoading(true);
       setOpen(false);
       await createServiceApi(deployId, {
         serviceName,
-        fromDockerCompose: false,
-      });
-      await fetchServiceList();
-    } catch (e) {
-      console.error(e);
-    }
-    setLoading(false);
-  }
-
-  async function createServiceFromCompose() {
-    try {
-      setLoading(true);
-      setOpen(false);
-      await createServiceApi(deployId, {
-        serviceName: "",
-        fromDockerCompose: true,
+        fromDockerCompose,
       });
       await fetchServiceList();
     } catch (e) {
@@ -89,10 +88,9 @@ export default function AddService({
       <CommandModal
         open={open}
         setOpen={setOpen}
-        services={services}
+        preConfiguredServices={preConfiguredServices}
+        serviceFromDockerCompose={serviceFromDockerCompose}
         createService={createService}
-        createServiceFromCompose={createServiceFromCompose}
-        composeFileFound={config?.composeFileFound}
       />
     </>
   );

@@ -215,49 +215,62 @@ type composeConfig struct {
 	Services map[string]serviceConfig `yaml:"services"`
 }
 
-func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) (dto.ServiceDto, error) {
-	pathToCompose := pathToSource + "/docker-compose.yml"
-	service := dto.ServiceDto{}
-
-	file, err := os.ReadFile(pathToCompose)
+func parsComposeFile(pathToComposeFile string) (*composeConfig, error) {
+	file, err := os.ReadFile(pathToComposeFile)
 
 	if err != nil {
-		return service, err
+		return nil, err
 	}
 
 	var cfg composeConfig
 
 	yaml.Unmarshal(file, &cfg)
 
+	return &cfg, nil
+}
+
+func filterComposeServiceToArray(services map[string]serviceConfig) []dto.ServiceDto {
+	servicesArray := []dto.ServiceDto{}
+
+	for key, value := range services {
+		envs := []string{}
+
+		for key := range value.Environment {
+			envs = append(envs, key)
+		}
+
+		volumes := []string{}
+
+		for _, volume := range value.Volumes {
+			volumes = append(volumes, strings.Split(volume, ":")[1])
+		}
+
+		servicesArray = append(servicesArray, dto.ServiceDto{
+			Name:  key,
+			Image: value.Image,
+			// TODO: get all the ports
+			Port:        strings.Split(value.Ports[0], ":")[1],
+			Envs:        envs,
+			VolumsNames: volumes,
+		})
+	}
+
+	return servicesArray
+}
+
+func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) ([]dto.ServiceDto, error) {
+	// TODO: try all the compose file name like (docker-compose.yml, docker-compose.yaml, compose.yml, compose.yaml)
+	cfg, err := parsComposeFile(pathToSource + "/docker-compose.yml")
+
+	if err != nil {
+		return nil, err
+	}
+
 	if len(cfg.Services) == 0 {
-		return service, errors.New("No services found in the docker-compose.yml")
+		return nil, errors.New("No services found in the docker-compose.yml")
 	}
 
-	listServicesConfig := []serviceConfig{}
+	services := filterComposeServiceToArray(cfg.Services)
 
-	for _, value := range cfg.Services {
-		listServicesConfig = append(listServicesConfig, value)
-	}
-
-	serviceFromCompose := listServicesConfig[0]
-
-	envs := []string{}
-
-	for key := range serviceFromCompose.Environment {
-		envs = append(envs, key)
-	}
-
-	volumes := []string{}
-
-	for _, volume := range serviceFromCompose.Volumes {
-		volumes = append(volumes, strings.Split(volume, ":")[1])
-	}
-
-	service.Name = serviceFromCompose.Name
-	service.Image = serviceFromCompose.Image
-	service.Envs = envs
-	service.Port = strings.Split(serviceFromCompose.Ports[0], ":")[1]
-	service.VolumsNames = volumes
-
-	return service, nil
+	return services, nil
 }

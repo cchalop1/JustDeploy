@@ -56,7 +56,18 @@ func CreateService(deployService *service.DeployService, deployId string, create
 	service := dto.ServiceDto{}
 
 	if createServiceDto.FromDockerCompose {
-		service, err = deployService.FilesystemAdapter.GetComposeConfigOfDeploy(deploy.PathToSource)
+		services, err := deployService.FilesystemAdapter.GetComposeConfigOfDeploy(deploy.PathToSource)
+
+		if err != nil {
+			return err
+		}
+
+		for _, s := range services {
+			if s.Name == createServiceDto.ServiceName {
+				service = s
+			}
+		}
+
 	} else {
 		service, err = findServiceByName(deployService, createServiceDto.ServiceName)
 	}

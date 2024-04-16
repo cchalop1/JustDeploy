@@ -5,6 +5,8 @@ export type ServiceDto = {
   icon: string;
 };
 
-export async function getServiceListApi(): Promise<Array<ServiceDto>> {
+export async function getPreConfiguredServiceListApi(): Promise<
+  Array<ServiceDto>
+> {
   return await callApi<Array<ServiceDto>>("/service", "GET");
 }
