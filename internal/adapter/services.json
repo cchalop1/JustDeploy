@@ -4,7 +4,7 @@
     "name": "Postgres",
     "image": "postgres:latest",
     "volume": "/var/lib/postgresql/data",
-    "port": "5432",
+    "ports": ["5432"],
     "envs": ["POSTGRES_USER", "POSTGRES_DB"],
     "secrets": ["POSTGRES_PASSWORD"],
     "connect_url": "postgres://POSTGRES_USER:POSTGRES_PASSWORD@localhost:5432/POSTGRES_DB"
@@ -13,7 +13,7 @@
     "icon": "https://grafikart.fr/uploads/icons/redis.svg",
     "name": "Redis",
     "image": "redis:latest",
-    "port": "6379",
+    "ports": ["6379"],
     "envs": [],
     "secrets": ["REDIS_PASSWORD"],
     "volume": "/data"
@@ -22,7 +22,7 @@
     "icon": "https://upload.wikimedia.org/wikipedia/fr/thumb/4/45/MongoDB-Logo.svg/1280px-MongoDB-Logo.svg.png",
     "name": "mongo",
     "image": "mongo:latest",
-    "port": "27017",
+    "ports": ["27017"],
     "envs": ["MONGO_INITDB_ROOT_USERNAME"],
     "secrets": ["MONGO_INITDB_ROOT_PASSWORD"],
     "volume": "/data/db"
@@ -31,7 +31,7 @@
     "icon": "https://upload.wikimedia.org/wikipedia/fr/thumb/6/62/MySQL.svg/1200px-MySQL.svg.png",
     "name": "mysql",
     "image": "mysql:latest",
-    "port": "3306",
+    "ports": ["3306"],
     "envs": ["MYSQL_DATABASE"],
     "secrets": ["MYSQL_ROOT_PASSWORD"],
     "volume": "/var/lib/mysql"
@@ -40,7 +40,7 @@
     "icon": "https://www.keycloak.org/resources/images/logo.svg",
     "name": "keycloak",
     "image": "jboss/keycloak",
-    "port": "8080",
+    "ports": ["8080"],
     "envs": ["KEYCLOAK_USER"],
     "secrets": ["KEYCLOAK_PASSWORD"],
     "volume": "/opt/jboss/keycloak/standalone/data"

@@ -38,6 +38,7 @@ export default function CommandModal({
               <CommandItem
                 className="flex gap-3"
                 onSelect={() => createService(s, true)}
+                key={s}
               >
                 <FileSlidersIcon className="w-5"></FileSlidersIcon>
                 <span className="h-4">{s}</span>

@@ -245,11 +245,17 @@ func filterComposeServiceToArray(services map[string]serviceConfig) []dto.Servic
 			volumes = append(volumes, strings.Split(volume, ":")[1])
 		}
 
+		ports := []string{}
+
+		for _, port := range value.Ports {
+			ports = append(ports, strings.Split(port, ":")[1])
+		}
+
 		servicesArray = append(servicesArray, dto.ServiceDto{
 			Name:  key,
 			Image: value.Image,
 			// TODO: get all the ports
-			Port:        strings.Split(value.Ports[0], ":")[1],
+			Ports:       ports,
 			Envs:        envs,
 			VolumsNames: volumes,
 		})

@@ -4,7 +4,7 @@ type ServiceDto struct {
 	Name        string   `json:"name"`
 	Icon        string   `json:"icon"`
 	Image       string   `json:"image"`
-	Port        string   `json:"port"`
+	Ports       []string `json:"ports"`
 	Envs        []string `json:"envs"`
 	Secrets     []string `json:"secrets"`
 	VolumsNames []string `json:"volumsNames"`
