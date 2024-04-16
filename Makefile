@@ -21,7 +21,7 @@ build-go:
 	@go build -o $(BINDIR)/$(EXECUTABLE) ./cmd/just-deploy/main.go
 
 build-web:
-	@cd web && pnpm install && pnpm run build
+	@cd web && bun install && bun run build
 
 copy-web-build:
 	cp -R web/dist internal/web/dist/
