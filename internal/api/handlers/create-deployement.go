@@ -17,12 +17,12 @@ func CreateDeployementHandler(deployService *service.DeployService) echo.Handler
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		err = application.DeployApplication(deployService, newDeployDto)
+		deploy, err := application.DeployApplication(deployService, newDeployDto)
 
 		if err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is deploy"})
+		return c.JSON(http.StatusOK, dto.CreateDeployResponse{Id: deploy.Id})
 	}
 }

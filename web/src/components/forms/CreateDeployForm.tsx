@@ -45,10 +45,10 @@ const createDeploymentEmptyState = (): CreateDeployDto => {
 
 export function CreateDeployForm() {
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
-    ButtonStateEnum.INIT,
+    ButtonStateEnum.INIT
   );
   const [newDeploy, setNewDeploy] = useState<CreateDeployDto>(
-    createDeploymentEmptyState(),
+    createDeploymentEmptyState()
   );
   const [serverList, setServerList] = useState<Array<ServerDto>>([]);
   const [config, setConfig] = useState<DeployConfigDto | null>(null);
@@ -87,9 +87,9 @@ export function CreateDeployForm() {
 
     setConnectButtonState(ButtonStateEnum.PENDING);
 
-    await createDeployApi(newDeploy);
+    const res = await createDeployApi(newDeploy);
     setConnectButtonState(ButtonStateEnum.SUCESS);
-    navigate("/");
+    navigate(`/deploy/${res.id}`);
   };
 
   function setEnvs(envs: Array<Env>) {

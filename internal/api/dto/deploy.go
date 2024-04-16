@@ -43,3 +43,7 @@ type DeployConfigDto struct {
 	EnvFileFound     bool   `json:"envFileFound"`
 	Envs             []Env  `json:"envs"`
 }
+
+type CreateDeployResponse struct {
+	Id string `json:"id"`
+}

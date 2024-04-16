@@ -1,4 +1,4 @@
-import { ResponseApi, callApi } from "./api";
+import { callApi } from "./api";
 
 export type Env = {
   name: string;
@@ -15,8 +15,16 @@ export type CreateDeployDto = {
   deployOnCommit: boolean;
 };
 
+export type CreateDeployResponse = {
+  id: string;
+};
+
 export async function createDeployApi(
   postCreateDeploymentDto: CreateDeployDto
-): Promise<ResponseApi> {
-  return await callApi<ResponseApi>("/deploy", "POST", postCreateDeploymentDto);
+): Promise<CreateDeployResponse> {
+  return await callApi<CreateDeployResponse>(
+    "/deploy",
+    "POST",
+    postCreateDeploymentDto
+  );
 }

@@ -36,16 +36,16 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 	deployService.DatabaseAdapter.UpdateDeploy(*deploy)
 }
 
-func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDeployDto) error {
+func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDeployDto) (domain.Deploy, error) {
 	server, err := deployService.DatabaseAdapter.GetServerById(newDeploy.ServerId)
 	if err != nil {
-		return err
+		return domain.Deploy{}, err
 	}
 
 	pathToDir, err := filepath.Abs(newDeploy.PathToSource)
 
 	if err != nil {
-		return err
+		return domain.Deploy{}, err
 	}
 
 	pathToDir = adapter.NewFilesystemAdapter().CleanPath(pathToDir)
@@ -53,7 +53,7 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 	err = deployService.DockerAdapter.ConnectClient(server)
 
 	if err != nil {
-		return err
+		return domain.Deploy{}, err
 	}
 
 	isFolder := adapter.NewFilesystemAdapter().IsFolder(pathToDir)
@@ -63,6 +63,14 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 		DockerFileName = adapter.NewFilesystemAdapter().BaseDir(pathToDir)
 		pathToDir = adapter.NewFilesystemAdapter().GetDir(pathToDir)
 	}
+
+	portEnv := make([]dto.Env, 1)
+	portEnv[0] = dto.Env{
+		Name:   "PORT",
+		Secret: "80",
+	}
+
+	newDeploy.Envs = append(portEnv, newDeploy.Envs...)
 
 	deploy := domain.Deploy{
 		Id:             utils.GenerateRandomPassword(5),
@@ -78,13 +86,10 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 	}
 
 	err = deployService.DatabaseAdapter.SaveDeploy(deploy)
-	fmt.Println(err)
-
-	// TODO: add fetch to docker compose file
 
 	runApplication(deployService, &deploy, server.Domain)
 
-	return nil
+	return deploy, err
 }
 
 func ReDeployApplicationRun(deployService *service.DeployService, deploy *domain.Deploy) error {
