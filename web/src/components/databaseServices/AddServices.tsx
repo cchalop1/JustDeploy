@@ -7,7 +7,6 @@ import { Button } from "../ui/button";
 
 import { createServiceApi } from "@/services/createServiceApi";
 import CommandModal from "./CommandModal";
-import { DeployConfigDto, getDeployConfig } from "@/services/getDeployConfig";
 import {
   ResponseServiceFromDockerComposeDto,
   getServicesFromDockerComposeApi,
