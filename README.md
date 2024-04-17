@@ -45,6 +45,14 @@ In this 2nd step you can configure your application with name and enable tls if 
 
 You can see all the process on [this video.](https://youtu.be/u2nQGLpXTxM)
 
+### Add Database
+
+When you have deploy your app you can create and connect a database services from preconfigured services or your local docker-compose settings.
+
+On the Deploy page click on on the databases services tab and create one from the modal.
+
+![ModalCreateService](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/ScreenCreateServices.png)
+
 ### Prerequisites
 
 - openssl
