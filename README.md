@@ -46,11 +46,10 @@ You can see all the process on [this video.](https://youtu.be/u2nQGLpXTxM)
 
 ### Prerequisites
 
-- Git
-- Make
-- golang
+- openssl
+- ssh
 
-Before deploying your application using JustDeploy, it is highly recommended that a domain name is associated with your server. This is a necessary step to generate the certificate, even if you disable
+Before deploying your application using JustDeploy, it is required that a domain name is associated with your server. This is a necessary step to generate the certificate, even if you disable
 
 ## Contributing
 
