@@ -16,7 +16,8 @@ Bun.serve({
       console.log(result);
 
       return new Response(
-        "Postgres is connected ! 🎉\nResult: " + JSON.stringify(result.fields)
+        "🚀 Postgres is connected ! 🎉\nResult: " +
+          JSON.stringify(result.fields)
       );
     } catch (error) {
       console.error(error);
