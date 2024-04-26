@@ -85,7 +85,7 @@ func CreateService(deployService *service.DeployService, deployId string, create
 
 	deployService.DockerAdapter.RunService(service, envs, containerHostname)
 
-	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_HOST", Secret: containerHostname})
+	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_HOSTNAME", Secret: containerHostname})
 
 	// TODO: add volume
 
