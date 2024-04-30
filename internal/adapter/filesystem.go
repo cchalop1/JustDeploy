@@ -10,8 +10,10 @@ import (
 	"strings"
 
 	"cchalop1.com/deploy/internal"
+	"cchalop1.com/deploy/internal/adapter/database"
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
+	"github.com/docker/docker/api/types/container"
 	"gopkg.in/yaml.v3"
 )
 
@@ -186,6 +188,7 @@ type serviceConfig struct {
 	Environment map[string]string `yaml:"environment"`
 	Volumes     []string          `yaml:"volumes"`
 	Name        string            `yaml:"container_name"`
+	Cmd         []string          `yaml:"command"`
 }
 
 type composeConfig struct {
@@ -206,8 +209,8 @@ func parsComposeFile(pathToComposeFile string) (*composeConfig, error) {
 	return &cfg, nil
 }
 
-func filterComposeServiceToArray(services map[string]serviceConfig) []dto.ServiceDto {
-	servicesArray := []dto.ServiceDto{}
+func filterComposeServiceToArray(services map[string]serviceConfig) []database.ServicesConfig {
+	servicesArray := []database.ServicesConfig{}
 
 	for key, value := range services {
 		envs := []string{}
@@ -228,20 +231,21 @@ func filterComposeServiceToArray(services map[string]serviceConfig) []dto.Servic
 			ports = append(ports, strings.Split(port, ":")[1])
 		}
 
-		servicesArray = append(servicesArray, dto.ServiceDto{
-			Name:  key,
-			Image: value.Image,
-			// TODO: get all the ports
-			Ports:       ports,
-			Envs:        envs,
-			VolumsNames: volumes,
+		servicesArray = append(servicesArray, database.ServicesConfig{
+			Name: key,
+			Icon: "compose",
+			Config: container.Config{
+				Image: value.Image,
+				Env:   envs,
+				Cmd:   value.Cmd,
+			},
 		})
 	}
 
 	return servicesArray
 }
 
-func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) ([]dto.ServiceDto, error) {
+func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) ([]database.ServicesConfig, error) {
 	// TODO: try all the compose file name like (docker-compose.yml, docker-compose.yaml, compose.yml, compose.yaml)
 	cfg, err := parsComposeFile(pathToSource + "/docker-compose.yml")
 
@@ -250,7 +254,7 @@ func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) ([]dt
 	}
 
 	if len(cfg.Services) == 0 {
-		return nil, errors.New("No services found in the docker-compose.yml")
+		return nil, errors.New("no services found in the docker-compose.yml")
 	}
 
 	services := filterComposeServiceToArray(cfg.Services)

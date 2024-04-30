@@ -109,13 +109,11 @@ var servicesConfigMap = map[string]ServicesConfig{
 }
 
 func GetListOfDatabasesServices() []ServicesConfig {
-	return []ServicesConfig{
-		servicesConfigMap["postgres"],
-		servicesConfigMap["mongo"],
-		servicesConfigMap["mysql"],
-		servicesConfigMap["redis"],
-		servicesConfigMap["keycloak"],
+	var servicesConfigArray []ServicesConfig
+	for _, serviceConfig := range servicesConfigMap {
+		servicesConfigArray = append(servicesConfigArray, serviceConfig)
 	}
+	return servicesConfigArray
 }
 
 // TODO: function to get service by name

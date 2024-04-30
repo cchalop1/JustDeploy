@@ -6,5 +6,6 @@ import (
 )
 
 func GetServiceList(deployService *service.DeployService) []database.ServicesConfig {
-	return database.GetListOfDatabasesServices()
+	services := database.GetListOfDatabasesServices()
+	return services
 }

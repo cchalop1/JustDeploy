@@ -1,7 +1,6 @@
 package application
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -58,22 +57,22 @@ func CreateService(deployService *service.DeployService, deployId string, create
 	service := database.ServicesConfig{}
 
 	if createServiceDto.FromDockerCompose {
-		// services, err := deployService.FilesystemAdapter.GetComposeConfigOfDeploy(deploy.PathToSource)
+		services, err := deployService.FilesystemAdapter.GetComposeConfigOfDeploy(deploy.PathToSource)
 
-		// if err != nil {
-		// 	return err
-		// }
+		if err != nil {
+			return err
+		}
 
-		// for _, s := range services {
-		// 	if s.Name == createServiceDto.ServiceName {
-		// 		// service = s
-		// 	}
-		// }
-		return errors.New("Not implemented")
+		for _, s := range services {
+			if s.Name == createServiceDto.ServiceName {
+				service = s
+			}
+		}
 
 	} else {
 		service, err = database.GetServiceByName(createServiceDto.ServiceName)
 	}
+
 	fmt.Println(service)
 
 	if err != nil {
