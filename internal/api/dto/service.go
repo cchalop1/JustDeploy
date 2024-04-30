@@ -1,5 +1,6 @@
 package dto
 
+// deprecated to delete:
 type ServiceDto struct {
 	Name        string   `json:"name"`
 	Icon        string   `json:"icon"`

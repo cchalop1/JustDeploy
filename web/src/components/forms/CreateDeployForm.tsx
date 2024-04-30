@@ -38,7 +38,7 @@ const createDeploymentEmptyState = (): CreateDeployDto => {
     enableTls: false,
     email: null,
     pathToSource: "",
-    envs: [{ name: "", secret: "" }],
+    envs: [{ name: "", value: "" }],
     deployOnCommit: false,
   };
 };
@@ -72,7 +72,7 @@ export function CreateDeployForm() {
       envs: envs,
     }));
     setConfig(deployConfig);
-    envs.push({ name: "", secret: "" });
+    envs.push({ name: "", value: "" });
   }
 
   useEffect(() => {

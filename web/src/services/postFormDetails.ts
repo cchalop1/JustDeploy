@@ -2,7 +2,7 @@ import { callApi } from "./api";
 
 export type Env = {
   name: string;
-  secret: string;
+  value: string;
 };
 
 export type CreateDeployDto = {

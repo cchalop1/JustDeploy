@@ -66,8 +66,8 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 
 	portEnv := make([]dto.Env, 1)
 	portEnv[0] = dto.Env{
-		Name:   "PORT",
-		Secret: "80",
+		Name:  "PORT",
+		Value: "80",
 	}
 
 	newDeploy.Envs = append(portEnv, newDeploy.Envs...)

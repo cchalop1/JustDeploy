@@ -8,8 +8,9 @@ type EditDeployDto struct {
 }
 
 type Env struct {
-	Name   string `json:"name"`
-	Secret string `json:"secret"`
+	Name     string `json:"name"`
+	Value    string `json:"value"`
+	IsSecret bool   `json:"isSecret"`
 }
 
 type NewDeployDto struct {

@@ -2,8 +2,6 @@ package adapter
 
 import (
 	"bufio"
-	"embed"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -98,8 +96,8 @@ func (fs *FilesystemAdapter) LoadEnvsFromFileSystem(pathToFolder string) []dto.E
 		parts := strings.SplitN(line, "=", 2)
 		if len(parts) == 2 {
 			env := dto.Env{
-				Name:   strings.TrimSpace(parts[0]),
-				Secret: strings.TrimSpace(parts[1]),
+				Name:  strings.TrimSpace(parts[0]),
+				Value: strings.TrimSpace(parts[1]),
 			}
 			envs = append(envs, env)
 		}
@@ -178,27 +176,6 @@ func (fs *FilesystemAdapter) GetDir(path string) string {
 		return strings.Join(arr, "/") + "/"
 	}
 	return "/"
-}
-
-//go:embed services.json
-var embedServiceJsonFile embed.FS
-
-func (fs *FilesystemAdapter) GetServicesListConfig() []dto.ServiceDto {
-	data, err := embedServiceJsonFile.ReadFile("services.json") // replace "services.json" with your file path
-	if err != nil {
-		fmt.Println(err)
-		return []dto.ServiceDto{}
-	}
-
-	// Unmarshal the JSON data into a slice of ServiceConfig
-	var services []dto.ServiceDto
-	err = json.Unmarshal(data, &services)
-	if err != nil {
-		fmt.Println(err)
-		return []dto.ServiceDto{}
-	}
-
-	return services
 }
 
 // Get docker compose config from the file

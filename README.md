@@ -53,8 +53,9 @@ On the Deploy page click on on the databases services tab and create one from th
 
 ![ModalCreateService](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/ScreenCreateServices.png)
 
-Feel free to add more preconfigured services with `services.json` by create a pull request.
+Feel free to add more preconfigured services with `databases.go` by create a pull request.
 
+// TODO: change the link to the file
 [file is here](https://github.com/cchalop1/JustDeploy/blob/main/internal/adapter/services.json)
 
 ### Prerequisites

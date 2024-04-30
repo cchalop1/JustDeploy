@@ -5,7 +5,7 @@ Bun.serve({
   async fetch(req) {
     try {
       const client = new pg.Client({
-        host: Bun.env.POSTGRES_HOST,
+        host: Bun.env.POSTGRES_HOSTNAME,
         database: Bun.env.POSTGRES_DB,
         user: Bun.env.POSTGRES_USER,
         password: Bun.env.POSTGRES_PASSWORD,

@@ -13,7 +13,7 @@ export default function EnvsManagements({
   setEnvs,
 }: EnvsManagementsProps) {
   const addNewEnv = () => {
-    setEnvs([...envs, { name: "", secret: "" }]);
+    setEnvs([...envs, { name: "", value: "" }]);
   };
 
   const removeEnv = (idx: number) => {
@@ -50,12 +50,12 @@ export default function EnvsManagements({
                 type="envSecret"
                 placeholder="Env Secret"
                 autoComplete="off"
-                value={env.secret}
+                value={env.value}
                 onChange={(e) => {
                   const updatedEnvs = [...envs];
                   updatedEnvs[idx] = {
                     ...updatedEnvs[idx],
-                    secret: e.target.value,
+                    value: e.target.value,
                   };
                   setEnvs(updatedEnvs);
                 }}

@@ -2,6 +2,7 @@ package domain
 
 import "cchalop1.com/deploy/internal/api/dto"
 
+// TODO: change to save serviceConfig
 type Service struct {
 	Id          string    `json:"id"`
 	Name        string    `json:"name"`

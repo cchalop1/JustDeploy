@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 
+	"cchalop1.com/deploy/internal/adapter/database"
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
 	"github.com/docker/docker/api/types"
@@ -199,8 +200,8 @@ func (d *DockerAdapter) RunRouter(email string) {
 func envToSlice(envVars []dto.Env) []string {
 	envSlice := make([]string, 0, len(envVars))
 	for _, value := range envVars {
-		if value.Name != "" && value.Secret != "" {
-			envSlice = append(envSlice, fmt.Sprintf("%s=%s", value.Name, value.Secret))
+		if value.Name != "" && value.Value != "" {
+			envSlice = append(envSlice, fmt.Sprintf("%s=%s", value.Name, value.Value))
 		}
 	}
 	return envSlice
@@ -290,13 +291,8 @@ func (d *DockerAdapter) GetLogsOfContainer(containerName string) []string {
 	return lines
 }
 
-func (d *DockerAdapter) RunService(service dto.ServiceDto, envs []dto.Env, containerHostName string) {
-	config := container.Config{
-		Image: service.Image,
-		Env:   envToSlice(envs),
-	}
-
-	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{},
+func (d *DockerAdapter) RunService(service database.ServicesConfig, containerHostName string) {
+	con, err := d.client.ContainerCreate(context.Background(), &service.Config, &container.HostConfig{},
 		&network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
 				"databases_default": {},

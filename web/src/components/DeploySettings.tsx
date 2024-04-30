@@ -21,7 +21,7 @@ export default function DeploySettings({
   fetchDeployById,
 }: DeploySettingsProps) {
   const envs: Env[] =
-    deploy.envs.length === 0 ? [{ name: "", secret: "" }] : deploy.envs;
+    deploy.envs.length === 0 ? [{ name: "", value: "" }] : deploy.envs;
   const deploySetting: EditDeployDto = {
     deployOnCommit: deploy.deployOnCommit,
     envs: envs,
