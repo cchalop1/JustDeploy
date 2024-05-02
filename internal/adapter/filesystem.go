@@ -14,6 +14,7 @@ import (
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/go-connections/nat"
 	"gopkg.in/yaml.v3"
 )
 
@@ -213,31 +214,32 @@ func filterComposeServiceToArray(services map[string]serviceConfig) []database.S
 	servicesArray := []database.ServicesConfig{}
 
 	for key, value := range services {
-		envs := []string{}
+		envs := []dto.Env{}
 
 		for key := range value.Environment {
-			envs = append(envs, key)
+			envs = append(envs, dto.Env{Name: key, Value: "", IsSecret: true})
 		}
 
-		volumes := []string{}
-
-		for _, volume := range value.Volumes {
-			volumes = append(volumes, strings.Split(volume, ":")[1])
-		}
-
-		ports := []string{}
+		ports := nat.PortSet{}
 
 		for _, port := range value.Ports {
-			ports = append(ports, strings.Split(port, ":")[1])
+			ports[nat.Port(port)] = struct{}{}
 		}
+
+		// volumes := []string{}
+
+		// for _, volume := range value.Volumes {
+		// 	volumes = append(volumes, strings.Split(volume, ":")[1])
+		// }
 
 		servicesArray = append(servicesArray, database.ServicesConfig{
 			Name: key,
 			Icon: "compose",
+			Env:  envs,
 			Config: container.Config{
-				Image: value.Image,
-				Env:   envs,
-				Cmd:   value.Cmd,
+				Image:        value.Image,
+				Cmd:          value.Cmd,
+				ExposedPorts: ports,
 			},
 		})
 	}
