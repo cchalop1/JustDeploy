@@ -128,7 +128,7 @@ func (fs *FilesystemAdapter) CopyFileToRemoteServer(sourcePath string, serverIp 
 
 func (fs *FilesystemAdapter) CreateGitPostCommitHooks(deploy domain.Deploy) error {
 	hooksFilePath := deploy.PathToSource + ".git/hooks/post-commit"
-	fileContent := []byte("#!/bin/sh\njustdeploy redeploy " + deploy.Id + "\n")
+	fileContent := []byte("#!/bin/sh\njustdeploy --redeploy " + deploy.Id + "\n")
 
 	err := os.WriteFile(hooksFilePath, fileContent, 0755)
 
