@@ -4,11 +4,16 @@ import ServerConfigForm from "./components/forms/ServerConfigForm";
 import { CreateDeployForm } from "./components/forms/CreateDeployForm";
 import DeployPage from "./DeployPage";
 import ServerPage from "./ServerPage";
+import { Suspense } from "react";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home />,
+    element: (
+      <Suspense fallback={"loading..."}>
+        <Home />
+      </Suspense>
+    ),
   },
   {
     path: "server/create",

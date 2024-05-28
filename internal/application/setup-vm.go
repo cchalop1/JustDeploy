@@ -16,6 +16,8 @@ import (
 func ConnectAndSetupServer(deployService *service.DeployService, server domain.Server) *adapter.DockerAdapter {
 	sshAdapter := adapter.NewSshAdapter()
 
+	fmt.Println("Connecting to server")
+
 	sshAdapter.Connect(dto.ConnectNewServerDto{
 		Domain:   server.Domain,
 		SshKey:   server.SshKey,
@@ -23,6 +25,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 		User:     "root",
 	})
 
+	fmt.Println("Check if docker is installed")
 	dockerIsInstalled, err := checkIfDockerIsIntalled(sshAdapter)
 	fmt.Println(err)
 
@@ -31,6 +34,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 		fmt.Println(err)
 	}
 
+	fmt.Println("Check if certificate is created")
 	certificateIsCreated, err := checkIsCertificateIsCreate(sshAdapter, server.Id)
 	fmt.Println(err)
 
@@ -40,6 +44,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 		fmt.Println(err)
 	}
 
+	fmt.Println("Check if docker port is open")
 	portIsOpen, err := checkIfDockerPortIsOpen(sshAdapter)
 	fmt.Println("port is open ", portIsOpen)
 
@@ -48,6 +53,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 		fmt.Println(err)
 	}
 
+	fmt.Println("Check if docker port is open")
 	sshAdapter.CloseConnection()
 	adapterDocker := adapter.NewDockerAdapter()
 	adapterDocker.ConnectClient(server)
