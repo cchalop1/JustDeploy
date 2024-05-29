@@ -75,7 +75,7 @@ export default function DeploySettings({
           <div>.{serverDomain}</div>
         </div>
       </div>
-      <div className="font-bold text-xl mt-4">Env Variables</div>
+      <div className="font-bold text-xl mt-4 mb-2">Env Variables</div>
       <EnvsManagements
         envs={deploySetting.envs}
         setEnvs={(newEnvs) => editDeploy({ ...deploySetting, envs: newEnvs })}
