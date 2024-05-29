@@ -12,7 +12,6 @@ export default function Header() {
         >
           Docs
         </a>
-        {/* <Button>JustDeploy Pro</Button> */}
       </div>
     </div>
   );

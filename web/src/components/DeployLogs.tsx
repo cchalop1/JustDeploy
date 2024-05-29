@@ -1,29 +1,28 @@
-import SpinnerIcon from "@/assets/SpinnerIcon";
+import { use } from "react";
 import { getApplicationLogs } from "@/services/getApplicationLogs";
-import { useEffect, useState } from "react";
+import dayjs from "dayjs";
 
 type DeployLogsProps = {
   id: string;
 };
 
 export default function DeployLogs({ id }: DeployLogsProps) {
-  const [logs, setLogs] = useState<null | string[]>(null);
-
-  useEffect(() => {
-    getApplicationLogs(id).then(setLogs);
-  }, []);
+  const logs = use(getApplicationLogs(id));
 
   return (
-    <div className="flex flex-col ml-3 mr-3">
-      {logs === null ? (
-        <SpinnerIcon color="text-black" />
-      ) : (
-        logs.map((log, idx) => (
-          <code key={idx} className=" text-xs w-full mb-2">
-            {log}
-          </code>
-        ))
-      )}
+    <div className="flex flex-col">
+      {logs.map((log, idx) => (
+        <code
+          key={idx}
+          className="flex gap-1 text-xs w-full mb-2 hover:bg-slate-50 rounded pt-1 pl-2 pr-2"
+        >
+          <div className="font-bold">
+            {dayjs(log.date).format("DD/MM/YYYY - HH:mm:ss")}
+          </div>
+          {">"}
+          <div>{log.message}</div>
+        </code>
+      ))}
     </div>
   );
 }

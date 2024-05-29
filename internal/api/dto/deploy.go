@@ -48,3 +48,8 @@ type DeployConfigDto struct {
 type CreateDeployResponse struct {
 	Id string `json:"id"`
 }
+
+type Logs struct {
+	Message string `json:"message"`
+	Date    string `json:"date"`
+}

@@ -40,6 +40,7 @@ export default function DeploySettings({
 
   return (
     <div>
+      <div className="font-bold text-xl">Git Hooks</div>
       <div className="mt-4 flex items-center space-x-2">
         <Checkbox
           id="deploy-on-commit"
@@ -59,7 +60,7 @@ export default function DeploySettings({
         </Label>
       </div>
       <div className="mt-4">
-        <Label>Sub domain</Label>
+        <div className="font-bold text-xl">Domain</div>
         <div className="flex items-center gap-2">
           <div>{deploy.enableTls ? "https://" : "http://"}</div>
           <Input
@@ -74,6 +75,7 @@ export default function DeploySettings({
           <div>.{serverDomain}</div>
         </div>
       </div>
+      <div className="font-bold text-xl mt-4">Env Variables</div>
       <EnvsManagements
         envs={deploySetting.envs}
         setEnvs={(newEnvs) => editDeploy({ ...deploySetting, envs: newEnvs })}

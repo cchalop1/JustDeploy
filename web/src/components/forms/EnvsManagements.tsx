@@ -1,4 +1,3 @@
-import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Env } from "@/services/postFormDetails";
@@ -22,7 +21,6 @@ export default function EnvsManagements({
 
   return (
     <>
-      <Label>Env Variables</Label>
       <div className="flex flex-col gap-2">
         {envs.map((env, idx) => {
           const lastEnv = envs.length - 1 === idx;

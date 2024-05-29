@@ -268,23 +268,24 @@ func (d *DockerAdapter) Start(appName string) {
 }
 
 func (d *DockerAdapter) GetLogsOfContainer(containerName string) []string {
-	logs, err := d.client.ContainerLogs(context.Background(), containerName, container.LogsOptions{ShowStdout: true})
+	logs, err := d.client.ContainerLogs(context.Background(), containerName, container.LogsOptions{ShowStdout: true, ShowStderr: true, Timestamps: true})
 	if err != nil {
-		fmt.Println("Failed to read container logs: ", err)
+		fmt.Println("Failed to read container logs:", err)
 		return make([]string, 0)
 	}
 	defer logs.Close()
 
 	lines := make([]string, 0)
-	buf := make([]byte, 1024)
+	buffer := make([]byte, 1024)
 
 	for {
-		n, err := logs.Read(buf)
-		if n > 0 {
-			lines = append(lines, string(buf[:n]))
-		}
+		n, err := logs.Read(buffer)
 		if err != nil {
 			break
+		}
+		clearLine := string(buffer[8:n])
+		if n > 0 {
+			lines = append(lines, clearLine)
 		}
 	}
 

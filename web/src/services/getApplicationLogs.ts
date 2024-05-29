@@ -1,5 +1,10 @@
 import { callApi } from "./api";
 
-export async function getApplicationLogs(appName: string): Promise<string[]> {
-  return await callApi<string[]>("/deploy/logs/" + appName, "GET");
+type Logs = {
+  date: string;
+  message: string;
+};
+
+export async function getApplicationLogs(appName: string): Promise<Logs[]> {
+  return await callApi<Logs[]>("/deploy/logs/" + appName, "GET");
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { DeployDto } from "./services/getDeployListApi";
 import { getDeployByIdApi } from "./services/getDeployById";
@@ -12,6 +12,7 @@ import DeploySettings from "./components/DeploySettings";
 import { ServerDto } from "./services/getServerListApi";
 import { getServerByIdApi } from "./services/getServerById";
 import ServicesManagements from "./components/databaseServices/ServicesManagements";
+import SpinnerIcon from "./assets/SpinnerIcon";
 
 export default function DeployPage() {
   const { id } = useParams();
@@ -59,7 +60,7 @@ export default function DeployPage() {
         <FolderIcon />
         {deploy.pathToSource}
       </div>
-      <Tabs defaultValue="database-service" className="mt-20">
+      <Tabs defaultValue="logs" className="mt-20">
         <TabsList
           className="w-full justify-around pl-5 pr-5"
           onClickCapture={() => fetchDeployById(deploy.id)}
@@ -72,7 +73,9 @@ export default function DeployPage() {
           <ServicesManagements deployId={deploy.id} />
         </TabsContent>
         <TabsContent value="logs">
-          <DeployLogs id={deploy.id} />
+          <Suspense fallback={<SpinnerIcon color="text-black" />}>
+            <DeployLogs id={deploy.id} />
+          </Suspense>
         </TabsContent>
         <TabsContent value="settings">
           <DeploySettings
