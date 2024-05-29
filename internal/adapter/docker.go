@@ -267,11 +267,10 @@ func (d *DockerAdapter) Start(appName string) {
 	d.client.ContainerStart(context.Background(), appName, container.StartOptions{})
 }
 
-func (d *DockerAdapter) GetLogsOfContainer(containerName string) []string {
+func (d *DockerAdapter) GetLogsOfContainer(containerName string) ([]string, error) {
 	logs, err := d.client.ContainerLogs(context.Background(), containerName, container.LogsOptions{ShowStdout: true, ShowStderr: true, Timestamps: true})
 	if err != nil {
-		fmt.Println("Failed to read container logs:", err)
-		return make([]string, 0)
+		return make([]string, 0), err
 	}
 	defer logs.Close()
 
@@ -289,7 +288,7 @@ func (d *DockerAdapter) GetLogsOfContainer(containerName string) []string {
 		}
 	}
 
-	return lines
+	return lines, nil
 }
 
 func (d *DockerAdapter) RunService(service database.ServicesConfig, containerHostName string) {

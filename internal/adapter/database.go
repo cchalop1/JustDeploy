@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"cchalop1.com/deploy/internal"
+	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
 )
 
@@ -40,12 +41,12 @@ func (d *DatabaseAdapter) createFoldeJustDeployFolderIfDontExist() error {
 }
 
 func (d *DatabaseAdapter) writeDeployConfigInDataBaseFile(databaseModels domain.DatabaseModelsType) error {
-	file, err := json.MarshalIndent(databaseModels, "", "  ")
+	fileContent, err := json.MarshalIndent(databaseModels, "", "  ")
 	if err != nil {
 		log.Fatalf("Error marshaling to JSON: %v", err)
 	}
 
-	err = os.WriteFile(internal.DATABASE_FILE_PATH, file, 0644)
+	err = os.WriteFile(internal.DATABASE_FILE_PATH, fileContent, 0644)
 	fmt.Println(err)
 	return err
 }
@@ -224,4 +225,45 @@ func (d *DatabaseAdapter) DeleteServiceById(id string) error {
 	}
 	databaseModels.Services = newServices
 	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}
+
+// Logs
+func (d *DatabaseAdapter) CreateDeployLogsFileIfNot(deployId string) error {
+	filePath := internal.JUSTDEPLOY_FOLDER + "/" + deployId + ".log"
+	if _, err := os.Stat(filePath); err == nil {
+		return nil
+	}
+	_, err := os.Create(filePath)
+	return err
+}
+
+func (d *DatabaseAdapter) SaveLogs(deployId string, logs []dto.Logs) error {
+	file, err := os.OpenFile(internal.JUSTDEPLOY_FOLDER+"/"+deployId+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	fileContent, err := json.MarshalIndent(logs, "", "  ")
+	if err != nil {
+		log.Fatalf("Error marshaling to JSON: %v", err)
+	}
+
+	file.Truncate(0)
+	_, err = file.Write(fileContent)
+	return err
+}
+
+func (d *DatabaseAdapter) GetLogs(deployId string) ([]dto.Logs, error) {
+	file, err := os.ReadFile(internal.JUSTDEPLOY_FOLDER + "/" + deployId + ".log")
+	if err != nil {
+		return []dto.Logs{}, err
+	}
+
+	var logs []dto.Logs
+	err = json.Unmarshal(file, &logs)
+	if err != nil {
+		return []dto.Logs{}, err
+	}
+	return logs, nil
 }

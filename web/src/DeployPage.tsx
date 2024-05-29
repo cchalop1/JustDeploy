@@ -60,7 +60,7 @@ export default function DeployPage() {
         <FolderIcon />
         {deploy.pathToSource}
       </div>
-      <Tabs defaultValue="logs" className="mt-20">
+      <Tabs defaultValue="database-service" className="mt-20">
         <TabsList
           className="w-full justify-around pl-5 pr-5"
           onClickCapture={() => fetchDeployById(deploy.id)}

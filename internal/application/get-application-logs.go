@@ -22,7 +22,10 @@ func GetApplicationLogs(deployService *service.DeployService, deployId string) (
 	// TODO: move all the connect client to a midleware
 	deployService.DockerAdapter.ConnectClient(server)
 
-	dockerLogs := deployService.DockerAdapter.GetLogsOfContainer(deploy.GetDockerName())
+	dockerLogs, err := deployService.DockerAdapter.GetLogsOfContainer(deploy.GetDockerName())
+	if err != nil {
+		return deployService.DatabaseAdapter.GetLogs(deployId)
+	}
 
 	for _, log := range dockerLogs {
 
@@ -36,6 +39,11 @@ func GetApplicationLogs(deployService *service.DeployService, deployId string) (
 			Date:    datePart,
 			Message: messagePart,
 		})
+	}
+
+	err = deployService.DatabaseAdapter.SaveLogs(deployId, logs)
+	if err != nil {
+		return logs, err
 	}
 
 	return logs, nil
