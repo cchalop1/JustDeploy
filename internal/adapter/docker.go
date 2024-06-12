@@ -218,28 +218,22 @@ func envToSlice(envVars []dto.Env) []string {
 func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) {
 	Name := deploy.GetDockerName()
 
-	// Labels := map[string]string{
-	// 	"traefik.enable":                                "true",
-	// 	"traefik.http.routers." + Name + ".rule":        "Host(`" + domain + "`)",
-	// 	"traefik.http.routers." + Name + ".entrypoints": "web",
-	// }
+	Labels := map[string]string{
+		"traefik.enable":                                "true",
+		"traefik.http.routers." + Name + ".rule":        "Host(`" + domain + "`)",
+		"traefik.http.routers." + Name + ".entrypoints": "web",
+	}
 
-	// if deploy.EnableTls {
-	// 	Labels["traefik.http.routers."+Name+".tls"] = "true"
-	// 	Labels["traefik.http.routers."+Name+".tls.certresolver"] = "myresolver"
-	// 	Labels["traefik.http.routers."+Name+".entrypoints"] = "websecure"
-	// }
+	if deploy.EnableTls {
+		Labels["traefik.http.routers."+Name+".tls"] = "true"
+		Labels["traefik.http.routers."+Name+".tls.certresolver"] = "myresolver"
+		Labels["traefik.http.routers."+Name+".entrypoints"] = "websecure"
+	}
 
 	config := container.Config{
-		Image: Name,
-		// Labels: Labels,
-
-		ExposedPorts: nat.PortSet{
-			"80/tcp": struct{}{},
-			// "443/tcp": struct{}{},
-			// "8080/tcp": struct{}{},
-		},
-		Env: envToSlice(deploy.Envs),
+		Image:  Name,
+		Labels: Labels,
+		Env:    envToSlice(deploy.Envs),
 	}
 
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, &network.NetworkingConfig{
