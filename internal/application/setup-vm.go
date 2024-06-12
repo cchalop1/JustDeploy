@@ -195,7 +195,7 @@ func setupDockerCertificates(sshAdapter *adapter.SshAdapter, server domain.Serve
 		return err
 	}
 
-	cmd = fmt.Sprintf("echo subjectAltName = DNS:%[1]s,IP:10.10.10.20,IP:127.0.0.1 >> %[2]s/extfile.cnf", server.Domain, pathToCert)
+	cmd = fmt.Sprintf("echo subjectAltName = IP:%[1]s,IP:10.10.10.20,IP:127.0.0.1 >> %[2]s/extfile.cnf", server.Domain, pathToCert)
 	_, err = sshAdapter.RunCommand(cmd)
 
 	if err != nil {
