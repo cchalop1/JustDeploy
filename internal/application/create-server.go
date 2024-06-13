@@ -23,7 +23,7 @@ func CreateServer(deployService *service.DeployService, createNewServer dto.Conn
 		Domain:      createNewServer.Domain,
 		Password:    createNewServer.Password,
 		SshKey:      createNewServer.SshKey,
-		Ip:          "",
+		Ip:          createNewServer.Ip,
 		CreatedDate: "",
 		Status:      "Installing",
 	}
