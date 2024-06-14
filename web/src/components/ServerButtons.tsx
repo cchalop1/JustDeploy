@@ -25,8 +25,13 @@ export default function ServerButtons({ serverId }: ServerButtonsProps) {
     }
   }
 
+  async function addDomain() {}
+
   return (
     <div className="flex gap-2">
+      <Button variant="outline" onClick={addDomain}>
+        Add Domain
+      </Button>
       <Button variant="destructive" onClick={removeServerById}>
         {removeServerButtonState === ButtonStateEnum.PENDING ? (
           <SpinnerIcon color="text-white" />

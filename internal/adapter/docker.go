@@ -33,7 +33,7 @@ func (d *DockerAdapter) ConnectClient(server domain.Server) error {
 	serverCerts := server.GetCertsPath()
 
 	client, err := client.NewClientWithOpts(
-		client.WithHost("tcp://"+server.Domain+":2376"),
+		client.WithHost("tcp://"+server.Ip+":2376"),
 		client.WithTLSClientConfig(
 			serverCerts.CaCertPath,
 			serverCerts.CertPath,

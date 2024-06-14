@@ -40,7 +40,7 @@ func (s *SshAdapter) Connect(connectConfig dto.ConnectNewServerDto) error {
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	client, err := ssh.Dial("tcp", connectConfig.Domain+":22", config)
+	client, err := ssh.Dial("tcp", connectConfig.Ip+":22", config)
 	if err != nil {
 		return err
 	}

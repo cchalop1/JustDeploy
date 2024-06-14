@@ -19,7 +19,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	fmt.Println("Connecting to server")
 
 	sshAdapter.Connect(dto.ConnectNewServerDto{
-		Domain:   server.Domain,
+		Ip:       server.Ip,
 		SshKey:   server.SshKey,
 		Password: server.Password,
 		User:     "root",
@@ -188,7 +188,7 @@ func setupDockerCertificates(sshAdapter *adapter.SshAdapter, server domain.Serve
 		return err
 	}
 
-	cmd = fmt.Sprintf("openssl req -subj \"/CN=%[1]s\" -sha256 -new -key %[2]s/server-key.pem -out %[2]s/server.csr", server.Domain, pathToCert)
+	cmd = fmt.Sprintf("openssl req -subj \"/CN=%[1]s\" -sha256 -new -key %[2]s/server-key.pem -out %[2]s/server.csr", server.Ip, pathToCert)
 	_, err = sshAdapter.RunCommand(cmd)
 
 	if err != nil {
@@ -196,7 +196,7 @@ func setupDockerCertificates(sshAdapter *adapter.SshAdapter, server domain.Serve
 	}
 
 	// TODO: check if is a domain or a ip
-	cmd = fmt.Sprintf("echo subjectAltName = IP:%[1]s,IP:10.10.10.20,IP:127.0.0.1 >> %[2]s/extfile.cnf", server.Domain, pathToCert)
+	cmd = fmt.Sprintf("echo subjectAltName = IP:%[1]s,IP:10.10.10.20,IP:127.0.0.1 >> %[2]s/extfile.cnf", server.Ip, pathToCert)
 	_, err = sshAdapter.RunCommand(cmd)
 
 	if err != nil {

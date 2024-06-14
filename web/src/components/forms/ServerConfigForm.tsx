@@ -22,7 +22,6 @@ import { Label } from "../ui/label";
 import { useState } from "react";
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import { ButtonStateEnum } from "@/lib/utils";
-import ModalDnsSettings from "../modals/ModalDnsSettings";
 import { useNavigate } from "react-router-dom";
 
 export default function ServerConfigForm() {
@@ -30,12 +29,11 @@ export default function ServerConfigForm() {
     ButtonStateEnum.INIT
   );
   const [connectServerData, setConnectServerData] = useState<ConnectServerDto>({
-    domain: "",
+    ip: "",
     password: null,
     sshKey: "",
     user: "root",
   });
-  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
   const navigate = useNavigate();
 
   async function readSSHKeyUpload(event: React.ChangeEvent<HTMLInputElement>) {
@@ -53,12 +51,6 @@ export default function ServerConfigForm() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!modalIsOpen) {
-      setModalIsOpen(true);
-      return;
-    }
-    setModalIsOpen(false);
-
     if (!event.target) return;
 
     setConnectButtonState(ButtonStateEnum.PENDING);
@@ -93,8 +85,8 @@ export default function ServerConfigForm() {
         <CardHeader>
           <CardTitle>Connect Your Server</CardTitle>
           <CardDescription>
-            Connect your server with your domain name before deploy your
-            application.
+            Connect your server to deploy a application. The connect process can
+            take a few minutes beacause we need to install some dependencies.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -117,16 +109,16 @@ export default function ServerConfigForm() {
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="server-domain">Server Domain</Label>
+                <Label htmlFor="server-ip">Server Ip</Label>
                 <Input
-                  id="server-domain"
-                  name="server-domain"
-                  placeholder="Dns domain server ex: mydomain.com"
-                  value={connectServerData.domain}
+                  id="server-ip"
+                  name="server-ip"
+                  placeholder="Ip to your server"
+                  value={connectServerData.ip}
                   onChange={(e) =>
                     setConnectServerData({
                       ...connectServerData,
-                      domain: e.target.value,
+                      ip: e.target.value,
                     })
                   }
                 />
@@ -172,12 +164,6 @@ export default function ServerConfigForm() {
               </div>
             </div>
           </CardContent>
-          <ModalDnsSettings
-            onClick={handleSubmit}
-            open={modalIsOpen}
-            onOpenChange={setModalIsOpen}
-            domain={connectServerData.domain}
-          />
           <CardFooter className="flex justify-between">
             <Button type="submit" className="w-full">
               {connectButtonState === ButtonStateEnum.PENDING ? (
@@ -192,9 +178,3 @@ export default function ServerConfigForm() {
     </div>
   );
 }
-
-<div className="pl-10 pr-10">
-  <div className="mb-2">
-    Before click to connect you server make sure you have corrcly setup your Dns
-  </div>
-</div>;
