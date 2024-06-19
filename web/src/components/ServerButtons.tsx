@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { removeServerByIdApi } from "@/services/removeServerByIdApi";
+import ModalAddDnsSettings from "./modals/ModalAddDnsSettings";
 
 type ServerButtonsProps = {
   serverId: string;
@@ -13,6 +14,7 @@ export default function ServerButtons({ serverId }: ServerButtonsProps) {
   const navigate = useNavigate();
   const [removeServerButtonState, setRemoveServerButtonState] =
     useState<ButtonStateEnum>(ButtonStateEnum.INIT);
+  const [openAddDomainModal, setOpenAddDomainModal] = useState<boolean>(false);
 
   async function removeServerById() {
     setRemoveServerButtonState(ButtonStateEnum.PENDING);
@@ -25,11 +27,14 @@ export default function ServerButtons({ serverId }: ServerButtonsProps) {
     }
   }
 
-  async function addDomain() {}
-
   return (
     <div className="flex gap-2">
-      <Button variant="outline" onClick={addDomain}>
+      <ModalAddDnsSettings
+        open={openAddDomainModal}
+        serverId={serverId}
+        onOpenChange={(o) => setOpenAddDomainModal(o)}
+      />
+      <Button variant="outline" onClick={() => setOpenAddDomainModal(true)}>
         Add Domain
       </Button>
       <Button variant="destructive" onClick={removeServerById}>

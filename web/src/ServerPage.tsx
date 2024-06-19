@@ -9,7 +9,6 @@ import LinkIcon from "./assets/linkIcon";
 import { DeployDto } from "./services/getDeployListApi";
 import ServerButtons from "./components/ServerButtons";
 import { getDeployListByServerIdApi } from "./services/getDeployListByServerIdApi";
-import { Button } from "./components/ui/button";
 
 export default function ServerPage() {
   const { id } = useParams();
@@ -51,6 +50,9 @@ export default function ServerPage() {
         <LinkIcon />
         <a href={server.ip} target="_blank" className="underline">
           {server.ip}
+        </a>
+        <a href={server.domain} target="_blank" className="underline">
+          {server.domain}
         </a>
       </div>
       <div className="mt-20 ">

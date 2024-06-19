@@ -53,3 +53,7 @@ type Logs struct {
 	Message string `json:"message"`
 	Date    string `json:"date"`
 }
+
+type NewDomain struct {
+	Domain string `json:"domain"`
+}

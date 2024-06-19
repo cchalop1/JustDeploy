@@ -120,7 +120,16 @@ func (d *DatabaseAdapter) CountServer() int {
 
 func (d *DatabaseAdapter) SaveServer(newServer domain.Server) error {
 	databaseModels := d.readDeployConfigInDataBaseFile()
+
+	for idx, existingServer := range databaseModels.Servers {
+		if existingServer.Id == newServer.Id {
+			databaseModels.Servers[idx] = newServer
+			return d.writeDeployConfigInDataBaseFile(databaseModels)
+		}
+	}
+
 	databaseModels.Servers = append(databaseModels.Servers, newServer)
+
 	return d.writeDeployConfigInDataBaseFile(databaseModels)
 }
 

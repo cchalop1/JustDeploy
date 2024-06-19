@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"cchalop1.com/deploy/internal/api/dto"
@@ -12,6 +13,8 @@ func GetServerByIdHandler(deployService *service.DeployService) echo.HandlerFunc
 	return func(c echo.Context) error {
 		serverId := c.Param("id")
 		server, err := deployService.DatabaseAdapter.GetServerById(serverId)
+
+		fmt.Printf("Server: %v\n", server)
 
 		if err != nil {
 			return c.JSON(http.StatusNotFound, dto.ResponseApi{Message: err.Error()})
