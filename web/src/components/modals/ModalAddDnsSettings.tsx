@@ -38,8 +38,8 @@ export default function ModalAddDnsSettings({
       if (!domainRegex.test(newDomain.toString())) {
         return "Invalid domain name";
       }
-      // TODO: add domain to server
       await addDomainToServerApi(serverId, { domain: newDomain.toString() });
+      // TODO: fetch server with new domain
 
       onOpenChange(false);
       return null;

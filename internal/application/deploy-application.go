@@ -9,6 +9,7 @@ import (
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/domain"
 	"cchalop1.com/deploy/internal/utils"
+	"k8s.io/kube-openapi/pkg/validation/errors"
 )
 
 func runApplication(deployService *service.DeployService, deploy *domain.Deploy, domain string) {
@@ -40,6 +41,10 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 	server, err := deployService.DatabaseAdapter.GetServerById(newDeploy.ServerId)
 	if err != nil {
 		return domain.Deploy{}, err
+	}
+
+	if server.Domain == "" {
+		return domain.Deploy{}, errors.New("Server does not have domain")
 	}
 
 	pathToDir, err := filepath.Abs(newDeploy.PathToSource)

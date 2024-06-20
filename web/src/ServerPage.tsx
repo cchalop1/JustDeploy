@@ -43,7 +43,7 @@ export default function ServerPage() {
     <div className="mt-40">
       <div className="flex justify-between">
         <div className="text-xl font-bold mb-2">{server.name}</div>
-        <ServerButtons serverId={server.id} />
+        <ServerButtons server={server} />
       </div>
       <Status status={server.status} />
       <div className="flex items-center mt-2 gap-2">
