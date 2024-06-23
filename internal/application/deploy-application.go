@@ -1,6 +1,7 @@
 package application
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -9,7 +10,6 @@ import (
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/domain"
 	"cchalop1.com/deploy/internal/utils"
-	"k8s.io/kube-openapi/pkg/validation/errors"
 )
 
 func runApplication(deployService *service.DeployService, deploy *domain.Deploy, domain string) {
