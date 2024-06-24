@@ -5,6 +5,7 @@ import (
 
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
+	"cchalop1.com/deploy/internal/application"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,6 +17,8 @@ func ConnectNewServer(deployService *service.DeployService) echo.HandlerFunc {
 		if err != nil {
 			return c.String(http.StatusBadRequest, "bad request")
 		}
+
+		application.CreateServer(deployService, connectNewServerDto)
 
 		return c.JSON(http.StatusOK, true)
 	}
