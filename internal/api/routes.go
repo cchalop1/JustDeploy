@@ -35,4 +35,6 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	app.Echo.DELETE("/api/deploy/:deployId/service/:serviceId", handlers.DeleteServiceHandler(deployService))
 
 	app.Echo.POST("/api/server/:id/domain", handlers.PostAddDomainToServerById(deployService))
+
+	app.Echo.GET("/api/server/:id/installation", handlers.SubCreateServerStatus(deployService))
 }

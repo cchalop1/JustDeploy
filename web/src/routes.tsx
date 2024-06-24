@@ -5,6 +5,7 @@ import { CreateDeployForm } from "./components/forms/CreateDeployForm";
 import DeployPage from "./pages/DeployPage";
 import ServerPage from "./pages/ServerPage";
 import { Suspense } from "react";
+import CreateServerStatus from "./pages/CreateServerStatus";
 
 export const router = createBrowserRouter([
   {
@@ -18,6 +19,10 @@ export const router = createBrowserRouter([
   {
     path: "server/create",
     element: <ServerConfigForm />,
+  },
+  {
+    path: "server/:id/installation",
+    element: <CreateServerStatus />,
   },
   {
     path: "deploy/create",
