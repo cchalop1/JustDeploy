@@ -1,18 +1,18 @@
 import { Suspense, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { DeployDto } from "./services/getDeployListApi";
-import { getDeployByIdApi } from "./services/getDeployById";
-import DeployButtons from "./components/DeployButtons";
-import Status from "./components/ServerStatus";
-import LinkIcon from "./assets/linkIcon";
-import FolderIcon from "./assets/FolderIcon";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
-import DeployLogs from "./components/DeployLogs";
-import DeploySettings from "./components/DeploySettings";
-import { ServerDto } from "./services/getServerListApi";
-import { getServerByIdApi } from "./services/getServerById";
-import ServicesManagements from "./components/databaseServices/ServicesManagements";
-import SpinnerIcon from "./assets/SpinnerIcon";
+import { DeployDto } from "@/services/getDeployListApi";
+import { getDeployByIdApi } from "@/services/getDeployById";
+import DeployButtons from "@/components/DeployButtons";
+import Status from "@/components/ServerStatus";
+import LinkIcon from "@/assets/linkIcon";
+import FolderIcon from "@/assets/FolderIcon";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DeployLogs from "@/components/DeployLogs";
+import DeploySettings from "@/components/DeploySettings";
+import { ServerDto } from "@/services/getServerListApi";
+import { getServerByIdApi } from "@/services/getServerById";
+import ServicesManagements from "@/components/databaseServices/ServicesManagements";
+import SpinnerIcon from "@/assets/SpinnerIcon";
 
 export default function DeployPage() {
   const { id } = useParams();

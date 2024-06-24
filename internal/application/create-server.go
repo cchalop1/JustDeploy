@@ -29,7 +29,7 @@ func CreateServer(deployService *service.DeployService, createNewServer dto.Conn
 
 	deployService.DatabaseAdapter.SaveServer(server)
 
-	go ConnectAndSetupServer(deployService, server)
+	// go ConnectAndSetupServer(deployService, server)
 
 	return server
 }

@@ -1,9 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
-import Home from "./Home";
+import Home from "./pages/Home";
 import ServerConfigForm from "./components/forms/ServerConfigForm";
 import { CreateDeployForm } from "./components/forms/CreateDeployForm";
-import DeployPage from "./DeployPage";
-import ServerPage from "./ServerPage";
+import DeployPage from "./pages/DeployPage";
+import ServerPage from "./pages/ServerPage";
 import { Suspense } from "react";
 
 export const router = createBrowserRouter([

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import SpinnerIcon from "./assets/SpinnerIcon";
-import Status from "./components/ServerStatus";
-import { ServerDto } from "./services/getServerListApi";
-import { getServerByIdApi } from "./services/getServerById";
-import DeployList from "./components/DeployList";
-import LinkIcon from "./assets/linkIcon";
-import { DeployDto } from "./services/getDeployListApi";
-import ServerButtons from "./components/ServerButtons";
-import { getDeployListByServerIdApi } from "./services/getDeployListByServerIdApi";
+import SpinnerIcon from "@/assets/SpinnerIcon";
+import Status from "@/components/ServerStatus";
+import { ServerDto } from "@/services/getServerListApi";
+import { getServerByIdApi } from "@/services/getServerById";
+import DeployList from "@/components/DeployList";
+import LinkIcon from "@/assets/linkIcon";
+import { DeployDto } from "@/services/getDeployListApi";
+import ServerButtons from "@/components/ServerButtons";
+import { getDeployListByServerIdApi } from "@/services/getDeployListByServerIdApi";
 
 export default function ServerPage() {
   const { id } = useParams();

@@ -1,10 +1,10 @@
 import { use } from "react";
-import DeployList from "./components/DeployList";
-import ServerList from "./components/ServerList";
-import { Button } from "./components/ui/button";
+import DeployList from "@/components/DeployList";
+import ServerList from "@/components/ServerList";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { getServersListApi } from "./services/getServerListApi";
-import { getDeployListApi } from "./services/getDeployListApi";
+import { getServersListApi } from "@/services/getServerListApi";
+import { getDeployListApi } from "@/services/getDeployListApi";
 
 export default function Home() {
   const navigate = useNavigate();
