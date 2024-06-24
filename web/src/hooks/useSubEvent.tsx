@@ -7,13 +7,13 @@ export default function useSubEvent<T>(eventPath: string) {
   useEffect(() => {
     const source = eventSubscription(eventPath);
     source.onmessage = (e: MessageEvent<T>) => {
-      setSubEvent((prev) => [...prev, e.data]);
+      setSubEvent((prev) => [...prev, JSON.parse<T>(e.data)]);
     };
 
     source.onerror = (e) => {
       console.error("EventSource failed:", e);
       // TODO: find a better way to close the connection
-      source.close();
+      // source.close();
     };
 
     return () => {

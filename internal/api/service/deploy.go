@@ -8,4 +8,5 @@ type DeployService struct {
 	DockerAdapter     *adapter.DockerAdapter
 	DatabaseAdapter   *adapter.DatabaseAdapter
 	FilesystemAdapter *adapter.FilesystemAdapter
+	EventAdapter      *adapter.AdapterEvent
 }

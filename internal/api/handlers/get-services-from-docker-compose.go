@@ -27,7 +27,6 @@ func GetServicesFromDockerComposeHandler(deployService *service.DeployService) e
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		// return c.JSON(http.StatusOK, filserviceDto(services))
 		return c.JSON(http.StatusOK, filserviceDto(services))
 	}
 }

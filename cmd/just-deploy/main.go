@@ -33,6 +33,7 @@ func main() {
 		DatabaseAdapter:   databaseAdapter,
 		DockerAdapter:     dockerAdapter,
 		FilesystemAdapter: filesystemAdapter,
+		EventAdapter:      adapter.NewAdapterEvent(),
 	}
 
 	// TODO: try server connection

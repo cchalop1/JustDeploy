@@ -6,7 +6,7 @@ export default function CreateServerStatus() {
   return (
     <>
       <div>Server Is Creating..</div>
-      <div>{events.map((e) => e)}</div>
+      <div>{events.map((e) => e.message)}</div>
     </>
   );
 }

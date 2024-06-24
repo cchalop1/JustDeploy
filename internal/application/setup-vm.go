@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/adapter"
@@ -16,7 +17,23 @@ import (
 func ConnectAndSetupServer(deployService *service.DeployService, server domain.Server) *adapter.DockerAdapter {
 	sshAdapter := adapter.NewSshAdapter()
 
-	fmt.Println("Connecting to server")
+	deployService.EventAdapter.CreateNewEvent(adapter.EventServer{
+		EventType:  "create_server",
+		ServerId:   "",
+		Message:    "Creating new server",
+		Step:       1,
+		TotalSteps: 6,
+		Time:       time.Now(),
+	})
+
+	deployService.EventAdapter.CreateNewEvent(adapter.EventServer{
+		EventType:  "create_server",
+		ServerId:   "",
+		Message:    "Connecting to server",
+		Step:       2,
+		TotalSteps: 6,
+		Time:       time.Now(),
+	})
 
 	sshAdapter.Connect(dto.ConnectNewServerDto{
 		Ip:       server.Ip,
@@ -29,6 +46,15 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	dockerIsInstalled, err := checkIfDockerIsIntalled(sshAdapter)
 	fmt.Println(err)
 
+	deployService.EventAdapter.CreateNewEvent(adapter.EventServer{
+		EventType:  "create_server",
+		ServerId:   "",
+		Message:    "Installing docker",
+		Step:       3,
+		TotalSteps: 6,
+		Time:       time.Now(),
+	})
+
 	if !dockerIsInstalled {
 		err = installDocker(sshAdapter)
 		fmt.Println(err)
@@ -37,6 +63,15 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	fmt.Println("Check if certificate is created")
 	certificateIsCreated, err := checkIsCertificateIsCreate(sshAdapter, server.Id)
 	fmt.Println(err)
+
+	deployService.EventAdapter.CreateNewEvent(adapter.EventServer{
+		EventType:  "create_server",
+		ServerId:   "",
+		Message:    "Generating certificates",
+		Step:       4,
+		TotalSteps: 6,
+		Time:       time.Now(),
+	})
 
 	if !certificateIsCreated {
 		err = setupDockerCertificates(sshAdapter, server)
@@ -48,6 +83,15 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	portIsOpen, err := checkIfDockerPortIsOpen(sshAdapter)
 	fmt.Println("port is open ", portIsOpen)
 
+	deployService.EventAdapter.CreateNewEvent(adapter.EventServer{
+		EventType:  "create_server",
+		ServerId:   "",
+		Message:    "Setting up docker port",
+		Step:       5,
+		TotalSteps: 6,
+		Time:       time.Now(),
+	})
+
 	if !portIsOpen {
 		openPortDockerConfig(sshAdapter)
 		fmt.Println(err)
@@ -56,6 +100,16 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	fmt.Println("Check if docker port is open")
 	sshAdapter.CloseConnection()
 	adapterDocker := adapter.NewDockerAdapter()
+
+	deployService.EventAdapter.CreateNewEvent(adapter.EventServer{
+		EventType:  "create_server",
+		ServerId:   "",
+		Message:    "Connect to docker client",
+		Step:       6,
+		TotalSteps: 6,
+		Time:       time.Now(),
+	})
+
 	adapterDocker.ConnectClient(server)
 
 	server.Status = "Runing"

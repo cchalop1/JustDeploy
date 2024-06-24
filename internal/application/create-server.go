@@ -1,7 +1,6 @@
 package application
 
 import (
-	"fmt"
 	"strconv"
 
 	"cchalop1.com/deploy/internal/api/dto"
@@ -13,8 +12,6 @@ import (
 func CreateServer(deployService *service.DeployService, createNewServer dto.ConnectNewServerDto) domain.Server {
 	serverCount := deployService.DatabaseAdapter.CountServer() + 1
 	Name := "Server " + strconv.Itoa(serverCount)
-
-	fmt.Println("Creating new server")
 
 	server := domain.Server{
 		Id:          utils.GenerateRandomPassword(5),
@@ -29,7 +26,7 @@ func CreateServer(deployService *service.DeployService, createNewServer dto.Conn
 
 	deployService.DatabaseAdapter.SaveServer(server)
 
-	// go ConnectAndSetupServer(deployService, server)
+	go ConnectAndSetupServer(deployService, server)
 
 	return server
 }
