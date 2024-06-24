@@ -10,7 +10,7 @@ import (
 	"cchalop1.com/deploy/internal/utils"
 )
 
-func CreateServer(deployService *service.DeployService, createNewServer dto.ConnectNewServerDto) bool {
+func CreateServer(deployService *service.DeployService, createNewServer dto.ConnectNewServerDto) domain.Server {
 	serverCount := deployService.DatabaseAdapter.CountServer() + 1
 	Name := "Server " + strconv.Itoa(serverCount)
 
@@ -29,7 +29,7 @@ func CreateServer(deployService *service.DeployService, createNewServer dto.Conn
 
 	deployService.DatabaseAdapter.SaveServer(server)
 
-	ConnectAndSetupServer(deployService, server)
+	go ConnectAndSetupServer(deployService, server)
 
-	return true
+	return server
 }

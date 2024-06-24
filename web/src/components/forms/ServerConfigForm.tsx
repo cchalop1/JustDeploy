@@ -23,7 +23,6 @@ import { useState } from "react";
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import { ButtonStateEnum } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
-import { baseUrl } from "@/services/api";
 
 export default function ServerConfigForm() {
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
@@ -57,9 +56,9 @@ export default function ServerConfigForm() {
     setConnectButtonState(ButtonStateEnum.PENDING);
 
     try {
-      await connectServerApi(connectServerData);
+      const { id } = await connectServerApi(connectServerData);
       setConnectButtonState(ButtonStateEnum.SUCESS);
-      navigate("/");
+      navigate(`/server/${id}/installation`);
     } catch (e) {
       console.error(e);
     }

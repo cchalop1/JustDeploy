@@ -1,4 +1,5 @@
-import { ResponseApi, callApi } from "./api";
+import { callApi } from "./api";
+import { ServerDto } from "./getServerListApi";
 
 export type ConnectServerDto = {
   ip: string;
@@ -9,6 +10,6 @@ export type ConnectServerDto = {
 
 export async function connectServerApi(
   connectServerDto: ConnectServerDto
-): Promise<ResponseApi> {
-  return await callApi<ResponseApi>("/server", "POST", connectServerDto);
+): Promise<ServerDto> {
+  return await callApi<ServerDto>("/server", "POST", connectServerDto);
 }

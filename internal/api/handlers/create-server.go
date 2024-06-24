@@ -18,8 +18,8 @@ func ConnectNewServer(deployService *service.DeployService) echo.HandlerFunc {
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		application.CreateServer(deployService, connectNewServerDto)
+		newServer := application.CreateServer(deployService, connectNewServerDto)
 
-		return c.JSON(http.StatusOK, true)
+		return c.JSON(http.StatusOK, newServer)
 	}
 }
