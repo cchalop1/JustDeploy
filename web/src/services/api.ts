@@ -1,4 +1,4 @@
-const baseUrl = "http://localhost:8080/api";
+export const baseUrl = "http://localhost:8080/api";
 
 export async function callApi<T>(
   path: string,
