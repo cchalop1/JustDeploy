@@ -10,10 +10,16 @@ export default function useSubEvent<T>(eventPath: string) {
       setSubEvent((prev) => [...prev, e.data]);
     };
 
+    source.onerror = (e) => {
+      console.error("EventSource failed:", e);
+      // TODO: find a better way to close the connection
+      source.close();
+    };
+
     return () => {
       source.close();
     };
-  }, []);
+  }, [eventPath]);
 
   return events;
 }

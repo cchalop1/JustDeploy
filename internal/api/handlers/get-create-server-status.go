@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"net/http"
 	"time"
 
 	"cchalop1.com/deploy/internal/api/service"
@@ -105,6 +104,8 @@ func SubCreateServerStatus(deployService *service.DeployService) echo.HandlerFun
 			return err
 		}
 		w.Flush()
-		return c.JSON(http.StatusOK, "")
+		c.Request().Context().Done()
+		return nil
+		// return c.NoContent(http.StatusOK)
 	}
 }
