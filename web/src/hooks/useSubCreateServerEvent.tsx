@@ -1,18 +1,22 @@
 import { useParams } from "react-router-dom";
 import useSubEvent from "./useSubEvent";
 
-type EventCreateServer = {
+type EventServer = {
   eventType: string;
-  serverId: string;
-  message: string;
-  errorMessage?: string; // note the ? symbol for optional property
-  step: number;
-  totalSteps: number;
+  title: string;
+  errorMessage: string;
   time: Date;
+};
+
+type EventServerWrapper = {
+  serverName: string;
+  serverId: string;
+  eventsServer: EventServer[];
+  currentStep: number;
 };
 
 export default function useSubCreateServerEvent() {
   const { id } = useParams<{ id: string }>();
-  const events = useSubEvent<EventCreateServer>(`server/${id}/installation`);
-  return events;
+  const event = useSubEvent<EventServerWrapper>(`server/${id}/installation`);
+  return event;
 }

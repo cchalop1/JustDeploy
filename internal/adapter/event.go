@@ -9,16 +9,20 @@ import (
 )
 
 type EventServer struct {
-	EventType    string    `json:"event_type"`
-	ServerId     string    `json:"server_id"`
-	Message      string    `json:"message"`
-	ErrorMessage *string   `json:"error_message"`
-	Step         int       `json:"step"`
-	TotalSteps   int       `json:"total_steps"`
+	EventType    string    `json:"eventType"`
+	Title        string    `json:"title"`
+	ErrorMessage string    `json:"errorMessage"`
 	Time         time.Time `json:"time"`
 }
 
-func (e *EventServer) MarshalToSseEvent(w io.Writer) error {
+type EventServerWrapper struct {
+	ServerName   string        `json:"serverName"`
+	ServerId     string        `json:"serverId"`
+	EventsServer []EventServer `json:"eventsServer"`
+	CurrentStep  int           `json:"currentStep"`
+}
+
+func (e *EventServerWrapper) MarshalToSseEvent(w io.Writer) error {
 	Data, err := json.Marshal(e)
 
 	if err != nil {
@@ -35,16 +39,15 @@ func (e *EventServer) MarshalToSseEvent(w io.Writer) error {
 }
 
 type AdapterEvent struct {
-	EventServer chan EventServer
+	EventServerWrapper chan EventServerWrapper
 }
 
 func NewAdapterEvent() *AdapterEvent {
 	return &AdapterEvent{
-		EventServer: make(chan EventServer),
+		EventServerWrapper: make(chan EventServerWrapper),
 	}
 }
 
-func (e *AdapterEvent) CreateNewEvent(event EventServer) {
-
-	e.EventServer <- event
+func (e *AdapterEvent) CreateNewEvent(event EventServerWrapper) {
+	e.EventServerWrapper <- event
 }

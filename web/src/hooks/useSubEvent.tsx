@@ -1,19 +1,20 @@
-import eventSubscription from "@/services/eventSubsctiptions";
 import { useEffect, useState } from "react";
+import eventSubscription from "@/services/eventSubsctiptions";
 
 export default function useSubEvent<T>(eventPath: string) {
-  const [events, setSubEvent] = useState<Array<T>>([]);
+  const [events, setSubEvent] = useState<T | null>(null);
 
   useEffect(() => {
     const source = eventSubscription(eventPath);
     source.onmessage = (e: MessageEvent<T>) => {
-      setSubEvent((prev) => [...prev, JSON.parse<T>(e.data)]);
+      console.log(e);
+      setSubEvent(JSON.parse<T>(e.data));
     };
 
     source.onerror = (e) => {
       console.error("EventSource failed:", e);
       // TODO: find a better way to close the connection
-      // source.close();
+      source.close();
     };
 
     return () => {

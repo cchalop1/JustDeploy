@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+
 	"cchalop1.com/deploy/internal/api/service"
 	"github.com/labstack/echo/v4"
 )
@@ -12,12 +14,17 @@ func SubscriptionCreateServer(deployService *service.DeployService) echo.Handler
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 
-		for e := range deployService.EventAdapter.EventServer {
-			e.MarshalToSseEvent(w)
-			w.Flush()
+		for {
+			select {
+			case <-c.Request().Context().Done():
+				return nil
+			case event := <-deployService.EventAdapter.EventServerWrapper: // Use the ticker channel
+				fmt.Println("Sending event", event)
+				event.MarshalToSseEvent(w)
+				w.Flush()
+			}
 		}
-
-		return nil
 	}
 }
