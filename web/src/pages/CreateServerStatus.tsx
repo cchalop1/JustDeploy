@@ -21,35 +21,37 @@ export default function CreateServerStatus() {
       </div>
       {event && (
         <Accordion type="single" collapsible className="w-full">
-          {event.eventsServer.map((eventServer, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger>
-                <div className="flex gap-5 items-center">
-                  <div
-                    className={`${
-                      eventServer.errorMessage ? "bg-red-400" : ""
-                    }`}
-                  >
-                    {eventServer.title}
+          {event.eventsServer.map((eventServer, index) => {
+            const textColor =
+              index < event.currentStep
+                ? "text-black"
+                : eventServer.errorMessage
+                ? "text-red-500"
+                : "text-gray-500";
+
+            return (
+              <AccordionItem key={index} value={`item-${index}`}>
+                <AccordionTrigger>
+                  <div className="flex gap-5 items-center">
+                    <div>{index + 1}.</div>
+                    <div className={`${textColor}`}>{eventServer.title}</div>
+                    {event.currentStep === index &&
+                    !eventServer.errorMessage ? (
+                      <SpinnerIcon color="text-black" />
+                    ) : null}
                   </div>
-                  {event.currentStep === index + 1 ? (
-                    <SpinnerIcon color="text-black" />
-                  ) : null}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <code>{eventServer.errorMessage}</code>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <code>{eventServer.errorMessage}</code>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
         </Accordion>
       )}
       <div className="flex justify-center m-4">
-        <Button
-          disabled={isLoading}
-          onClick={() => navigate("/server/" + event?.serverId)}
-        >
-          Go to server
+        <Button disabled={isLoading} onClick={() => navigate("/")}>
+          Deploy application
         </Button>
       </div>
     </div>

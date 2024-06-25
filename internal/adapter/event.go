@@ -38,6 +38,15 @@ func (e *EventServerWrapper) MarshalToSseEvent(w io.Writer) error {
 	return nil
 }
 
+func (e *EventServerWrapper) NextStep() {
+	e.EventsServer[e.CurrentStep].Time = time.Now()
+	e.CurrentStep += 1
+}
+
+func (e *EventServerWrapper) SetStepError(errorMessage string) {
+	e.EventsServer[e.CurrentStep].ErrorMessage = errorMessage
+}
+
 type AdapterEvent struct {
 	EventServerWrapper chan EventServerWrapper
 }
@@ -48,6 +57,6 @@ func NewAdapterEvent() *AdapterEvent {
 	}
 }
 
-func (e *AdapterEvent) CreateNewEvent(event EventServerWrapper) {
+func (e *AdapterEvent) SendNewEvent(event EventServerWrapper) {
 	e.EventServerWrapper <- event
 }

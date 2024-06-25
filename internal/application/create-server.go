@@ -24,7 +24,7 @@ func CreateServer(deployService *service.DeployService, createNewServer dto.Conn
 		Status:      "Installing",
 	}
 
-	// deployService.DatabaseAdapter.SaveServer(server)
+	deployService.DatabaseAdapter.SaveServer(server)
 
 	go ConnectAndSetupServer(deployService, server)
 

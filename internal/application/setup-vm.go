@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/adapter"
@@ -19,19 +18,15 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 
 	eventsList := []adapter.EventServer{
 		{
-			Title:     "Creating new server",
+			Title:     "Connect to the server by ssh",
 			EventType: "create_server",
 		},
 		{
-			Title:     "Connecting to server",
+			Title:     "Install packages and docker",
 			EventType: "create_server",
 		},
 		{
-			Title:     "Installing docker",
-			EventType: "create_server",
-		},
-		{
-			Title:     "Generating certificates",
+			Title:     "Genereates certificates",
 			EventType: "create_server",
 		},
 		{
@@ -39,7 +34,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 			EventType: "create_server",
 		},
 		{
-			Title:     "Connect to docker client",
+			Title:     "Connect to the docker client",
 			EventType: "create_server",
 		},
 	}
@@ -51,10 +46,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 		CurrentStep:  0,
 	}
 
-	eventWrapper.EventsServer[eventWrapper.CurrentStep].Time = time.Now()
-	eventWrapper.CurrentStep += 1
-	deployService.EventAdapter.CreateNewEvent(eventWrapper)
-
+	// Connect to the server by ssh
 	sshAdapter.Connect(dto.ConnectNewServerDto{
 		Ip:       server.Ip,
 		SshKey:   server.SshKey,
@@ -62,116 +54,129 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 		User:     "root",
 	})
 
-	time.Sleep(5 * time.Second)
+	// Install packages and docker
 
-	fmt.Println("Check if docker is installed")
-	// dockerIsInstalled, err := checkIfDockerIsIntalled(sshAdapter)
-	// fmt.Println(err)
+	eventWrapper.NextStep()
+	deployService.EventAdapter.SendNewEvent(eventWrapper)
 
-	eventWrapper.EventsServer[eventWrapper.CurrentStep].Time = time.Now()
-	eventWrapper.CurrentStep += 1
-	deployService.EventAdapter.CreateNewEvent(eventWrapper)
+	dockerIsInstalled := checkIfDockerIsIntalled(sshAdapter)
 
-	// if !dockerIsInstalled {
-	// 	err = installDocker(sshAdapter)
-	// 	fmt.Println(err)
-	// }
+	var err error
 
-	time.Sleep(5 * time.Second)
+	if !dockerIsInstalled {
+		err = installDocker(sshAdapter)
+		if err != nil {
+			eventWrapper.SetStepError(err.Error())
+			deployService.EventAdapter.SendNewEvent(eventWrapper)
+			return nil
+		}
+	}
 
-	// fmt.Println("Check if certificate is created")
-	// certificateIsCreated, err := checkIsCertificateIsCreate(sshAdapter, server.Id)
-	// fmt.Println(err)
+	// Genereates certificates
 
-	eventWrapper.EventsServer[eventWrapper.CurrentStep].Time = time.Now()
-	eventWrapper.CurrentStep += 1
-	deployService.EventAdapter.CreateNewEvent(eventWrapper)
+	eventWrapper.NextStep()
+	deployService.EventAdapter.SendNewEvent(eventWrapper)
 
-	// if !certificateIsCreated {
-	// 	err = setupDockerCertificates(sshAdapter, server)
-	// 	copyCertificates(sshAdapter, server.Id)
-	// 	fmt.Println(err)
-	// }
+	certificateIsCreated := checkIsCertificateIsCreate(sshAdapter, server.Id)
 
-	time.Sleep(5 * time.Second)
+	if !certificateIsCreated {
+		err = setupDockerCertificates(sshAdapter, server)
+		copyCertificates(sshAdapter, server.Id)
 
-	// fmt.Println("Check if docker port is open")
-	// portIsOpen, err := checkIfDockerPortIsOpen(sshAdapter)
-	// fmt.Println("port is open ", portIsOpen)
+		if err != nil {
+			eventWrapper.SetStepError(err.Error())
+			deployService.EventAdapter.SendNewEvent(eventWrapper)
+			return nil
+		}
+	}
 
-	eventWrapper.EventsServer[eventWrapper.CurrentStep].Time = time.Now()
-	eventWrapper.CurrentStep += 1
-	deployService.EventAdapter.CreateNewEvent(eventWrapper)
+	// Setting up docker port
+	eventWrapper.NextStep()
+	deployService.EventAdapter.SendNewEvent(eventWrapper)
 
-	time.Sleep(5 * time.Second)
+	portIsOpen := checkIfDockerPortIsOpen(sshAdapter)
 
-	// if !portIsOpen {
-	// 	openPortDockerConfig(sshAdapter)
-	// 	fmt.Println(err)
-	// }
+	if !portIsOpen {
+		err = openPortDockerConfig(sshAdapter)
+		if err != nil {
+			eventWrapper.SetStepError(err.Error())
+			deployService.EventAdapter.SendNewEvent(eventWrapper)
+			return nil
+		}
+	}
 
-	// fmt.Println("Check if docker port is open")
-	// sshAdapter.CloseConnection()
-	// adapterDocker := adapter.NewDockerAdapter()
+	sshAdapter.CloseConnection()
 
-	// eventWrapper.EventsServer[eventWrapper.CurrentStep].Time = time.Now()
-	// eventWrapper.CurrentStep += 1
-	// deployService.EventAdapter.CreateNewEvent(eventWrapper)
+	adapterDocker := adapter.NewDockerAdapter()
 
-	// adapterDocker.ConnectClient(server)
+	// Connect to the docker client
+
+	eventWrapper.NextStep()
+	deployService.EventAdapter.SendNewEvent(eventWrapper)
+
+	err = adapterDocker.ConnectClient(server)
+
+	if err != nil {
+		eventWrapper.SetStepError(err.Error())
+		deployService.EventAdapter.SendNewEvent(eventWrapper)
+		return nil
+	}
 
 	server.Status = "Runing"
 
 	deployService.DatabaseAdapter.UpdateServer(server)
 
+	eventWrapper.NextStep()
+	deployService.EventAdapter.SendNewEvent(eventWrapper)
+
 	return nil
 }
 
-func checkIfDockerIsIntalled(sshAdapter *adapter.SshAdapter) (bool, error) {
+func checkIfDockerIsIntalled(sshAdapter *adapter.SshAdapter) bool {
 	output, err := sshAdapter.RunCommand("docker --version")
 	if err != nil {
-		return false, err
+		return false
 	}
 
 	if len(output) > 0 {
-		return true, nil
+		return true
 	}
 
-	return false, nil
+	return false
 }
 
-func checkIsCertificateIsCreate(sshAdapter *adapter.SshAdapter, serverId string) (bool, error) {
+func checkIsCertificateIsCreate(sshAdapter *adapter.SshAdapter, serverId string) bool {
 	certificatePath := "/root/cert-docker/" + serverId
 	statCommand := fmt.Sprintf("stat -t -- \"%s\" &>/dev/null", certificatePath)
 	output, err := sshAdapter.RunCommand(statCommand)
 	if err != nil {
-		return false, err
+		return false
 	}
 
 	// If the output is empty, the certificate file exists
 	if len(output) == 0 {
-		return true, nil
+		return true
 	}
 
 	// If the output is not empty, the certificate file does not exist
-	return false, nil
+	return false
 }
 
-func checkIfDockerPortIsOpen(sshAdapter *adapter.SshAdapter) (bool, error) {
+func checkIfDockerPortIsOpen(sshAdapter *adapter.SshAdapter) bool {
 	port := "2376"
 	ncCommand := fmt.Sprintf("netstat -tuln | grep :%s", port)
 	output, err := sshAdapter.RunCommand(ncCommand)
 	if err != nil {
-		return false, err
+		return false
 	}
 
 	// If the output is empty, the port is closed
 	if len(output) == 0 {
-		return false, nil
+		return false
 	}
 
 	// If the output is not empty, the port is open
-	return true, nil
+	return true
 }
 
 func installDocker(sshAdapter *adapter.SshAdapter) error {
