@@ -29,7 +29,8 @@ import { ServerDto, getServersListApi } from "@/services/getServerListApi";
 import { useNavigate } from "react-router-dom";
 import { DeployConfigDto, getDeployConfig } from "@/services/getDeployConfig";
 import EnvsManagements from "./EnvsManagements";
-import AlertConfigDeploy from "../AlertConfigDeploy";
+import ConfigDeployInfos from "../ConfigDeployInfos";
+import AlertDestructive from "../alerts/AlertDestructive";
 
 const createDeploymentEmptyState = (): CreateDeployDto => {
   return {
@@ -43,15 +44,16 @@ const createDeploymentEmptyState = (): CreateDeployDto => {
 };
 
 export function CreateDeployForm() {
+  const navigate = useNavigate();
+  const [serverList, setServerList] = useState<Array<ServerDto>>([]);
+  const [config, setConfig] = useState<DeployConfigDto | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
     ButtonStateEnum.INIT
   );
   const [newDeploy, setNewDeploy] = useState<CreateDeployDto>(
     createDeploymentEmptyState()
   );
-  const [serverList, setServerList] = useState<Array<ServerDto>>([]);
-  const [config, setConfig] = useState<DeployConfigDto | null>(null);
-  const navigate = useNavigate();
 
   async function fetchServerList() {
     const resServerList = await getServersListApi();
@@ -86,9 +88,18 @@ export function CreateDeployForm() {
 
     setConnectButtonState(ButtonStateEnum.PENDING);
 
-    const res = await createDeployApi(newDeploy);
-    setConnectButtonState(ButtonStateEnum.SUCESS);
-    navigate(`/deploy/${res.id}`);
+    try {
+      const res = await createDeployApi(newDeploy);
+      setConnectButtonState(ButtonStateEnum.SUCESS);
+      navigate(`/deploy/${res.id}`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      setError(e.message);
+      setTimeout(() => {
+        setError(null);
+      }, 5000);
+      setConnectButtonState(ButtonStateEnum.INIT);
+    }
   };
 
   function setEnvs(envs: Array<Env>) {
@@ -97,7 +108,8 @@ export function CreateDeployForm() {
 
   return (
     <div className="flex flex-col gap-4 mt-16 items-center">
-      {config && <AlertConfigDeploy config={config} />}
+      {error && <AlertDestructive message={error} />}
+      {config && <ConfigDeployInfos config={config} />}
       <Card className="w-[500px]">
         <CardHeader>
           <CardTitle>Deploy project</CardTitle>

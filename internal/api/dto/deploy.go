@@ -12,12 +12,11 @@ type Env struct {
 	Value    string `json:"value"`
 	IsSecret bool   `json:"isSecret"`
 }
-
 type NewDeployDto struct {
-	ServerId       string `json:"serverId"`
+	ServerId       string `json:"serverId" validate:"required"`
 	EnableTls      bool   `json:"enableTls"`
-	Email          string `json:"email"`
-	PathToSource   string `json:"pathToSource"`
+	Email          string `json:"email" validate:"omitempty,email"`
+	PathToSource   string `json:"pathToSource" validate:"required"`
 	Envs           []Env  `json:"envs"`
 	DeployOnCommit bool   `json:"deployOnCommit"`
 }

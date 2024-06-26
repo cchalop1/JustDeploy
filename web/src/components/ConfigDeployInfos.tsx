@@ -2,11 +2,11 @@ import { Check, Terminal } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { DeployConfigDto } from "@/services/getDeployConfig";
 
-type AlertConfigDeployProps = {
+type ConfigDeployInfosProps = {
   config: DeployConfigDto;
 };
 
-export default function AlertConfigDeploy({ config }: AlertConfigDeployProps) {
+export default function ConfigDeployInfos({ config }: ConfigDeployInfosProps) {
   return (
     <Alert className="w-[500px]">
       <Terminal />

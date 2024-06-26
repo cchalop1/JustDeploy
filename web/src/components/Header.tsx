@@ -7,7 +7,7 @@ export default function Header() {
       <div className="flex gap-4 items-center">
         <a
           className="underline"
-          href="https://github.com/cchalop1/JustDeploy"
+          href="https://github.com/cchalop1/JustDeploy?tab=readme-ov-file#-justdeploy"
           target="_blank"
         >
           Docs

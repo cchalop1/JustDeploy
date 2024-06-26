@@ -49,6 +49,7 @@ func main() {
 		application.ReDeployApplication(&deployService, flags.redeploy.deployId)
 		os.Exit(0)
 	} else {
+		api.InitValidator(app)
 		api.CreateRoutes(app, &deployService)
 		web.CreateMiddlewareWebFiles(app)
 		app.StartServer(!flags.noBrowser)
