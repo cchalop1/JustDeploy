@@ -20,7 +20,8 @@ func GetServerByIdHandler(deployService *service.DeployService) echo.HandlerFunc
 		err = deployService.DockerAdapter.ConnectClient(server)
 
 		if err != nil {
-			return c.JSON(http.StatusNotFound, dto.ResponseApi{Message: err.Error()})
+			server.Status = "Error"
+			return c.JSON(http.StatusOK, server)
 		}
 
 		return c.JSON(http.StatusOK, server)
