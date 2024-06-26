@@ -18,6 +18,14 @@ func ConnectNewServer(deployService *service.DeployService) echo.HandlerFunc {
 			return c.NoContent(http.StatusBadRequest)
 		}
 
+		if connectNewServerDto.Ip == "" {
+			return c.JSON(http.StatusBadRequest, dto.ResponseApi{Message: "ip are required"})
+		}
+
+		if connectNewServerDto.SshKey == nil || connectNewServerDto.Password == nil {
+			return c.JSON(http.StatusBadRequest, dto.ResponseApi{Message: "sshKey or password are required"})
+		}
+
 		newServerId, err := application.CreateServer(deployService, connectNewServerDto)
 
 		if err != nil {
