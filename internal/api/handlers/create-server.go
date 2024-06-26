@@ -22,7 +22,7 @@ func ConnectNewServer(deployService *service.DeployService) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, dto.ResponseApi{Message: "ip are required"})
 		}
 
-		if connectNewServerDto.SshKey == nil || connectNewServerDto.Password == nil {
+		if connectNewServerDto.SshKey == nil && connectNewServerDto.Password == nil {
 			return c.JSON(http.StatusBadRequest, dto.ResponseApi{Message: "sshKey or password are required"})
 		}
 

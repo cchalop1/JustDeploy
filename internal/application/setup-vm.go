@@ -77,33 +77,33 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	eventWrapper.NextStep()
 	deployService.EventAdapter.SendNewEvent(eventWrapper)
 
-	certificateIsCreated := checkIsCertificateIsCreate(sshAdapter, server.Id)
+	// certificateIsCreated := checkIsCertificateIsCreate(sshAdapter, server.Id)
 
-	if !certificateIsCreated {
-		err = setupDockerCertificates(sshAdapter, server)
-		copyCertificates(sshAdapter, server.Id)
+	// if !certificateIsCreated {
+	err = setupDockerCertificates(sshAdapter, server)
+	copyCertificates(sshAdapter, server.Id)
 
-		if err != nil {
-			eventWrapper.SetStepError(err.Error())
-			deployService.EventAdapter.SendNewEvent(eventWrapper)
-			return nil
-		}
+	if err != nil {
+		eventWrapper.SetStepError(err.Error())
+		deployService.EventAdapter.SendNewEvent(eventWrapper)
+		return nil
 	}
+	// }
 
 	// Setting up docker port
 	eventWrapper.NextStep()
 	deployService.EventAdapter.SendNewEvent(eventWrapper)
 
-	portIsOpen := checkIfDockerPortIsOpen(sshAdapter)
+	// portIsOpen := checkIfDockerPortIsOpen(sshAdapter)
 
-	if !portIsOpen {
-		err = openPortDockerConfig(sshAdapter)
-		if err != nil {
-			eventWrapper.SetStepError(err.Error())
-			deployService.EventAdapter.SendNewEvent(eventWrapper)
-			return nil
-		}
+	// if !portIsOpen {
+	err = openPortDockerConfig(sshAdapter)
+	if err != nil {
+		eventWrapper.SetStepError(err.Error())
+		deployService.EventAdapter.SendNewEvent(eventWrapper)
+		return nil
 	}
+	// }
 
 	sshAdapter.CloseConnection()
 

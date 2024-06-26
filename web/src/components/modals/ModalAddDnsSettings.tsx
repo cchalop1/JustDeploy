@@ -16,12 +16,14 @@ type ModalAddDnsSettingsProps = {
   open: boolean;
   onOpenChange: (bool: boolean) => void;
   serverId: string;
+  fetchServerById: (id: string) => void;
 };
 
 export default function ModalAddDnsSettings({
   open,
   onOpenChange,
   serverId,
+  fetchServerById,
 }: ModalAddDnsSettingsProps) {
   const [error, formAction] = useActionState(
     async (prev: string | null, formData: FormData) => {
@@ -39,7 +41,7 @@ export default function ModalAddDnsSettings({
         return "Invalid domain name";
       }
       await addDomainToServerApi(serverId, { domain: newDomain.toString() });
-      // TODO: fetch server with new domain
+      fetchServerById(serverId);
 
       onOpenChange(false);
       return null;

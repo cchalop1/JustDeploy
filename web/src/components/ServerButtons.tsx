@@ -9,9 +9,13 @@ import { ServerDto } from "@/services/getServerListApi";
 
 type ServerButtonsProps = {
   server: ServerDto;
+  fetchServerById: (id: string) => void;
 };
 
-export default function ServerButtons({ server }: ServerButtonsProps) {
+export default function ServerButtons({
+  server,
+  fetchServerById,
+}: ServerButtonsProps) {
   const navigate = useNavigate();
   const [removeServerButtonState, setRemoveServerButtonState] =
     useState<ButtonStateEnum>(ButtonStateEnum.INIT);
@@ -33,6 +37,7 @@ export default function ServerButtons({ server }: ServerButtonsProps) {
       <ModalAddDnsSettings
         open={openAddDomainModal}
         serverId={server.id}
+        fetchServerById={fetchServerById}
         onOpenChange={(o) => setOpenAddDomainModal(o)}
       />
       {!server.domain && (

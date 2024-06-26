@@ -19,7 +19,7 @@ func NewSshAdapter() *SshAdapter {
 }
 
 func (s *SshAdapter) getAuthMethode(connectConfig dto.ConnectNewServerDto) []ssh.AuthMethod {
-	if connectConfig.Password != nil && connectConfig.SshKey == nil {
+	if connectConfig.Password != nil {
 		return []ssh.AuthMethod{
 			ssh.Password(*connectConfig.Password),
 		}
