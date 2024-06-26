@@ -20,7 +20,14 @@ func RemoveServerById(deployService *service.DeployService, serverId string) err
 		return errors.New("you can't remove server with application on it")
 	}
 
+	err = deployService.DatabaseAdapter.DeleteServer(server)
+
+	if err != nil {
+		return err
+	}
+
 	sshAdapter := adapter.NewSshAdapter()
+
 	sshAdapter.Connect(dto.ConnectNewServerDto{
 		Domain:   server.Domain,
 		SshKey:   server.SshKey,
@@ -30,9 +37,8 @@ func RemoveServerById(deployService *service.DeployService, serverId string) err
 
 	removeCertOnServer(sshAdapter)
 
-	deployService.FilesystemAdapter.RemoveDockerCertOfServer(server.Id)
+	deployService.FilesystemAdapter.RemoveDockerCertificateByServerId(server.Id)
 
-	deployService.DatabaseAdapter.DeleteServer(server)
 	return nil
 }
 

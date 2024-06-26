@@ -154,7 +154,7 @@ func (fs *FilesystemAdapter) DeleteGitPostCommitHooks(deploy domain.Deploy) erro
 	return nil
 }
 
-func (fs *FilesystemAdapter) RemoveDockerCertOfServer(serverId string) error {
+func (fs *FilesystemAdapter) RemoveDockerCertificateByServerId(serverId string) error {
 	pathLocalCertDir := internal.CERT_DOCKER_FOLDER + "/" + serverId + "/"
 	return os.Remove(pathLocalCertDir)
 }
