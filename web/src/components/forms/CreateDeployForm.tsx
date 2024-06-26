@@ -91,7 +91,7 @@ export function CreateDeployForm() {
     try {
       const res = await createDeployApi(newDeploy);
       setConnectButtonState(ButtonStateEnum.SUCESS);
-      navigate(`/deploy/${res.id}`);
+      navigate(`/deploy/${res.id}/installation`);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       setError(e.message);

@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func SubscriptionCreateServer(deployService *service.DeployService) echo.HandlerFunc {
+func SubscriptionCreateServerLoadingState(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		w := c.Response()
 
@@ -20,7 +20,7 @@ func SubscriptionCreateServer(deployService *service.DeployService) echo.Handler
 			select {
 			case <-c.Request().Context().Done():
 				return nil
-			case event := <-deployService.EventAdapter.EventServerWrapper: // Use the ticker channel
+			case event := <-deployService.EventAdapter.EventServerWrapper:
 				fmt.Println("Sending event", event)
 				event.MarshalToSseEvent(w)
 				w.Flush()

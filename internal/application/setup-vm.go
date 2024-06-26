@@ -57,7 +57,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	// Install packages and docker
 
 	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewEvent(eventWrapper)
+	deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
 	dockerIsInstalled := checkIfDockerIsIntalled(sshAdapter)
 
@@ -67,7 +67,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 		err = installDocker(sshAdapter)
 		if err != nil {
 			eventWrapper.SetStepError(err.Error())
-			deployService.EventAdapter.SendNewEvent(eventWrapper)
+			deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 			return nil
 		}
 	}
@@ -75,7 +75,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	// Genereates certificates
 
 	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewEvent(eventWrapper)
+	deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
 	// certificateIsCreated := checkIsCertificateIsCreate(sshAdapter, server.Id)
 
@@ -85,14 +85,14 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 
 	if err != nil {
 		eventWrapper.SetStepError(err.Error())
-		deployService.EventAdapter.SendNewEvent(eventWrapper)
+		deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 		return nil
 	}
 	// }
 
 	// Setting up docker port
 	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewEvent(eventWrapper)
+	deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
 	// portIsOpen := checkIfDockerPortIsOpen(sshAdapter)
 
@@ -100,7 +100,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	err = openPortDockerConfig(sshAdapter)
 	if err != nil {
 		eventWrapper.SetStepError(err.Error())
-		deployService.EventAdapter.SendNewEvent(eventWrapper)
+		deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 		return nil
 	}
 	// }
@@ -112,13 +112,13 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	// Connect to the docker client
 
 	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewEvent(eventWrapper)
+	deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
 	err = adapterDocker.ConnectClient(server)
 
 	if err != nil {
 		eventWrapper.SetStepError(err.Error())
-		deployService.EventAdapter.SendNewEvent(eventWrapper)
+		deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 		return nil
 	}
 
@@ -127,7 +127,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	deployService.DatabaseAdapter.UpdateServer(server)
 
 	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewEvent(eventWrapper)
+	deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
 	return nil
 }

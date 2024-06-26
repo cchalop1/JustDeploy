@@ -64,12 +64,11 @@ func makeTar(pathToDir string) (io.ReadCloser, error) {
 }
 
 // BuildImage builds a Docker image from the specified Dockerfile and context directory.
-func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) {
+func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) error {
 	fmt.Println("Make a tar of", deploy.PathToSource)
 	tar, err := makeTar(deploy.PathToSource)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
 	buildOptions := types.ImageBuildOptions{
@@ -80,8 +79,7 @@ func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) {
 
 	buildResponse, err := d.client.ImageBuild(context.Background(), tar, buildOptions)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	defer buildResponse.Body.Close()
 
@@ -92,6 +90,7 @@ func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) {
 	}
 	fmt.Println(string(bytes))
 	// check if sucesfull build image or not
+	return nil
 
 }
 
@@ -127,13 +126,14 @@ func (d *DockerAdapter) checkRouterIsRuning() (bool, error) {
 	return false, nil
 }
 
-func (d *DockerAdapter) PullTreafikImage() {
+func (d *DockerAdapter) PullTreafikImage() error {
 	treafikIsPulled, err := d.checkIsRouterImageIsPull()
 	if treafikIsPulled || err != nil {
-		return
+		return err
 	}
 
 	d.PullImage(TRAEFIK_IMAGE)
+	return nil
 }
 
 func (d *DockerAdapter) PullImage(image string) {

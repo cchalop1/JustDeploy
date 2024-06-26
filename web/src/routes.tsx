@@ -5,7 +5,8 @@ import { CreateDeployForm } from "./components/forms/CreateDeployForm";
 import DeployPage from "./pages/DeployPage";
 import ServerPage from "./pages/ServerPage";
 import { Suspense } from "react";
-import CreateServerStatus from "./pages/CreateServerStatus";
+import CreateServerLoading from "./pages/CreateServerLoading";
+import CreateDeployLoading from "./pages/CreateDeployLoading";
 
 export const router = createBrowserRouter([
   {
@@ -22,7 +23,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "server/:id/installation",
-    element: <CreateServerStatus />,
+    element: <CreateServerLoading />,
+  },
+  {
+    path: "deploy/:id/installation",
+    element: <CreateDeployLoading />,
   },
   {
     path: "deploy/create",

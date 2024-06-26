@@ -36,5 +36,6 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	app.Echo.POST("/api/server/:id/domain", handlers.PostAddDomainToServerById(deployService))
 
-	app.Echo.GET("/api/server/:id/installation", handlers.SubscriptionCreateServer(deployService))
+	app.Echo.GET("/api/server/:id/loading", handlers.SubscriptionCreateServerLoadingState(deployService))
+	app.Echo.GET("/api/deploy/:id/loading", handlers.SubscriptionCreateDeployLoadingState(deployService))
 }

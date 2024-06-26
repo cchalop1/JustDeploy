@@ -1,23 +1,22 @@
 import { useParams } from "react-router-dom";
 import useSubEvent from "./useSubEvent";
 
-export type EventServer = {
+type EventServer = {
   eventType: string;
   title: string;
   errorMessage: string;
   time: Date;
 };
 
-export type EventServerWrapper = {
-  serverName: string;
-  serverId: string;
-  // TODO: rename
+export type EventDeployWrapper = {
+  deployName: string;
+  deployId: string;
   eventsServer: EventServer[];
   currentStep: number;
 };
 
-export default function useSubCreateServerEvent() {
+export default function useSubCreateDeployEvent() {
   const { id } = useParams<{ id: string }>();
-  const event = useSubEvent<EventServerWrapper>(`server/${id}/loading`);
+  const event = useSubEvent<EventDeployWrapper>(`deploy/${id}/loading`);
   return event;
 }
