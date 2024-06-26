@@ -23,8 +23,11 @@ import { useState } from "react";
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import { ButtonStateEnum } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
+import AlertDestructive from "@/components/alerts/AlertDestructive";
 
 export default function ServerConfigForm() {
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
     ButtonStateEnum.INIT
   );
@@ -34,7 +37,6 @@ export default function ServerConfigForm() {
     sshKey: "",
     user: "root",
   });
-  const navigate = useNavigate();
 
   async function readSSHKeyUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const target = event.target;
@@ -59,8 +61,14 @@ export default function ServerConfigForm() {
       const { id } = await connectServerApi(connectServerData);
       setConnectButtonState(ButtonStateEnum.SUCESS);
       navigate(`/server/${id}/installation`);
-    } catch (e) {
-      console.error(e);
+      // TODO: handle error
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      setError(e.message);
+      setTimeout(() => {
+        setError(null);
+      }, 5000);
+      setConnectButtonState(ButtonStateEnum.INIT);
     }
   };
 
@@ -80,101 +88,105 @@ export default function ServerConfigForm() {
     }
   };
   return (
-    <div className="mt-16 flex justify-center">
-      <Card className="w-[500px]">
-        <CardHeader>
-          <CardTitle>Connect Your Server</CardTitle>
-          <CardDescription>
-            Connect your server to deploy a application. The connect process can
-            take a few minutes beacause we need to install some dependencies.
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent>
-            <div className="grid w-full items-center gap-4">
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="server-user">Server user</Label>
-                <Input
-                  id="server-user"
-                  name="server-user"
-                  placeholder="root"
-                  value={connectServerData.user}
-                  disabled
-                  onChange={(e) =>
-                    setConnectServerData({
-                      ...connectServerData,
-                      user: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="server-ip">Server Ip</Label>
-                <Input
-                  id="server-ip"
-                  name="server-ip"
-                  placeholder="Ip to your server"
-                  value={connectServerData.ip}
-                  onChange={(e) =>
-                    setConnectServerData({
-                      ...connectServerData,
-                      ip: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="auth-methode">Chose your auth methode</Label>
-                <Select onValueChange={changeAuthMethode}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="SSH key" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SSH key">SSH key</SelectItem>
-                    <SelectItem value="password">Password</SelectItem>
-                    {/* <SelectItem value="arealy-access">Ssh connect</SelectItem> */}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                {connectServerData.sshKey !== null && (
+    <>
+      {error && <AlertDestructive message={error} />}
+      <div className="mt-16 flex justify-center">
+        <Card className="w-[500px]">
+          <CardHeader>
+            <CardTitle>Connect Your Server</CardTitle>
+            <CardDescription>
+              Connect your server to deploy a application. The connect process
+              can take a few minutes beacause we need to install some
+              dependencies.
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSubmit}>
+            <CardContent>
+              <div className="grid w-full items-center gap-4">
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="server-user">Server user</Label>
                   <Input
-                    type="file"
-                    id="ssh-key"
-                    name="ssh-key"
-                    placeholder="Upload your ssh key"
-                    onChange={readSSHKeyUpload}
-                  ></Input>
-                )}
-                {connectServerData.password !== null && (
-                  <Input
-                    id="password"
-                    name="password"
-                    placeholder="Enter the password of your server"
-                    type="password"
-                    value={connectServerData.password}
+                    id="server-user"
+                    name="server-user"
+                    placeholder="root"
+                    value={connectServerData.user}
+                    disabled
                     onChange={(e) =>
                       setConnectServerData({
                         ...connectServerData,
-                        password: e.target.value,
+                        user: e.target.value,
                       })
                     }
-                  ></Input>
-                )}
+                  />
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="server-ip">Server Ip</Label>
+                  <Input
+                    id="server-ip"
+                    name="server-ip"
+                    placeholder="Ip to your server"
+                    value={connectServerData.ip}
+                    onChange={(e) =>
+                      setConnectServerData({
+                        ...connectServerData,
+                        ip: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="auth-methode">Chose your auth methode</Label>
+                  <Select onValueChange={changeAuthMethode}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="SSH key" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="SSH key">SSH key</SelectItem>
+                      <SelectItem value="password">Password</SelectItem>
+                      {/* <SelectItem value="arealy-access">Ssh connect</SelectItem> */}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  {connectServerData.sshKey !== null && (
+                    <Input
+                      type="file"
+                      id="ssh-key"
+                      name="ssh-key"
+                      placeholder="Upload your ssh key"
+                      onChange={readSSHKeyUpload}
+                    ></Input>
+                  )}
+                  {connectServerData.password !== null && (
+                    <Input
+                      id="password"
+                      name="password"
+                      placeholder="Enter the password of your server"
+                      type="password"
+                      value={connectServerData.password}
+                      onChange={(e) =>
+                        setConnectServerData({
+                          ...connectServerData,
+                          password: e.target.value,
+                        })
+                      }
+                    ></Input>
+                  )}
+                </div>
               </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button type="submit" className="w-full">
-              {connectButtonState === ButtonStateEnum.PENDING ? (
-                <SpinnerIcon color="text-white" />
-              ) : (
-                "Connect server"
-              )}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button type="submit" className="w-full">
+                {connectButtonState === ButtonStateEnum.PENDING ? (
+                  <SpinnerIcon color="text-white" />
+                ) : (
+                  "Connect server"
+                )}
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
+    </>
   );
 }

@@ -14,6 +14,11 @@ export async function callApi<T>(
     },
     body: JSON.stringify(body),
   });
+  console.log(res);
+  if (res.status >= 400) {
+    const body = (await res.json()) as ResponseApi;
+    throw new Error(body.message);
+  }
   return (await res.json()) as T;
 }
 

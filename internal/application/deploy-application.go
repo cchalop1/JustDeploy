@@ -44,7 +44,7 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 	}
 
 	if server.Domain == "" {
-		return domain.Deploy{}, errors.New("Server does not have domain")
+		return domain.Deploy{}, errors.New("server does not have domain")
 	}
 
 	pathToDir, err := filepath.Abs(newDeploy.PathToSource)
