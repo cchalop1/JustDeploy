@@ -15,11 +15,15 @@ func ConnectNewServer(deployService *service.DeployService) echo.HandlerFunc {
 
 		err := c.Bind(&connectNewServerDto)
 		if err != nil {
-			return c.String(http.StatusBadRequest, "bad request")
+			return c.NoContent(http.StatusBadRequest)
 		}
 
-		newServer := application.CreateServer(deployService, connectNewServerDto)
+		newServerId, err := application.CreateServer(deployService, connectNewServerDto)
 
-		return c.JSON(http.StatusOK, newServer)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, dto.ResponseApi{Message: err.Error()})
+		}
+
+		return c.JSON(http.StatusOK, dto.ServerDto{Id: newServerId})
 	}
 }

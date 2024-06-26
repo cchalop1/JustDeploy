@@ -1,6 +1,7 @@
 package application
 
 import (
+	"errors"
 	"strconv"
 
 	"cchalop1.com/deploy/internal/api/dto"
@@ -9,7 +10,7 @@ import (
 	"cchalop1.com/deploy/internal/utils"
 )
 
-func CreateServer(deployService *service.DeployService, createNewServer dto.ConnectNewServerDto) domain.Server {
+func CreateServer(deployService *service.DeployService, createNewServer dto.ConnectNewServerDto) (string, error) {
 	serverCount := deployService.DatabaseAdapter.CountServer() + 1
 	Name := "Server " + strconv.Itoa(serverCount)
 
@@ -24,9 +25,18 @@ func CreateServer(deployService *service.DeployService, createNewServer dto.Conn
 		Status:      "Installing",
 	}
 
+	serverList := deployService.DatabaseAdapter.GetServers()
+
+	for _, s := range serverList {
+		if s.Ip == server.Ip {
+			return server.Id, errors.New("server already exist")
+		}
+
+	}
+
 	deployService.DatabaseAdapter.SaveServer(server)
 
 	go ConnectAndSetupServer(deployService, server)
 
-	return server
+	return server.Id, nil
 }
