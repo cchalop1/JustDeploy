@@ -148,10 +148,10 @@ func (d *DockerAdapter) PullImage(image string) {
 	io.Copy(io.Discard, reader)
 }
 
-func (d *DockerAdapter) RunRouter(email string) {
+func (d *DockerAdapter) RunRouter(email string) error {
 	routerIsRuning, err := d.checkRouterIsRuning()
 	if routerIsRuning || err != nil {
-		return
+		return nil
 	}
 
 	d.client.NetworkCreate(context.Background(), "databases_default", types.NetworkCreate{})
@@ -171,14 +171,12 @@ func (d *DockerAdapter) RunRouter(email string) {
 		ExposedPorts: nat.PortSet{
 			"80/tcp":  struct{}{},
 			"443/tcp": struct{}{},
-			// "8080/tcp": struct{}{},
 		},
 	}
 
 	portMap := nat.PortMap{
 		"80/tcp":  []nat.PortBinding{{HostIP: "", HostPort: "80"}},
 		"443/tcp": []nat.PortBinding{{HostIP: "", HostPort: "443"}},
-		// "8080/tcp": []nat.PortBinding{{HostIP: "", HostPort: "8080"}},
 	}
 
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{
@@ -195,15 +193,14 @@ func (d *DockerAdapter) RunRouter(email string) {
 	}, &v1.Platform{}, ROUTER_NAME)
 
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
-	d.client.ContainerStart(context.Background(), con.ID, types.ContainerStartOptions{})
+	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
 	fmt.Printf("Container %s is started", con.ID)
 
 	fmt.Println("Run image", ROUTER_NAME)
-
+	return nil
 }
 
 func envToSlice(envVars []dto.Env) []string {
@@ -216,7 +213,7 @@ func envToSlice(envVars []dto.Env) []string {
 	return envSlice
 }
 
-func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) {
+func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) error {
 	Name := deploy.GetDockerName()
 
 	Labels := map[string]string{
@@ -244,14 +241,14 @@ func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) {
 	}, &v1.Platform{}, Name)
 
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
-	d.client.ContainerStart(context.Background(), con.ID, types.ContainerStartOptions{})
+	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
 	fmt.Printf("Container %s is started", con.ID)
 
 	fmt.Println("Run image", Name)
+	return nil
 }
 
 // TODO: remove stop router

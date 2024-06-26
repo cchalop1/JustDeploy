@@ -23,6 +23,7 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 
 	deployService.DockerAdapter.BuildImage(deploy)
 	deployService.DockerAdapter.PullTreafikImage()
+	// TODO: get errors
 	deployService.DockerAdapter.RunRouter(deploy.Email)
 	deployService.DockerAdapter.RunImage(deploy, appUrl)
 
@@ -94,6 +95,7 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 
 	err = deployService.DatabaseAdapter.SaveDeploy(deploy)
 
+	// TODO: make it async
 	runApplication(deployService, &deploy, server.Domain)
 
 	return deploy, err

@@ -23,5 +23,6 @@ type Deploy struct {
 }
 
 func (d *Deploy) GetDockerName() string {
+	// TODO: put the server id in the docker name
 	return strings.ToLower(d.Id) + "-" + strings.ToLower(d.ServerId)
 }
