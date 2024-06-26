@@ -56,7 +56,7 @@ func (d *DockerAdapter) ConnectClient(server domain.Server) error {
 	}
 
 	d.client = client
-	fmt.Println("I'm connected to docker of the server ", server.Name, " With domain ", server.Domain)
+	fmt.Println("I'm connected to docker of the server ", server.Name, " With domain ", server.Ip)
 	return nil
 }
 

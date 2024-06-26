@@ -241,6 +241,7 @@ func setupDockerCertificates(sshAdapter *adapter.SshAdapter, server domain.Serve
 		return err
 	}
 
+	// TODO: change to set the ip
 	cmd := fmt.Sprintf("openssl req -new -x509 -days 365 -keyout %[3]s/ca-key.pem -passout pass:%[2]s -sha256 -out %[3]s/ca.pem -subj \"/C=/ST=/L=/O=/CN=%[1]s\"", server.Domain, password, pathToCert)
 	_, err = sshAdapter.RunCommand(cmd)
 
