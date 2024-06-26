@@ -14,7 +14,7 @@ export type DeployConfigDto = {
 };
 
 export async function getDeployConfig(
-  deployId?: string,
+  deployId?: string
 ): Promise<DeployConfigDto> {
   if (!deployId) {
     deployId = "";

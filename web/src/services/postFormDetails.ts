@@ -7,7 +7,6 @@ export type Env = {
 
 export type CreateDeployDto = {
   serverId: string;
-  name: string;
   enableTls: boolean;
   email: string | null;
   pathToSource: string;

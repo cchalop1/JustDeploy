@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "../ui/checkbox";
-import { useActionState, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CreateDeployDto,
   Env,
@@ -34,7 +34,6 @@ import AlertConfigDeploy from "../AlertConfigDeploy";
 const createDeploymentEmptyState = (): CreateDeployDto => {
   return {
     serverId: "",
-    name: "",
     enableTls: false,
     email: null,
     pathToSource: "",
@@ -132,22 +131,6 @@ export function CreateDeployForm() {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="Name of your project"
-                  value={newDeploy.name}
-                  autoComplete="off"
-                  onChange={(e) =>
-                    setNewDeploy({
-                      ...newDeploy,
-                      name: e.target.value,
-                    })
-                  }
-                />
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="projectPath">

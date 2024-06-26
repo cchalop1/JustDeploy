@@ -77,16 +77,18 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 
 	newDeploy.Envs = append(portEnv, newDeploy.Envs...)
 
+	Name := adapter.NewFilesystemAdapter().GetFolderName(pathToDir)
+
 	deploy := domain.Deploy{
 		Id:             utils.GenerateRandomPassword(5),
-		Name:           newDeploy.Name,
+		Name:           Name,
 		ServerId:       newDeploy.ServerId,
 		PathToSource:   pathToDir,
 		Status:         "Installing",
 		EnableTls:      newDeploy.EnableTls,
 		Email:          newDeploy.Email,
 		Envs:           newDeploy.Envs,
-		SubDomain:      newDeploy.Name,
+		SubDomain:      Name,
 		DockerFileName: DockerFileName,
 	}
 

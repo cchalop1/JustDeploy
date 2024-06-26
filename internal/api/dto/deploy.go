@@ -14,7 +14,6 @@ type Env struct {
 }
 
 type NewDeployDto struct {
-	Name           string `json:"name"`
 	ServerId       string `json:"serverId"`
 	EnableTls      bool   `json:"enableTls"`
 	Email          string `json:"email"`

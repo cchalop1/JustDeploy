@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"time"
 
 	"cchalop1.com/deploy/internal/adapter/database"
 	"cchalop1.com/deploy/internal/api/dto"
@@ -40,7 +39,7 @@ func (d *DockerAdapter) ConnectClient(server domain.Server) error {
 			serverCerts.CertPath,
 			serverCerts.KeyPath,
 		),
-		client.WithTimeout(3*time.Second),
+		// client.WithTimeout(3*time.Second),
 	)
 
 	if err != nil {
