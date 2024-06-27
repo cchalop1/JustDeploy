@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import ModalDeleteService from "./ModalDeleteService";
+import ModalDeleteConfirmation from "../modals/ModalDeleteConfirmation";
+import { deleteServiceApi } from "@/services/deleteServiceApi";
 
 type ServiceListDeployProps = {
   deployId: string;
@@ -24,13 +25,31 @@ export default function ServiceListDeploy({
     fetchServiceList();
   }, [deployId]);
 
+  async function deleteService() {
+    const serviceId = serviceToDelete?.id;
+
+    if (!serviceId) {
+      return;
+    }
+    try {
+      await deleteServiceApi(deployId, serviceId);
+      await fetchServiceList();
+      // TODO: send a toast to the user
+    } catch (e) {
+      console.error(e);
+    }
+    setServiceToDelete(null);
+  }
+
   return (
     <>
-      <ModalDeleteService
-        deployId={deployId}
-        serviceToDelete={serviceToDelete}
-        fetchServiceList={fetchServiceList}
-        setServiceToDelete={setServiceToDelete}
+      <ModalDeleteConfirmation
+        open={serviceToDelete !== null}
+        content="This action is irreversible. Deleting this service will remove all data associated with it."
+        title="Are you sure you want to delete this service?"
+        onConfirm={deleteService}
+        setOpen={() => {}}
+        textConfirm="Delete"
       />
       <div className="flex flex-col">
         {services.map((s) => (

@@ -255,10 +255,6 @@ func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) error {
 func (d *DockerAdapter) Delete(appName string, stopRouter bool) {
 	d.Stop(appName)
 	d.Remove(appName)
-	if stopRouter {
-		d.Stop(ROUTER_NAME)
-		d.Remove(ROUTER_NAME)
-	}
 }
 
 func (d *DockerAdapter) Stop(appName string) {

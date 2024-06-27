@@ -8,6 +8,7 @@ import { startApplicationApi } from "@/services/startApplication";
 import { reDeployAppApi } from "@/services/reDeployApp";
 import { useNavigate } from "react-router-dom";
 import { removeApplicationApi } from "@/services/removeApplication";
+import ModalDeleteConfirmation from "./modals/ModalDeleteConfirmation";
 
 type DeployButtonsProps = {
   deploy: DeployDto;
@@ -27,11 +28,14 @@ export default function DeployButtons({
   const [stopStartButtonState, setStopStartButtonState] =
     useState<ButtonStateEnum>(ButtonStateEnum.INIT);
 
+  const [openModalRemoveApp, setOpenModalRemoveApp] = useState(false);
+
   async function removeApplication() {
     setConnectButtonState(ButtonStateEnum.PENDING);
     try {
       await removeApplicationApi(deploy.id);
       setConnectButtonState(ButtonStateEnum.SUCESS);
+      setOpenModalRemoveApp(false);
       navigate("/");
     } catch (e) {
       console.error(e);
@@ -66,7 +70,16 @@ export default function DeployButtons({
 
   return (
     <div className="flex gap-2">
-      <Button variant="destructive" onClick={removeApplication}>
+      <ModalDeleteConfirmation
+        content="This action is irreversible. Deleting this application will remove all data associated with it."
+        title="Are you sure you want to delete this application?"
+        onConfirm={removeApplication}
+        setOpen={setOpenModalRemoveApp}
+        open={openModalRemoveApp}
+        textConfirm="Delete"
+      />
+
+      <Button variant="destructive" onClick={() => setOpenModalRemoveApp(true)}>
         {connectButtonState === ButtonStateEnum.PENDING ? (
           <SpinnerIcon color="text-white" />
         ) : (
