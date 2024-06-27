@@ -1,18 +1,10 @@
-import Footer from "./components/Footer";
-import Header from "./components/Header";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import router from "@/routes";
 import { RouterProvider } from "react-router-dom";
-import { router } from "./routes";
 
 function App() {
-  return (
-    <div className="flex justify-center">
-      <div className="w-2/4 mt-10">
-        <Header />
-        <RouterProvider router={router} />
-        <Footer />
-      </div>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
