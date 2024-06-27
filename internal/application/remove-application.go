@@ -22,7 +22,7 @@ func RemoveApplicationById(deployService *service.DeployService, deployId string
 		}
 	}
 
-	deployService.DockerAdapter.Delete(deploy.GetDockerName(), false)
+	deployService.DockerAdapter.Delete(deploy.GetDockerName())
 	deployService.DatabaseAdapter.DeleteDeploy(deploy)
 	return nil
 }

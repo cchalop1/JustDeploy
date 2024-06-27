@@ -17,7 +17,7 @@ func ReDeployApplication(deployService *service.DeployService, deployId string) 
 		return err
 	}
 	deployService.DockerAdapter.ConnectClient(server)
-	deployService.DockerAdapter.Delete(deploy.GetDockerName(), false)
+	deployService.DockerAdapter.Delete(deploy.GetDockerName())
 
 	deploy.Status = "Stopped"
 	deployService.DatabaseAdapter.UpdateDeploy(deploy)

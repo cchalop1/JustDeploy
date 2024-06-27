@@ -251,8 +251,7 @@ func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) error {
 	return nil
 }
 
-// TODO: remove stop router
-func (d *DockerAdapter) Delete(appName string, stopRouter bool) {
+func (d *DockerAdapter) Delete(appName string) {
 	d.Stop(appName)
 	d.Remove(appName)
 }

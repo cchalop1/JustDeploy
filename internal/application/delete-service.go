@@ -24,7 +24,7 @@ func DeleteService(deployService *service.DeployService, serviceId string) error
 	}
 
 	deployService.DockerAdapter.ConnectClient(server)
-	deployService.DockerAdapter.Delete(s.Name, false)
+	deployService.DockerAdapter.Delete(s.Name)
 
 	err = deployService.DatabaseAdapter.DeleteServiceById(serviceId)
 	if err != nil {
