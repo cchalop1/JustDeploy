@@ -11,8 +11,7 @@ export type EventServer = {
 export type EventServerWrapper = {
   serverName: string;
   serverId: string;
-  // TODO: rename
-  eventsServer: EventServer[];
+  serverEventsList: EventServer[];
   currentStep: number;
 };
 

@@ -6,7 +6,8 @@ import EventList from "@/components/EventsList";
 export default function CreateServerLoading() {
   const navigate = useNavigate();
   const event = useSubCreateServerEvent();
-  const isLoading = !event || event?.currentStep !== event?.eventsServer.length;
+  const isLoading =
+    !event || event?.currentStep !== event?.serverEventsList.length;
 
   return (
     <div>
@@ -15,7 +16,7 @@ export default function CreateServerLoading() {
       </div>
       {event && (
         <EventList
-          eventList={event.eventsServer}
+          eventList={event.serverEventsList}
           currentStep={event.currentStep}
         />
       )}

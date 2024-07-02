@@ -40,10 +40,10 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	}
 
 	eventWrapper := adapter.EventServerWrapper{
-		ServerName:   server.Name,
-		ServerId:     server.Id,
-		EventsServer: eventsList,
-		CurrentStep:  0,
+		ServerName:       server.Name,
+		ServerId:         server.Id,
+		EventServersList: eventsList,
+		CurrentStep:      0,
 	}
 
 	// Connect to the server by ssh

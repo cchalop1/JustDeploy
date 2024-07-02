@@ -7,13 +7,14 @@ import useSubCreateDeployEvent from "@/hooks/useSubCreateDeployEvent";
 export default function CreateDeployLoading() {
   const navigate = useNavigate();
   const event = useSubCreateDeployEvent();
-  const isLoading = !event || event?.currentStep !== event?.eventsServer.length;
+  const isLoading =
+    !event || event?.currentStep !== event?.eventsDeployList.length;
 
   useEffect(() => {
     if (
       event &&
-      event.currentStep === event.eventsServer.length &&
-      !event.eventsServer.find((e) => e.errorMessage)
+      event.currentStep === event.eventsDeployList.length &&
+      !event.eventsDeployList.find((e) => e.errorMessage)
     ) {
       navigate("/");
     }
@@ -26,7 +27,7 @@ export default function CreateDeployLoading() {
       </div>
       {event && (
         <EventList
-          eventList={event.eventsServer}
+          eventList={event.eventsDeployList}
           currentStep={event.currentStep}
         />
       )}

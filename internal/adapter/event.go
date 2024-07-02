@@ -18,10 +18,10 @@ type EventServer struct {
 // EventServerWrapper is a wrapper for the events of a server
 
 type EventServerWrapper struct {
-	ServerName   string        `json:"serverName"`
-	ServerId     string        `json:"serverId"`
-	EventsServer []EventServer `json:"eventsServer"`
-	CurrentStep  int           `json:"currentStep"`
+	ServerName       string        `json:"serverName"`
+	ServerId         string        `json:"serverId"`
+	EventServersList []EventServer `json:"eventServersList"`
+	CurrentStep      int           `json:"currentStep"`
 }
 
 func (e *EventServerWrapper) MarshalToSseEvent(w io.Writer) error {
@@ -41,20 +41,20 @@ func (e *EventServerWrapper) MarshalToSseEvent(w io.Writer) error {
 }
 
 func (e *EventServerWrapper) NextStep() {
-	e.EventsServer[e.CurrentStep].Time = time.Now()
+	e.EventServersList[e.CurrentStep].Time = time.Now()
 	e.CurrentStep += 1
 }
 
 func (e *EventServerWrapper) SetStepError(errorMessage string) {
-	e.EventsServer[e.CurrentStep].ErrorMessage = errorMessage
+	e.EventServersList[e.CurrentStep].ErrorMessage = errorMessage
 }
 
 // EventDeployWrapper is a wrapper for the events of a deploy
 type EventDeployWrapper struct {
-	DeployName   string        `json:"deployName"`
-	DeployId     string        `json:"deployId"`
-	EventsServer []EventServer `json:"eventsServer"`
-	CurrentStep  int           `json:"currentStep"`
+	DeployName       string        `json:"deployName"`
+	DeployId         string        `json:"deployId"`
+	EventsDeployList []EventServer `json:"eventsDeployList"`
+	CurrentStep      int           `json:"currentStep"`
 }
 
 func (e *EventDeployWrapper) MarshalToSseEvent(w io.Writer) error {
@@ -74,12 +74,12 @@ func (e *EventDeployWrapper) MarshalToSseEvent(w io.Writer) error {
 }
 
 func (e *EventDeployWrapper) NextStep() {
-	e.EventsServer[e.CurrentStep].Time = time.Now()
+	e.EventsDeployList[e.CurrentStep].Time = time.Now()
 	e.CurrentStep += 1
 }
 
 func (e *EventDeployWrapper) SetStepError(errorMessage string) {
-	e.EventsServer[e.CurrentStep].ErrorMessage = errorMessage
+	e.EventsDeployList[e.CurrentStep].ErrorMessage = errorMessage
 }
 
 // TODO: find a better way to handle 2 types of events

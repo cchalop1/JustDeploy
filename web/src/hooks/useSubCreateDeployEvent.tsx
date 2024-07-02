@@ -1,17 +1,11 @@
 import { useParams } from "react-router-dom";
 import useSubEvent from "./useSubEvent";
-
-type EventServer = {
-  eventType: string;
-  title: string;
-  errorMessage: string;
-  time: Date;
-};
+import { EventServer } from "./useSubCreateServerEvent";
 
 export type EventDeployWrapper = {
   deployName: string;
   deployId: string;
-  eventsServer: EventServer[];
+  eventsDeployList: EventServer[];
   currentStep: number;
 };
 

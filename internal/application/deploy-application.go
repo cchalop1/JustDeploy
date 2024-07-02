@@ -41,13 +41,14 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 	}
 
 	eventWrapper := adapter.EventDeployWrapper{
-		DeployName:   deploy.Name,
-		DeployId:     deploy.Id,
-		EventsServer: eventsList,
-		CurrentStep:  0,
+		DeployName:       deploy.Name,
+		DeployId:         deploy.Id,
+		EventsDeployList: eventsList,
+		CurrentStep:      0,
 	}
 
 	// Build your application
+	deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
 
 	err := deployService.DockerAdapter.BuildImage(deploy)
 	if err != nil {
@@ -153,6 +154,14 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 
 	Name := adapter.NewFilesystemAdapter().GetFolderName(pathToDir)
 
+	SubDomain := ""
+
+	deploys := deployService.DatabaseAdapter.GetDeployByServerId(server.Id)
+
+	if len(deploys) > 0 {
+		SubDomain = Name
+	}
+
 	deploy := domain.Deploy{
 		Id:             utils.GenerateRandomPassword(5),
 		Name:           Name,
@@ -162,7 +171,7 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 		EnableTls:      newDeploy.EnableTls,
 		Email:          newDeploy.Email,
 		Envs:           newDeploy.Envs,
-		SubDomain:      Name,
+		SubDomain:      SubDomain,
 		DockerFileName: DockerFileName,
 	}
 
