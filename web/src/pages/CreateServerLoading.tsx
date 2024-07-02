@@ -7,7 +7,7 @@ export default function CreateServerLoading() {
   const navigate = useNavigate();
   const event = useSubCreateServerEvent();
   const isLoading =
-    !event || event?.currentStep !== event?.serverEventsList.length;
+    !event || event?.currentStep !== event?.eventServersList.length;
 
   return (
     <div>
@@ -16,7 +16,7 @@ export default function CreateServerLoading() {
       </div>
       {event && (
         <EventList
-          eventList={event.serverEventsList}
+          eventList={event.eventServersList}
           currentStep={event.currentStep}
         />
       )}

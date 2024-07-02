@@ -11,7 +11,7 @@ export type EventServer = {
 export type EventServerWrapper = {
   serverName: string;
   serverId: string;
-  serverEventsList: EventServer[];
+  eventServersList: EventServer[];
   currentStep: number;
 };
 
