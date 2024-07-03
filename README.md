@@ -69,6 +69,8 @@ Before deploying your application using JustDeploy, it is required that a domain
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
+To compile it in local you need to install bunjs. You can find the install process on there website [bun website](https://bun.sh)
+
 ### Build in local
 
 1. Clone the repository
