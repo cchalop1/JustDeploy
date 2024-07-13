@@ -4,6 +4,7 @@ import EventList from "@/components/EventsList";
 import { useEffect } from "react";
 import useSubCreateDeployEvent from "@/hooks/useSubCreateDeployEvent";
 
+// TODO: rename to DeployLoadingPage
 export default function CreateDeployLoading() {
   const navigate = useNavigate();
   const event = useSubCreateDeployEvent();
@@ -16,7 +17,7 @@ export default function CreateDeployLoading() {
       event.currentStep === event.eventsDeployList.length &&
       !event.eventsDeployList.find((e) => e.errorMessage)
     ) {
-      navigate("/");
+      navigate("/deploy/" + event.deployId);
     }
   }, [event, navigate]);
 

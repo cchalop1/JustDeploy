@@ -13,7 +13,11 @@ func ReDeployAppHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		deployId := c.Param("id")
 
-		application.ReDeployApplication(deployService, deployId)
+		err := application.ReDeployApplication(deployService, deployId)
+
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, dto.ResponseApi{Message: err.Error()})
+		}
 
 		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is redeploy"})
 	}

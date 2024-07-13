@@ -20,7 +20,7 @@ JustDeploy is that it **doesn't install anything on your server other than your 
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/cchalop1/JustDeploy/main/install.sh | bash
+curl -fsSL https://get.justdeploy.app | bash
 ```
 
 ## Usage

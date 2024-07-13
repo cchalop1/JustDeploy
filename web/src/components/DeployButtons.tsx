@@ -45,6 +45,7 @@ export default function DeployButtons({
   async function reDeployApplication() {
     setReDeployButtonState(ButtonStateEnum.PENDING);
     try {
+      navigate(`/deploy/${deploy.id}/installation`);
       await reDeployAppApi(deploy.id);
       setReDeployButtonState(ButtonStateEnum.SUCESS);
       fetchDeployById(deploy.id);

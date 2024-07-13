@@ -26,7 +26,7 @@ func CreateDeployementHandler(deployService *service.DeployService) echo.Handler
 		deploy, err := application.DeployApplication(deployService, newDeployDto)
 
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, dto.ResponseApi{Message: err.Error()})
 		}
 
 		return c.JSON(http.StatusOK, dto.CreateDeployResponse{Id: deploy.Id})

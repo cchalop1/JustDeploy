@@ -48,7 +48,9 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 	}
 
 	// Build your application
+	fmt.Println("Build your application")
 	deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
+	fmt.Println("send: Build your application")
 
 	err := deployService.DockerAdapter.BuildImage(deploy)
 	if err != nil {
@@ -60,8 +62,11 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 	}
 
 	// Pull the traefik image
+
+	fmt.Println("Pull the traefik image")
 	eventWrapper.NextStep()
 	deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
+	fmt.Println("send: Pull the traefik image")
 	err = deployService.DockerAdapter.PullTreafikImage()
 
 	if err != nil {
@@ -180,25 +185,4 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 	go runApplication(deployService, &deploy, server.Domain)
 
 	return deploy, err
-}
-
-func ReDeployApplicationRun(deployService *service.DeployService, deploy *domain.Deploy) error {
-	server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
-	if err != nil {
-		return err
-	}
-
-	err = deployService.DockerAdapter.ConnectClient(server)
-
-	if err != nil {
-		return err
-	}
-
-	deploy.Status = "Installing"
-
-	err = deployService.DatabaseAdapter.UpdateDeploy(*deploy)
-	fmt.Println(err)
-	runApplication(deployService, deploy, server.Domain)
-	return nil
-
 }

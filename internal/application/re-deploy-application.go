@@ -19,10 +19,10 @@ func ReDeployApplication(deployService *service.DeployService, deployId string) 
 	deployService.DockerAdapter.ConnectClient(server)
 	deployService.DockerAdapter.Delete(deploy.GetDockerName())
 
-	deploy.Status = "Stopped"
+	deploy.Status = "Installing"
 	deployService.DatabaseAdapter.UpdateDeploy(deploy)
 
-	err = ReDeployApplicationRun(deployService, &deploy)
+	runApplication(deployService, &deploy, server.Domain)
 
 	if err != nil {
 		return err
