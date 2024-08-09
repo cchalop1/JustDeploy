@@ -49,7 +49,7 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 
 	// Build your application
 	fmt.Println("Build your application")
-	deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
+	go deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
 	fmt.Println("send: Build your application")
 
 	err := deployService.DockerAdapter.BuildImage(deploy)
@@ -65,7 +65,7 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 
 	fmt.Println("Pull the traefik image")
 	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
+	go deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
 	fmt.Println("send: Pull the traefik image")
 	err = deployService.DockerAdapter.PullTreafikImage()
 
@@ -79,7 +79,7 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 
 	// Run the traefik router
 	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
+	go deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
 	err = deployService.DockerAdapter.RunRouter(deploy.Email)
 
 	if err != nil {
@@ -92,7 +92,7 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 
 	// Run your application
 	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
+	go deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
 	err = deployService.DockerAdapter.RunImage(deploy, appUrl)
 
 	if err != nil {
@@ -103,7 +103,7 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 	}
 
 	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
+	go deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
 
 	if deploy.EnableTls {
 		deploy.Url = "https://" + appUrl
