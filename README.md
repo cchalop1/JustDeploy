@@ -55,8 +55,7 @@ On the Deploy page click on on the databases services tab and create one from th
 
 Feel free to add more preconfigured services with `databases.go` by create a pull request.
 
-// TODO: change the link to the file
-[file is here](https://github.com/cchalop1/JustDeploy/blob/main/internal/adapter/services.json)
+[file is here](https://github.com/cchalop1/JustDeploy/blob/main/internal/adapter/database/database.go)
 
 ### Prerequisites
 
