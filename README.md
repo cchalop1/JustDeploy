@@ -1,5 +1,7 @@
 # 🛵 JustDeploy
 
+[![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true)](https://discord.gg/nrTCzpRF)
+
 JustDeploy is an open-source application designed to simplify the deployment process for developers. It allows you to deploy your applications on your own server. JustDeploy handles server connection, Docker installation, and secure certificate generation, making the deployment process seamless and efficient. JustDeploy read your app source (.env, Dockfile, docker-compose) and allow you to deploy it.
 
 JustDeploy is that it **doesn't install anything on your server other than your application.** This makes it an ideal choice for small servers with limited resources or development environments

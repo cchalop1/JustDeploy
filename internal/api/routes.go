@@ -13,8 +13,8 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	app.Echo.GET("/api/server/:id", handlers.GetServerByIdHandler(deployService))
 	app.Echo.GET("/api/server/:id/deploy", handlers.GetDeployByServerIdHandler(deployService))
 
-	app.Echo.GET("/api/deploy/config/", handlers.GetDeployConfigHandler(deployService))
-	app.Echo.GET("/api/deploy/config/:deployId", handlers.GetDeployConfigHandler(deployService))
+	app.Echo.POST("/api/deploy/config/", handlers.GetDeployConfigHandler(deployService))
+	app.Echo.POST("/api/deploy/config/:deployId", handlers.GetDeployConfigHandler(deployService))
 
 	app.Echo.POST("/api/deploy", handlers.CreateDeployementHandler(deployService))
 	app.Echo.PUT("/api/deploy/edit", handlers.EditDeployementHandler(deployService))

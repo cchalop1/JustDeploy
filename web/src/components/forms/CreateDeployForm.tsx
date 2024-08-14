@@ -64,8 +64,8 @@ export function CreateDeployForm() {
     }
   }
 
-  async function fetchDeployConfig() {
-    const deployConfig = await getDeployConfig();
+  async function fetchDeployConfig(path: string | null = null) {
+    const deployConfig = await getDeployConfig(path);
     const envs = deployConfig.envs;
     setNewDeploy((d) => ({
       ...d,
@@ -80,6 +80,10 @@ export function CreateDeployForm() {
     fetchDeployConfig();
     fetchServerList();
   }, []);
+
+  useEffect(() => {
+    fetchDeployConfig(newDeploy.pathToSource);
+  }, [newDeploy.pathToSource]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
