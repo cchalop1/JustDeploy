@@ -1,6 +1,6 @@
 module cchalop1.com/deploy
 
-go 1.21.3
+go 1.23
 
 require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
