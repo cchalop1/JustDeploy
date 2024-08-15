@@ -1,7 +1,9 @@
 package internal
 
-const JUSTDEPLOY_FOLDER = "/Users/cchalop1/.config/" + "justdeploy"
+import "os"
 
-const CERT_DOCKER_FOLDER = JUSTDEPLOY_FOLDER + "/cert-docker"
+var JUSTDEPLOY_FOLDER = os.Getenv("HOME") + "/xs.config/" + "justdeploy"
 
-const DATABASE_FILE_PATH = JUSTDEPLOY_FOLDER + "/database.json"
+var CERT_DOCKER_FOLDER = JUSTDEPLOY_FOLDER + "/cert-docker"
+
+var DATABASE_FILE_PATH = JUSTDEPLOY_FOLDER + "/database.json"
