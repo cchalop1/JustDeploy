@@ -1,6 +1,6 @@
 import { callApi } from "./api";
 
-type Logs = {
+export type Logs = {
   date: string;
   message: string;
 };
