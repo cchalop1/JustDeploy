@@ -276,3 +276,7 @@ func (d *DatabaseAdapter) GetLogs(deployId string) ([]dto.Logs, error) {
 	}
 	return logs, nil
 }
+
+func (d *DatabaseAdapter) DeleteLogFile(deployId string) error {
+	return os.Remove(internal.JUSTDEPLOY_FOLDER + "/" + deployId + ".log")
+}
