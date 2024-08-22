@@ -23,14 +23,14 @@ export default function Home() {
 
   return (
     <>
-      <div className="h-52 mt-40">
+      <div className="mt-40">
         <div className="flex justify-between">
           <div className="text-2xl font-bold">Servers</div>
           <Button onClick={onClickNewServer}>New Server</Button>
         </div>
         <ServerList serverList={serverList} />
       </div>
-      <div className="h-52">
+      <div className="mt-10">
         <div className="flex justify-between">
           <div className="text-2xl font-bold">Deploys</div>
           <Button disabled={!serverIsReady} onClick={onClickNewDeploy}>

@@ -25,10 +25,10 @@ export default function DeployList({ deployList }: DeployListProps) {
   }
 
   return (
-    <div className="flex gap-3 h-2/3 mt-2">
+    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3 h-2/3 mt-2">
       {deployList.map((deploy) => (
         <Card
-          className="hover:shadow-md cursor-pointer w-80 h-full pt-4 pl-2"
+          className="hover:shadow-md cursor-pointer h-full pt-4 pl-2 "
           key={deploy.id}
           onClick={() => navigate("/deploy/" + deploy.id)}
         >
