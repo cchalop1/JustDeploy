@@ -5,13 +5,19 @@ import (
 	"cchalop1.com/deploy/internal/api/service"
 )
 
-func GetDeployConfig(deployService *service.DeployService, deployId string) dto.DeployConfigDto {
+func GetDeployConfig(deployService *service.DeployService, paramsDeployConfig dto.ParamsDeployConfigDto) dto.DeployConfigDto {
 	deployConfig := dto.DeployConfigDto{}
 
-	currentPath, err := deployService.FilesystemAdapter.GetCurrentPath()
+	currentPath := ""
 
-	if deployId != "" {
-		deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
+	if paramsDeployConfig.Path == "" {
+		currentPath = deployService.FilesystemAdapter.GetCurrentPath()
+	} else {
+		currentPath = paramsDeployConfig.Path
+	}
+
+	if paramsDeployConfig.DeployId != "" {
+		deploy, err := deployService.DatabaseAdapter.GetDeployById(paramsDeployConfig.DeployId)
 
 		if err != nil {
 			return dto.DeployConfigDto{}
@@ -34,9 +40,7 @@ func GetDeployConfig(deployService *service.DeployService, deployId string) dto.
 
 	deployConfig.Envs = envs
 
-	if err == nil {
-		deployConfig.PathToSource = currentPath
-	}
+	deployConfig.PathToSource = currentPath
 
 	deployConfig.SourceType = "Local Folder"
 

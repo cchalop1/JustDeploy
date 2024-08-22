@@ -33,6 +33,11 @@ type DeployDto struct {
 	Url          string    `json:"url"`
 }
 
+type ParamsDeployConfigDto struct {
+	DeployId string `json:"deployId"`
+	Path     string `json:"path"`
+}
+
 type DeployConfigDto struct {
 	DeployName       string `json:"deployName"`
 	SourceType       string `json:"sourceType"`

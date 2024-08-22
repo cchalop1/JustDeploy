@@ -52,8 +52,12 @@ func (fs *FilesystemAdapter) CleanPath(path string) string {
 	return path
 }
 
-func (fs *FilesystemAdapter) GetCurrentPath() (string, error) {
-	return os.Getwd()
+func (fs *FilesystemAdapter) GetCurrentPath() string {
+	path, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+	return path
 }
 
 func (fs *FilesystemAdapter) FindDockerFile(pathToFolder string) bool {

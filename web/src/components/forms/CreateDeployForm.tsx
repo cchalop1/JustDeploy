@@ -64,8 +64,8 @@ export function CreateDeployForm() {
     }
   }
 
-  async function fetchDeployConfig(path: string | null = null) {
-    const deployConfig = await getDeployConfig(path);
+  async function fetchDeployConfig() {
+    const deployConfig = await getDeployConfig({});
     const envs = deployConfig.envs;
     setNewDeploy((d) => ({
       ...d,
@@ -76,13 +76,25 @@ export function CreateDeployForm() {
     envs.push({ name: "", value: "" });
   }
 
+  async function fetchDeployConfigByPath(path: string) {
+    const deployConfig = await getDeployConfig({ path: path });
+    const envs = deployConfig.envs;
+    setNewDeploy((d) => ({
+      ...d,
+      // pathToSource: deployConfig.pathToSource,
+      envs: envs,
+    }));
+    setConfig(deployConfig);
+    envs.push({ name: "", value: "" });
+  }
+
   useEffect(() => {
-    fetchDeployConfig();
     fetchServerList();
+    fetchDeployConfig();
   }, []);
 
   useEffect(() => {
-    fetchDeployConfig(newDeploy.pathToSource);
+    fetchDeployConfigByPath(newDeploy.pathToSource);
   }, [newDeploy.pathToSource]);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -221,7 +233,6 @@ export function CreateDeployForm() {
           </CardFooter>
         </form>
       </Card>
-      {config && config.composeFileFound && <Card>fjlkze</Card>}
     </div>
   );
 }
