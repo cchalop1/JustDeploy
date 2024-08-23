@@ -5,6 +5,9 @@
   "devDependencies": {
     "@types/bun": "latest"
   },
+  "scripts": {
+    "check": "bun tsc"
+  },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },

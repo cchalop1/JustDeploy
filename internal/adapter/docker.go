@@ -1,10 +1,11 @@
 package adapter
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 
 	"cchalop1.com/deploy/internal/adapter/database"
 	"cchalop1.com/deploy/internal/api/dto"
@@ -63,6 +64,15 @@ func makeTar(pathToDir string) (io.ReadCloser, error) {
 	return archive.TarWithOptions(pathToDir, &archive.TarOptions{})
 }
 
+type DockerMessage struct {
+	Stream      string `json:"stream"`
+	ErrorDetail struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	} `json:"errorDetail"`
+	Error string `json:"error"`
+}
+
 // BuildImage builds a Docker image from the specified Dockerfile and context directory.
 func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) error {
 	fmt.Println("Make a tar of", deploy.PathToSource)
@@ -83,13 +93,33 @@ func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) error {
 	}
 	defer buildResponse.Body.Close()
 
-	fmt.Println("Building image...")
-	bytes, err := io.ReadAll(buildResponse.Body)
-	if err != nil {
-		log.Fatal(err)
+	scanner := bufio.NewScanner(buildResponse.Body)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		var msg DockerMessage
+		if err := json.Unmarshal([]byte(line), &msg); err != nil {
+			return fmt.Errorf("error decoding JSON: %v", err)
+		}
+
+		if msg.Stream != "" {
+			fmt.Print(msg.Stream)
+		}
+
+		if msg.ErrorDetail.Message != "" || msg.Error != "" {
+			errorMsg := msg.ErrorDetail.Message
+			if errorMsg == "" {
+				errorMsg = msg.Error
+			}
+			return fmt.Errorf("error building image: %s", errorMsg)
+		}
 	}
-	fmt.Println(string(bytes))
-	// check if sucesfull build image or not
+
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("error reading build output: %v", err)
+	}
+
+	fmt.Println("Image built successfully")
 	return nil
 
 }
