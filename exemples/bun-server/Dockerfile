@@ -7,8 +7,6 @@ COPY package.json .
 # Install dependencies
 RUN bun install --frozen-lockfile
 
-RUN bun check
-
 COPY index.ts .
 EXPOSE 80
 

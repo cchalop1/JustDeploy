@@ -1,5 +1,4 @@
 import pg from "pg";
-kjznfz;
 
 Bun.serve({
   port: 80,
