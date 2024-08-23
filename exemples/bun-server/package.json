@@ -6,7 +6,7 @@
     "@types/bun": "latest"
   },
   "scripts": {
-    "check": "bun tsc"
+    "check": "tsc --noEmit"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

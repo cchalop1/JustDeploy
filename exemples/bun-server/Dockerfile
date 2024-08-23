@@ -8,6 +8,10 @@ COPY package.json .
 RUN bun install --frozen-lockfile
 
 COPY index.ts .
+COPY tsconfig.json .
+
+RUN bun check
+
 EXPOSE 80
 
 CMD ["bun", "run", "index.ts"]
