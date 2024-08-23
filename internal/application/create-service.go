@@ -103,6 +103,7 @@ func CreateService(deployService *service.DeployService, deployId string, create
 		VolumsNames: []string{},
 		Status:      "Runing",
 		ImageName:   service.Config.Image,
+		ImageUrl:    service.Icon,
 	}
 
 	deployService.DatabaseAdapter.SaveService(domainService)

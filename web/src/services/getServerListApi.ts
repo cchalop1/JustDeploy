@@ -1,6 +1,10 @@
 import { callApi } from "./api";
 
-export type ServerStatusType = "Runing" | "NotConnected" | "Installing";
+export type ServerStatusType =
+  | "Runing"
+  | "NotConnected"
+  | "Installing"
+  | "Error";
 
 export type ServerDto = {
   id: string;

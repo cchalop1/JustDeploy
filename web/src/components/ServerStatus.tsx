@@ -12,6 +12,8 @@ export default function Status({ status }: ServerStatusProps) {
     color = "bg-green-500";
   } else if (status === "Installing") {
     color = "bg-blue-500";
+  } else if (status === "Error") {
+    color = "bg-red-500";
   } else {
     color = "bg-red-500";
   }

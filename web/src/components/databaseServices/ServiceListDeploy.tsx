@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import ModalDeleteConfirmation from "../modals/ModalDeleteConfirmation";
 import { deleteServiceApi } from "@/services/deleteServiceApi";
+import Status from "../ServerStatus";
 
 type ServiceListDeployProps = {
   deployId: string;
@@ -53,13 +54,15 @@ export default function ServiceListDeploy({
       />
       <div className="flex flex-col">
         {services.map((s) => (
-          <Card key={s.name} className="flex justify-between p-3 mb-3 h-24">
+          <Card
+            key={s.name}
+            className="flex justify-between p-3 mb-3 hover:bg-gray-100"
+          >
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-5">
-                <div className="text-xl font-bold">{s.name}</div>
-                <div>{s.status}</div>
+                <img className="w-10" src={s.imageUrl}></img>
+                <Status status={s.status} />
               </div>
-              <div>{s.imageName}</div>
             </div>
             <div>
               <Button

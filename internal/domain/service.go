@@ -12,4 +12,5 @@ type Service struct {
 	Host        string    `json:"host"`
 	DeployId    string    `json:"deployId"`
 	ImageName   string    `json:"imageName"`
+	ImageUrl    string    `json:"imageUrl"`
 }
