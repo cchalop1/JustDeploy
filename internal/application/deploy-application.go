@@ -52,15 +52,39 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 	go deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
 	fmt.Println("send: Build your application")
 
-	err := deployService.DockerAdapter.BuildImage(deploy)
-	if err != nil {
-		deploy.Status = "Error"
-		deployService.DatabaseAdapter.UpdateDeploy(*deploy)
-		eventWrapper.SetStepError(err.Error())
-		deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
+	var err error
+
+	isDockerfile := deployService.FilesystemAdapter.FindDockerFile(deploy.PathToSource)
+	if isDockerfile {
+		err := deployService.DockerAdapter.BuildImage(deploy)
+		if err != nil {
+			deploy.Status = "Error"
+			deployService.DatabaseAdapter.UpdateDeploy(*deploy)
+			eventWrapper.SetStepError(err.Error())
+			deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
+			return
+		}
+	} else {
+		server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
+
+		if err != nil {
+			deploy.Status = "Error"
+			deployService.DatabaseAdapter.UpdateDeploy(*deploy)
+			eventWrapper.SetStepError(err.Error())
+			deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
+			return
+		}
+
+		err = deployService.DockerAdapter.BuildNixpacksImage(deploy, server)
+		if err != nil {
+			deploy.Status = "Error"
+			deployService.DatabaseAdapter.UpdateDeploy(*deploy)
+			eventWrapper.SetStepError(err.Error())
+			deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
+			return
+		}
 		return
 	}
-
 	// Pull the traefik image
 
 	fmt.Println("Pull the traefik image")
@@ -144,6 +168,7 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 	DockerFileName := "Dockerfile"
 
 	if !isFolder {
+		fmt.Println("Is not a folder")
 		DockerFileName = adapter.NewFilesystemAdapter().BaseDir(pathToDir)
 		pathToDir = adapter.NewFilesystemAdapter().GetDir(pathToDir)
 	}

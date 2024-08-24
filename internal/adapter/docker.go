@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os/exec"
 
 	"cchalop1.com/deploy/internal/adapter/database"
 	"cchalop1.com/deploy/internal/api/dto"
@@ -117,6 +118,40 @@ func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) error {
 	fmt.Println("Image built successfully")
 	return nil
 
+}
+
+func (d *DockerAdapter) BuildNixpacksImage(deploy *domain.Deploy, server domain.Server) error {
+	// Construct the nixpacks command
+	serverCerts := server.GetCertsPath()
+
+	nixpacksCmd := exec.Command("nixpacks", "build",
+		"--docker-host", server.Domain,
+		"--docker-tls-verify", serverCerts.CertPath,
+		"--name", deploy.GetDockerName(),
+		deploy.PathToSource)
+
+	// Set up pipes for stdout and stderr
+	stdout, _ := nixpacksCmd.StdoutPipe()
+	stderr, _ := nixpacksCmd.StderrPipe()
+
+	// Start the command
+	if err := nixpacksCmd.Start(); err != nil {
+		return fmt.Errorf("failed to start nixpacks build: %v", err)
+	}
+
+	// Create a scanner to read the output line by line
+	scanner := bufio.NewScanner(io.MultiReader(stdout, stderr))
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
+
+	// Wait for the command to finish
+	if err := nixpacksCmd.Wait(); err != nil {
+		return fmt.Errorf("nixpacks build failed: %v", err)
+	}
+
+	fmt.Println("Nixpacks image built successfully")
+	return nil
 }
 
 func (d *DockerAdapter) checkIsRouterImageIsPull() (bool, error) {
