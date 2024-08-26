@@ -13,11 +13,13 @@ type DeploySettingsProps = {
   deploy: DeployDto;
   serverDomain: string;
   fetchDeployById: (id: string) => void;
+  setToReDeploy: (toReDeploy: boolean) => void;
 };
 
 export default function DeploySettings({
   deploy,
   serverDomain,
+  setToReDeploy,
   fetchDeployById,
 }: DeploySettingsProps) {
   const envs: Env[] =
@@ -33,13 +35,14 @@ export default function DeploySettings({
     try {
       await editDeployementApi(editDeployDto);
       fetchDeployById(deploy.id);
+      setToReDeploy(true);
     } catch (e) {
       console.error(e);
     }
   }
 
   return (
-    <div>
+    <div className="pb-20">
       <div className="font-bold text-xl">Git Hooks</div>
       <div className="mt-4 flex items-center space-x-2">
         <Checkbox

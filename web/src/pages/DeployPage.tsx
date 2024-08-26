@@ -19,6 +19,7 @@ export default function DeployPage() {
   const navigate = useNavigate();
   const [deploy, setDeploy] = useState<DeployDto | null>(null);
   const [server, setServer] = useState<ServerDto | null>(null);
+  const [toReDeploy, setToReDeploy] = useState(false);
 
   async function fetchDeployById(id: string) {
     const res = await getDeployByIdApi(id);
@@ -47,7 +48,12 @@ export default function DeployPage() {
     <div className="mt-40">
       <div className="flex justify-between">
         <div className="text-xl font-bold mb-2">{deploy.name}</div>
-        <DeployButtons deploy={deploy} fetchDeployById={fetchDeployById} />
+        <DeployButtons
+          deploy={deploy}
+          toReDeploy={toReDeploy}
+          setToReDeploy={setToReDeploy}
+          fetchDeployById={fetchDeployById}
+        />
       </div>
       <Status status={deploy.status} />
       <div className="flex items-center mt-2 gap-2">
@@ -81,6 +87,7 @@ export default function DeployPage() {
           <DeploySettings
             serverDomain={server.domain}
             deploy={deploy}
+            setToReDeploy={setToReDeploy}
             fetchDeployById={fetchDeployById}
           />
         </TabsContent>

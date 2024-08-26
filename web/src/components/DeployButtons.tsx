@@ -12,11 +12,15 @@ import ModalDeleteConfirmation from "./modals/ModalDeleteConfirmation";
 
 type DeployButtonsProps = {
   deploy: DeployDto;
+  toReDeploy: boolean;
+  setToReDeploy: (toReDeploy: boolean) => void;
   fetchDeployById: (deployId: string) => void;
 };
 
 export default function DeployButtons({
   deploy,
+  toReDeploy,
+  setToReDeploy,
   fetchDeployById,
 }: DeployButtonsProps) {
   const navigate = useNavigate();
@@ -48,6 +52,7 @@ export default function DeployButtons({
       navigate(`/deploy/${deploy.id}/installation`);
       await reDeployAppApi(deploy.id);
       setReDeployButtonState(ButtonStateEnum.SUCESS);
+      setToReDeploy(false);
       fetchDeployById(deploy.id);
     } catch (e) {
       console.error(e);
@@ -99,7 +104,11 @@ export default function DeployButtons({
           "Start"
         )}
       </Button>
-      <Button variant="secondary" onClick={() => reDeployApplication()}>
+      <Button
+        variant={toReDeploy ? "default" : "ghost"}
+        color="bg-yellow-600"
+        onClick={() => reDeployApplication()}
+      >
         {redeployButtonState === ButtonStateEnum.PENDING ? (
           <SpinnerIcon color="text-black" />
         ) : (

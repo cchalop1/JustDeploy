@@ -7,7 +7,7 @@ type DisplayLogsProps = {
 
 export default function DisplayLogs({ logs }: DisplayLogsProps) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col pb-20">
       {logs.map((log, idx) => (
         <code
           key={idx}
