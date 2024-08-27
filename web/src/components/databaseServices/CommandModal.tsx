@@ -47,7 +47,7 @@ export default function CommandModal({
           </CommandGroup>
         )}
         <CommandSeparator />
-        <CommandGroup heading="Other sercices">
+        <CommandGroup heading="Other services">
           {preConfiguredServices.map((s) => (
             <NewServiceItem
               key={s.name}
