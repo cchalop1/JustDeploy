@@ -1,11 +1,11 @@
 import { Service } from "@/services/getServicesByDeployId";
 import { useEffect, useState } from "react";
 import { Card } from "../ui/card";
-import { Button } from "../ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import ModalDeleteConfirmation from "../modals/ModalDeleteConfirmation";
 import { deleteServiceApi } from "@/services/deleteServiceApi";
-import Status from "../ServerStatus";
+import DatabaseServiceCard from "./DatabaseServiceCard";
+import DatabaseServiceCardLoading from "./DatabaseServiceCardLoading";
 
 type ServiceListDeployProps = {
   deployId?: string;
@@ -41,7 +41,6 @@ export default function ServiceListDeploy({
     }
     setServiceToDelete(null);
   }
-
   return (
     <>
       <ModalDeleteConfirmation
@@ -54,38 +53,13 @@ export default function ServiceListDeploy({
       />
       <div className="flex flex-col">
         {services.map((s) => (
-          <Card
-            key={s.name}
-            className="flex justify-between p-3 mb-3 hover:bg-gray-100"
-          >
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-5">
-                <img className="w-10" src={s.imageUrl}></img>
-                <p className="font-bold">{s.name}</p>
-                <Status status={s.status} />
-              </div>
-            </div>
-            <div>
-              <Button
-                variant="destructive"
-                onClick={() => setServiceToDelete(s)}
-              >
-                Delete
-              </Button>
-            </div>
-          </Card>
+          <DatabaseServiceCard
+            key={s.id}
+            service={s}
+            setServiceToDelete={setServiceToDelete}
+          />
         ))}
-        {loadingNewService && (
-          <Card className="flex justify-between p-3 h-24">
-            <div className="flex flex-col gap-3 w-full">
-              <div className="flex justify-between">
-                <Skeleton className="w-44 h-6" />
-                <Skeleton className="w-24 h-10" />
-              </div>
-              <Skeleton className="w-20 h-3" />
-            </div>
-          </Card>
-        )}
+        {loadingNewService && <DatabaseServiceCardLoading />}
       </div>
     </>
   );

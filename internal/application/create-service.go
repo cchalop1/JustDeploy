@@ -143,7 +143,7 @@ func createServiceOnly(deployService *service.DeployService, serviceName string)
 
 	deployService.DockerAdapter.RunService(service, containerHostname)
 
-	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_HOSTNAME", Value: containerHostname})
+	envs = append(envs, dto.Env{Name: "localhost", Value: containerHostname})
 
 	domainService := domain.Service{
 		Id:          utils.GenerateRandomPassword(5),
