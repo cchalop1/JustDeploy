@@ -1,30 +1,29 @@
-import {
-  Service,
-  getServicesByDeployIdApi,
-} from "@/services/getServicesByDeployId";
+import { Service } from "@/services/getServicesByDeployId";
 import AddService from "./AddServices";
 import ServiceListDeploy from "./ServiceListDeploy";
 import { useState } from "react";
+import { CreateServiceApi } from "@/services/createServiceApi";
 
 type ServicesManagementsProps = {
-  deployId: string;
+  deployId?: string;
+  services: Service[];
+  createService: (serviceParams: CreateServiceApi) => Promise<void>;
+  fetchServiceList: (deployId?: string) => Promise<void>;
 };
 
 export default function ServicesManagements({
   deployId,
+  services,
+  createService,
+  fetchServiceList,
 }: ServicesManagementsProps) {
-  const [services, setServices] = useState<Service[]>([]);
   const [loadingNewService, setLoadingNewService] = useState(false);
-
-  async function fetchServiceList() {
-    const res = await getServicesByDeployIdApi(deployId);
-    setServices(res);
-  }
 
   return (
     <>
       <AddService
         deployId={deployId}
+        createService={createService}
         setLoading={setLoadingNewService}
         fetchServiceList={fetchServiceList}
       />

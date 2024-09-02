@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { getServersListApi } from "@/services/getServerListApi";
 import { getDeployListApi } from "@/services/getDeployListApi";
+import ServicesLocalContainer from "@/components/databaseServices/ServicesLocalContainer";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -39,6 +40,7 @@ export default function Home() {
         </div>
         <DeployList deployList={deployList} />
       </div>
+      <ServicesLocalContainer />
     </>
   );
 }

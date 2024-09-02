@@ -5,7 +5,7 @@ import {
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 
-import { createServiceApi } from "@/services/createServiceApi";
+import { CreateServiceApi } from "@/services/createServiceApi";
 import CommandModal from "./CommandModal";
 import {
   ResponseServiceFromDockerComposeDto,
@@ -13,19 +13,22 @@ import {
 } from "@/services/getServicesFromDockerCompose";
 
 type AddServiceProps = {
-  deployId: string;
+  deployId?: string;
   setLoading: (loading: boolean) => void;
-  fetchServiceList: () => Promise<void>;
+  createService: (serviceParams: CreateServiceApi) => Promise<void>;
+  fetchServiceList: (deployId?: string) => Promise<void>;
 };
 
 export default function AddService({
   deployId,
-  fetchServiceList,
   setLoading,
+  createService,
+  fetchServiceList,
 }: AddServiceProps) {
   const [preConfiguredServices, setPreConfiguredServices] = useState<
     Array<ServiceDto>
   >([]);
+  const text = "Click here for create and connect new database or press";
   const [serviceFromDockerCompose, setServiceFromDockerCompose] =
     useState<ResponseServiceFromDockerComposeDto>(null);
 
@@ -37,6 +40,7 @@ export default function AddService({
   }
 
   async function getServicesFromDockerCompose() {
+    if (!deployId) return;
     const res = await getServicesFromDockerComposeApi(deployId);
     setServiceFromDockerCompose(res);
   }
@@ -54,25 +58,6 @@ export default function AddService({
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  async function createService(
-    serviceName: string,
-    fromDockerCompose: boolean
-  ) {
-    try {
-      setLoading(true);
-      setOpen(false);
-      await createServiceApi({
-        serviceName,
-        fromDockerCompose,
-        deployId,
-      });
-      await fetchServiceList();
-    } catch (e) {
-      console.error(e);
-    }
-    setLoading(false);
-  }
-
   return (
     <>
       <Button
@@ -80,7 +65,7 @@ export default function AddService({
         className="w-full mb-3"
         onClick={() => setOpen(true)}
       >
-        Click here for create and connect new database or press{" "}
+        {text}{" "}
         <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
           <span className="text-xs">⌘</span>K
         </kbd>
@@ -90,7 +75,17 @@ export default function AddService({
         setOpen={setOpen}
         preConfiguredServices={preConfiguredServices}
         serviceFromDockerCompose={serviceFromDockerCompose}
-        createService={createService}
+        createService={async (serviceName, fromDockerCompose) => {
+          setLoading(true);
+          setOpen(false);
+          await createService({
+            serviceName,
+            fromDockerCompose,
+            deployId,
+          });
+          await fetchServiceList(deployId);
+          setLoading(false);
+        }}
       />
     </>
   );

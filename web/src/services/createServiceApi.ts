@@ -1,6 +1,6 @@
 import { ResponseApi, callApi } from "./api";
 
-type CreateServiceApi = {
+export type CreateServiceApi = {
   serviceName: string;
   fromDockerCompose: boolean;
   deployId: string | undefined;

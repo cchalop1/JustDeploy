@@ -214,6 +214,17 @@ func (d *DatabaseAdapter) GetServicesByDeployId(deployId string) []domain.Servic
 	return serviceList
 }
 
+func (d *DatabaseAdapter) GetLocalService() []domain.Service {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	serviceList := []domain.Service{}
+	for _, s := range databaseModels.Services {
+		if s.DeployId == nil {
+			serviceList = append(serviceList, s)
+		}
+	}
+	return serviceList
+}
+
 func (d *DatabaseAdapter) GetServiceById(id string) (*domain.Service, error) {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	for _, s := range databaseModels.Services {

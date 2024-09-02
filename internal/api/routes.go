@@ -31,7 +31,9 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	app.Echo.GET("/api/service", handlers.GetServicesListHandler(deployService))
 	app.Echo.GET("/api/deploy/:deployId/service-docker-compose", handlers.GetServicesFromDockerComposeHandler(deployService))
+
 	app.Echo.POST("/api/deploy/service", handlers.CreateServiceHandler(deployService))
+
 	app.Echo.GET("/api/deploy/:deployId/service", handlers.GetServicesByDeployIdHandler(deployService))
 	app.Echo.DELETE("/api/deploy/:deployId/service/:serviceId", handlers.DeleteServiceHandler(deployService))
 
@@ -39,4 +41,6 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	app.Echo.GET("/api/server/:id/loading", handlers.SubscriptionCreateServerLoadingState(deployService))
 	app.Echo.GET("/api/deploy/:id/loading", handlers.SubscriptionCreateDeployLoadingState(deployService))
+
+	app.Echo.GET("/api/local/services", handlers.GetLocalServicesHandler(deployService))
 }

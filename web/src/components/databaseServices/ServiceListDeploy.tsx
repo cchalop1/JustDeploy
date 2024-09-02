@@ -8,10 +8,10 @@ import { deleteServiceApi } from "@/services/deleteServiceApi";
 import Status from "../ServerStatus";
 
 type ServiceListDeployProps = {
-  deployId: string;
+  deployId?: string;
   services: Service[];
   loadingNewService: boolean;
-  fetchServiceList: () => Promise<void>;
+  fetchServiceList: (deployId?: string) => Promise<void>;
 };
 
 export default function ServiceListDeploy({
@@ -23,7 +23,7 @@ export default function ServiceListDeploy({
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
 
   useEffect(() => {
-    fetchServiceList();
+    fetchServiceList(deployId);
   }, [deployId]);
 
   async function deleteService() {
@@ -33,8 +33,8 @@ export default function ServiceListDeploy({
       return;
     }
     try {
-      await deleteServiceApi(deployId, serviceId);
-      await fetchServiceList();
+      await deleteServiceApi(serviceId, deployId);
+      await fetchServiceList(deployId);
       // TODO: send a toast to the user
     } catch (e) {
       console.error(e);
@@ -61,6 +61,7 @@ export default function ServiceListDeploy({
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-5">
                 <img className="w-10" src={s.imageUrl}></img>
+                <p className="font-bold">{s.name}</p>
                 <Status status={s.status} />
               </div>
             </div>

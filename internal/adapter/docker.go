@@ -319,6 +319,21 @@ func (d *DockerAdapter) GetLogsOfContainer(containerName string) ([]string, erro
 
 func (d *DockerAdapter) RunService(service database.ServicesConfig, containerHostName string) {
 	con, err := d.client.ContainerCreate(context.Background(), &service.Config, &container.HostConfig{},
+		&network.NetworkingConfig{}, &v1.Platform{}, containerHostName)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
+	fmt.Printf("Container %s is started", con.ID)
+
+	fmt.Println("Run image", service.Name)
+}
+
+func (d *DockerAdapter) RunServiceWithDeploy(service database.ServicesConfig, containerHostName string) {
+	con, err := d.client.ContainerCreate(context.Background(), &service.Config, &container.HostConfig{},
 		&network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
 				"databases_default": {},
@@ -330,7 +345,7 @@ func (d *DockerAdapter) RunService(service database.ServicesConfig, containerHos
 		return
 	}
 
-	d.client.ContainerStart(context.Background(), con.ID, types.ContainerStartOptions{})
+	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
 	fmt.Printf("Container %s is started", con.ID)
 
 	fmt.Println("Run image", service.Name)

@@ -17,7 +17,7 @@ type CommandModalProps = {
   preConfiguredServices: ServiceDto[];
   serviceFromDockerCompose: ResponseServiceFromDockerComposeDto;
   setOpen: (open: boolean) => void;
-  createService: (serviceId: string, fromDockerCompose: boolean) => void;
+  createService: (serviceName: string, fromDockerCompose: boolean) => void;
 };
 
 export default function CommandModal({

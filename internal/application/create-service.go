@@ -97,7 +97,7 @@ func createServiceLinkToDeploy(deployService *service.DeployService, createServi
 
 	containerHostname := generateContainerHostname(service.Name, createServiceDto.DeployId)
 
-	deployService.DockerAdapter.RunService(service, containerHostname)
+	deployService.DockerAdapter.RunServiceWithDeploy(service, containerHostname)
 
 	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_HOSTNAME", Value: containerHostname})
 

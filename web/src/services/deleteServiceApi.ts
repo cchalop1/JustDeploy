@@ -1,8 +1,9 @@
 import { ResponseApi, callApi } from "./api";
 
 export async function deleteServiceApi(
-  deployId: string,
-  serviceId: string
+  // TODO: delete deployId
+  serviceId: string,
+  deployId?: string
 ): Promise<ResponseApi> {
   return await callApi<ResponseApi>(
     `/deploy/${deployId}/service/${serviceId}`,

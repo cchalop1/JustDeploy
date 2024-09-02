@@ -13,6 +13,14 @@ import { ServerDto } from "@/services/getServerListApi";
 import { getServerByIdApi } from "@/services/getServerById";
 import ServicesManagements from "@/components/databaseServices/ServicesManagements";
 import SpinnerIcon from "@/assets/SpinnerIcon";
+import {
+  getServicesByDeployIdApi,
+  Service,
+} from "@/services/getServicesByDeployId";
+import {
+  createServiceApi,
+  CreateServiceApi,
+} from "@/services/createServiceApi";
 
 export default function DeployPage() {
   const { id } = useParams();
@@ -20,6 +28,7 @@ export default function DeployPage() {
   const [deploy, setDeploy] = useState<DeployDto | null>(null);
   const [server, setServer] = useState<ServerDto | null>(null);
   const [toReDeploy, setToReDeploy] = useState(false);
+  const [services, setServices] = useState<Service[]>([]);
 
   async function fetchDeployById(id: string) {
     const res = await getDeployByIdApi(id);
@@ -39,6 +48,18 @@ export default function DeployPage() {
       navigate("/");
     }
   }, [id, navigate]);
+
+  async function fetchServiceList(deployId?: string) {
+    if (!deployId) {
+      return;
+    }
+    const res = await getServicesByDeployIdApi(deployId);
+    setServices(res);
+  }
+
+  async function createService(createServiceParams: CreateServiceApi) {
+    await createServiceApi(createServiceParams);
+  }
 
   if (deploy === null || server === null) {
     return null;
@@ -76,7 +97,12 @@ export default function DeployPage() {
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
         <TabsContent value="database-service">
-          <ServicesManagements deployId={deploy.id} />
+          <ServicesManagements
+            deployId={deploy.id}
+            services={services}
+            createService={createService}
+            fetchServiceList={fetchServiceList}
+          />
         </TabsContent>
         <TabsContent value="logs">
           <Suspense fallback={<SpinnerIcon color="text-black" />}>
