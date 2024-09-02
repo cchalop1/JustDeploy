@@ -12,6 +12,7 @@ type ServiceDto struct {
 }
 
 type CreateServiceDto struct {
-	ServiceName       string `json:"serviceName"`
-	FromDockerCompose bool   `json:"fromDockerCompose"`
+	ServiceName       string  `json:"serviceName"`
+	FromDockerCompose bool    `json:"fromDockerCompose"`
+	DeployId          *string `json:"deployId"`
 }

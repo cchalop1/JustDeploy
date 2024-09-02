@@ -11,7 +11,6 @@ import (
 
 func CreateServiceHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		deployId := c.Param("deployId")
 		createServiceDto := dto.CreateServiceDto{}
 
 		err := c.Bind(&createServiceDto)
@@ -20,7 +19,7 @@ func CreateServiceHandler(deployService *service.DeployService) echo.HandlerFunc
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		err = application.CreateService(deployService, deployId, createServiceDto)
+		err = application.CreateService(deployService, createServiceDto)
 
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, dto.ResponseApi{Message: err.Error()})

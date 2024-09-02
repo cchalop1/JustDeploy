@@ -3,15 +3,9 @@ import { ResponseApi, callApi } from "./api";
 type CreateServiceApi = {
   serviceName: string;
   fromDockerCompose: boolean;
+  deployId: string | undefined;
 };
 
-export async function createServiceApi(
-  deployId: string,
-  body: CreateServiceApi,
-) {
-  return await callApi<ResponseApi>(
-    `/deploy/${deployId}/service`,
-    "POST",
-    body,
-  );
+export async function createServiceApi(body: CreateServiceApi) {
+  return await callApi<ResponseApi>(`/deploy/service`, "POST", body);
 }

@@ -56,14 +56,15 @@ export default function AddService({
 
   async function createService(
     serviceName: string,
-    fromDockerCompose: boolean,
+    fromDockerCompose: boolean
   ) {
     try {
       setLoading(true);
       setOpen(false);
-      await createServiceApi(deployId, {
+      await createServiceApi({
         serviceName,
         fromDockerCompose,
+        deployId,
       });
       await fetchServiceList();
     } catch (e) {

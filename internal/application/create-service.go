@@ -1,7 +1,6 @@
 package application
 
 import (
-	"fmt"
 	"strings"
 
 	"cchalop1.com/deploy/internal/adapter/database"
@@ -42,18 +41,28 @@ func replaceEnvForServicesConfig(service *database.ServicesConfig, serviceEnvs [
 	}
 }
 
-func CreateService(deployService *service.DeployService, deployId string, createServiceDto dto.CreateServiceDto) error {
-	deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
+func generateContainerHostname(serviceName string, deployId *string) string {
+	serviceName += "-"
+
+	if deployId != nil {
+		serviceName += *deployId + "-"
+	}
+
+	return serviceName + utils.GenerateRandomPassword(5)
+}
+
+func createServiceLinkToDeploy(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) error {
+	deploy, err := deployService.DatabaseAdapter.GetDeployById(*createServiceDto.DeployId)
 	if err != nil {
 		return err
 	}
+
 	server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(createServiceDto.ServiceName)
-
+	// extract service from deploy
 	service := database.ServicesConfig{}
 
 	if createServiceDto.FromDockerCompose {
@@ -73,7 +82,49 @@ func CreateService(deployService *service.DeployService, deployId string, create
 		service, err = database.GetServiceByName(createServiceDto.ServiceName)
 	}
 
-	fmt.Println(service)
+	if err != nil {
+		return err
+	}
+
+	deployService.DockerAdapter.ConnectClient(server)
+
+	deployService.DockerAdapter.PullImage(service.Config.Image)
+
+	envs := generateEnvsForService(service.Env)
+
+	// replace in services config all the envs with the new values
+	replaceEnvForServicesConfig(&service, envs)
+
+	containerHostname := generateContainerHostname(service.Name, createServiceDto.DeployId)
+
+	deployService.DockerAdapter.RunService(service, containerHostname)
+
+	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_HOSTNAME", Value: containerHostname})
+
+	// TODO: add volume
+	domainService := domain.Service{
+		Id:          utils.GenerateRandomPassword(5),
+		DeployId:    createServiceDto.DeployId,
+		Name:        containerHostname,
+		Envs:        envs,
+		VolumsNames: []string{},
+		Status:      "Runing",
+		ImageName:   service.Config.Image,
+		ImageUrl:    service.Icon,
+	}
+
+	deployService.DatabaseAdapter.SaveService(domainService)
+
+	EditDeploy(deployService, dto.EditDeployDto{Id: deploy.Id, Envs: append(envs, deploy.Envs...), SubDomain: deploy.SubDomain, DeployOnCommit: deploy.DeployOnCommit})
+	ReDeployApplication(deployService, deploy.Id)
+
+	return nil
+}
+
+func createServiceOnly(deployService *service.DeployService, serviceName string) error {
+	server := deployService.DockerAdapter.GetLocalHostServer()
+
+	service, err := database.GetServiceByName(serviceName)
 
 	if err != nil {
 		return err
@@ -88,16 +139,15 @@ func CreateService(deployService *service.DeployService, deployId string, create
 	// replace in services config all the envs with the new values
 	replaceEnvForServicesConfig(&service, envs)
 
-	containerHostname := strings.ToLower(service.Name) + "-db-" + deployId + "-" + utils.GenerateRandomPassword(5)
+	containerHostname := generateContainerHostname(service.Name, nil)
 
 	deployService.DockerAdapter.RunService(service, containerHostname)
 
 	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_HOSTNAME", Value: containerHostname})
 
-	// TODO: add volume
 	domainService := domain.Service{
 		Id:          utils.GenerateRandomPassword(5),
-		DeployId:    deployId,
+		DeployId:    nil,
 		Name:        containerHostname,
 		Envs:        envs,
 		VolumsNames: []string{},
@@ -108,9 +158,13 @@ func CreateService(deployService *service.DeployService, deployId string, create
 
 	deployService.DatabaseAdapter.SaveService(domainService)
 
-	EditDeploy(deployService, dto.EditDeployDto{Id: deploy.Id, Envs: append(envs, deploy.Envs...), SubDomain: deploy.SubDomain, DeployOnCommit: deploy.DeployOnCommit})
-
-	ReDeployApplication(deployService, deploy.Id)
-
 	return nil
+}
+
+func CreateService(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) error {
+	if createServiceDto.DeployId == nil {
+		return createServiceOnly(deployService, createServiceDto.ServiceName)
+	} else {
+		return createServiceLinkToDeploy(deployService, createServiceDto)
+	}
 }

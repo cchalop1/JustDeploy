@@ -31,33 +31,28 @@ const TRAEFIK_IMAGE = "traefik"
 const ROUTER_NAME = "treafik"
 
 func (d *DockerAdapter) ConnectClient(server domain.Server) error {
-	serverCerts := server.GetCertsPath()
+	var err error
 
-	client, err := client.NewClientWithOpts(
-		client.WithHost("tcp://"+server.Ip+":2376"),
-		client.WithTLSClientConfig(
-			serverCerts.CaCertPath,
-			serverCerts.CertPath,
-			serverCerts.KeyPath,
-		),
-		// client.WithTimeout(3*time.Second),
-	)
+	if server.Ip != "localhost" {
+		serverCerts := server.GetCertsPath()
 
-	if err != nil {
-		fmt.Println(err)
-		return err
+		d.client, err = client.NewClientWithOpts(
+			client.WithHost("tcp://"+server.Ip+":2376"),
+			client.WithTLSClientConfig(
+				serverCerts.CaCertPath,
+				serverCerts.CertPath,
+				serverCerts.KeyPath,
+			),
+		)
+	} else {
+		d.client, err = client.NewClientWithOpts(client.FromEnv)
 	}
 
-	_, err = client.ContainerList(context.Background(), container.ListOptions{})
-
 	if err != nil {
-		fmt.Println(err)
-		return err
+		fmt.Println("Error creating Docker client:", err)
 	}
 
-	d.client = client
-	fmt.Println("I'm connected to docker of the server ", server.Name, " With domain ", server.Ip)
-	return nil
+	return err
 }
 
 func makeTar(pathToDir string) (io.ReadCloser, error) {
@@ -339,4 +334,17 @@ func (d *DockerAdapter) RunService(service database.ServicesConfig, containerHos
 	fmt.Printf("Container %s is started", con.ID)
 
 	fmt.Println("Run image", service.Name)
+}
+
+func (d *DockerAdapter) GetLocalHostServer() domain.Server {
+	return domain.Server{
+		Id:          "local",
+		Name:        "local",
+		Ip:          "localhost",
+		Domain:      "localhost",
+		Password:    nil,
+		SshKey:      nil,
+		CreatedDate: "2021-09-01",
+		Status:      "active",
+	}
 }

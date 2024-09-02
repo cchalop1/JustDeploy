@@ -207,21 +207,21 @@ func (d *DatabaseAdapter) GetServicesByDeployId(deployId string) []domain.Servic
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	serviceList := []domain.Service{}
 	for _, s := range databaseModels.Services {
-		if s.DeployId == deployId {
+		if *s.DeployId == deployId {
 			serviceList = append(serviceList, s)
 		}
 	}
 	return serviceList
 }
 
-func (d *DatabaseAdapter) GetServiceById(id string) (domain.Service, error) {
+func (d *DatabaseAdapter) GetServiceById(id string) (*domain.Service, error) {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	for _, s := range databaseModels.Services {
 		if s.Id == id {
-			return s, nil
+			return &s, nil
 		}
 	}
-	return domain.Service{}, errors.New("service not found")
+	return &domain.Service{}, errors.New("service not found")
 }
 
 func (d *DatabaseAdapter) DeleteServiceById(id string) error {
@@ -279,4 +279,39 @@ func (d *DatabaseAdapter) GetLogs(deployId string) ([]dto.Logs, error) {
 
 func (d *DatabaseAdapter) DeleteLogFile(deployId string) error {
 	return os.Remove(internal.JUSTDEPLOY_FOLDER + "/" + deployId + ".log")
+}
+
+// refactor with new database
+func (d *DatabaseAdapter) GetServerFromService(serviceId string) (domain.Server, error) {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	for _, s := range databaseModels.Services {
+		if s.Id == serviceId {
+			if s.DeployId == nil {
+				return domain.Server{}, errors.New("deploy not found")
+			}
+			if s.DeployId == nil {
+				// return Localhost server
+				return domain.Server{
+					Id:     "localhost",
+					Name:   "localhost",
+					Ip:     "localhost",
+					Domain: "localhost",
+				}, nil
+			} else {
+				deploy, err := d.GetDeployById(*s.DeployId)
+				if err != nil {
+					return domain.Server{}, errors.New("deploy not found")
+				}
+				server, err := d.GetServerById(deploy.ServerId)
+
+				if err != nil {
+					return domain.Server{}, errors.New("server not found")
+				}
+				return server, nil
+
+			}
+
+		}
+	}
+	return domain.Server{}, errors.New("service not found")
 }

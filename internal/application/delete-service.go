@@ -5,6 +5,7 @@ import (
 
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
+	"cchalop1.com/deploy/internal/domain"
 )
 
 func DeleteService(deployService *service.DeployService, serviceId string) error {
@@ -13,7 +14,15 @@ func DeleteService(deployService *service.DeployService, serviceId string) error
 		return err
 	}
 
-	deploy, err := deployService.DatabaseAdapter.GetDeployById(s.DeployId)
+	if s.DeployId != nil {
+		return deleteServiceWithDeploy(deployService, s)
+	} else {
+		return deleteServiceWithoutDeploy(deployService, s)
+	}
+}
+
+func deleteServiceWithDeploy(deployService *service.DeployService, s *domain.Service) error {
+	deploy, err := deployService.DatabaseAdapter.GetDeployById(*s.DeployId)
 	if err != nil {
 		return err
 	}
@@ -26,13 +35,12 @@ func DeleteService(deployService *service.DeployService, serviceId string) error
 	deployService.DockerAdapter.ConnectClient(server)
 	deployService.DockerAdapter.Delete(s.Name)
 
-	err = deployService.DatabaseAdapter.DeleteServiceById(serviceId)
+	err = deployService.DatabaseAdapter.DeleteServiceById(s.Id)
 	if err != nil {
 		return err
 	}
 
 	dEnvs := []dto.Env{}
-
 	for _, dEnv := range deploy.Envs {
 		if !slices.Contains(s.Envs, dEnv) {
 			dEnvs = append(dEnvs, dEnv)
@@ -40,17 +48,18 @@ func DeleteService(deployService *service.DeployService, serviceId string) error
 	}
 
 	deploy.Envs = dEnvs
-
 	err = EditDeploy(deployService, dto.EditDeployDto{Id: deploy.Id, DeployOnCommit: deploy.DeployOnCommit, Envs: deploy.Envs, SubDomain: deploy.SubDomain})
-
-	if err != nil {
-		return err
-	}
-	err = ReDeployApplication(deployService, deploy.Id)
-
 	if err != nil {
 		return err
 	}
 
-	return err
+	return ReDeployApplication(deployService, deploy.Id)
+}
+
+func deleteServiceWithoutDeploy(deployService *service.DeployService, s *domain.Service) error {
+	server := deployService.DockerAdapter.GetLocalHostServer()
+	deployService.DockerAdapter.ConnectClient(server)
+	deployService.DockerAdapter.Delete(s.Name)
+
+	return deployService.DatabaseAdapter.DeleteServiceById(s.Id)
 }
