@@ -43,33 +43,13 @@ var servicesConfigMap = map[string]ServicesConfig{
 			{Name: "MONGO_INITDB_ROOT_PASSWORD", Value: "", IsSecret: true},
 		},
 		Config: container.Config{
-			Image: "mongo:latest",
-			Cmd:   []string{"mongo"},
+			Image: "mongo",
 			ExposedPorts: map[nat.Port]struct{}{
 				"27017/tcp": {},
 			},
 			Env: []string{
 				"MONGO_INITDB_ROOT_USERNAME=$MONGO_INITDB_ROOT_USERNAME",
 				"MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD",
-			},
-		},
-	},
-	"Mysql": {
-		Name: "MySQL",
-		Icon: "https://upload.wikimedia.org/wikipedia/fr/thumb/6/62/MySQL.svg/1200px-MySQL.svg.png",
-		Env: []dto.Env{
-			{Name: "MYSQL_ROOT_PASSWORD", Value: "", IsSecret: true},
-			{Name: "MYSQL_DATABASE", Value: "", IsSecret: false},
-		},
-		Config: container.Config{
-			Image: "mysql:latest",
-			Cmd:   []string{"mysql"},
-			ExposedPorts: map[nat.Port]struct{}{
-				"3306/tcp": {},
-			},
-			Env: []string{
-				"MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD",
-				"MYSQL_DATABASE=$MYSQL_DATABASE",
 			},
 		},
 	},
@@ -81,7 +61,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 		},
 		Config: container.Config{
 			Image: "redis:latest",
-			Cmd:   []string{"redis --requirepass $REDIS_PASSWORD"},
+			Cmd:   []string{"redis-server", "--requirepass", "$REDIS_PASSWORD"},
 			ExposedPorts: map[nat.Port]struct{}{
 				"6379/tcp": {},
 			},
@@ -95,8 +75,8 @@ var servicesConfigMap = map[string]ServicesConfig{
 			{Name: "KEYCLOAK_PASSWORD", Value: "", IsSecret: true},
 		},
 		Config: container.Config{
-			Image: "jboss/keycloak:latest",
-			Cmd:   []string{"keycloak"},
+			Image: "quay.io/keycloak/keycloak",
+			Cmd:   []string{"start-dev"},
 			ExposedPorts: map[nat.Port]struct{}{
 				"8080/tcp": {},
 			},

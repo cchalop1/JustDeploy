@@ -92,7 +92,6 @@ func createServiceLinkToDeploy(deployService *service.DeployService, createServi
 
 	envs := generateEnvsForService(service.Env)
 
-	// replace in services config all the envs with the new values
 	replaceEnvForServicesConfig(&service, envs)
 
 	containerHostname := generateContainerHostname(service.Name, createServiceDto.DeployId)
@@ -136,14 +135,13 @@ func createServiceOnly(deployService *service.DeployService, serviceName string)
 
 	envs := generateEnvsForService(service.Env)
 
-	// replace in services config all the envs with the new values
 	replaceEnvForServicesConfig(&service, envs)
 
 	containerHostname := generateContainerHostname(service.Name, nil)
 
 	deployService.DockerAdapter.RunService(service, containerHostname)
 
-	envs = append(envs, dto.Env{Name: "localhost", Value: containerHostname})
+	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_HOSTNAME", Value: "localhost"})
 
 	domainService := domain.Service{
 		Id:          utils.GenerateRandomPassword(5),
