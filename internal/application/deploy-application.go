@@ -83,7 +83,6 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 			deployService.EventAdapter.SendNewDeployEvent(eventWrapper)
 			return
 		}
-		return
 	}
 	// Pull the traefik image
 

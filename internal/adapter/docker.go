@@ -122,12 +122,13 @@ func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) error {
 
 func (d *DockerAdapter) BuildNixpacksImage(deploy *domain.Deploy, server domain.Server) error {
 	// Construct the nixpacks command
-	serverCerts := server.GetCertsPath()
 
 	nixpacksCmd := exec.Command("nixpacks", "build",
-		"--docker-host", server.Domain,
-		"--docker-tls-verify", serverCerts.CertPath,
+		// TODO: chose the ip or the domain depends of what is in the server
+		"--docker-host", server.Ip+":2376",
 		"--name", deploy.GetDockerName(),
+		"--docker-tls-verify", "1",
+		"--docker-cert-path", server.GetSshKeyPath(),
 		deploy.PathToSource)
 
 	// Set up pipes for stdout and stderr
@@ -292,6 +293,10 @@ func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) error {
 		Image:  Name,
 		Labels: Labels,
 		Env:    envToSlice(deploy.Envs),
+		ExposedPorts: nat.PortSet{
+			// TODO: get the port from the envs
+			"80/tcp": struct{}{},
+		},
 	}
 
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, &network.NetworkingConfig{

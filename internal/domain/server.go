@@ -40,3 +40,7 @@ func (s *Server) GetCertsPath() ServerCertsPath {
 		KeyPath:    internal.CERT_DOCKER_FOLDER + "/" + s.Id + "/key.pem",
 	}
 }
+
+func (s *Server) GetSshKeyPath() string {
+	return internal.CERT_DOCKER_FOLDER + "/" + s.Id + "/"
+}
