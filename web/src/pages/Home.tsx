@@ -25,11 +25,7 @@ export default function Home() {
   return (
     <>
       <div className="mt-40">
-        <div className="flex justify-between">
-          <div className="text-2xl font-bold">Servers</div>
-          <Button onClick={onClickNewServer}>New Server</Button>
-        </div>
-        <ServerList serverList={serverList} />
+        <ServicesLocalContainer />
       </div>
       <div className="mt-10">
         <div className="flex justify-between">
@@ -40,7 +36,13 @@ export default function Home() {
         </div>
         <DeployList deployList={deployList} />
       </div>
-      <ServicesLocalContainer />
+      <div className="mt-10 mb-20">
+        <div className="flex justify-between">
+          <div className="text-2xl font-bold">Servers</div>
+          <Button onClick={onClickNewServer}>New Server</Button>
+        </div>
+        <ServerList serverList={serverList} />
+      </div>
     </>
   );
 }
