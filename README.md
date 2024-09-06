@@ -4,6 +4,12 @@
 
 JustDeploy is an open-source application designed to simplify the deployment process for developers. It allows you to deploy your applications on your own server. JustDeploy handles server connection, Docker installation, and secure certificate generation, making the deployment process seamless and efficient. JustDeploy read your app source (.env, Dockfile, docker-compose) and allow you to deploy it.
 
+## How JustDeploy work
+
+This CLI tool is designed to be installed directly on the developer’s computer, not on the deployment server. It connects remotely to the server via the Docker socket, allowing container management and deployment orchestration from the local machine. This eliminates the need for server-side installation, streamlining integration with remote environments and ensuring smooth interaction between the developer's machine and the server.
+
+![Schema image](./images/JustDeploySchema.png)
+
 JustDeploy is that it **doesn't install anything on your server other than your application.** This makes it an ideal choice for small servers with limited resources or development environments
 
 ## Features
