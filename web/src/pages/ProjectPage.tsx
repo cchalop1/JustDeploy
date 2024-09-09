@@ -1,4 +1,5 @@
 import CommandModal from "@/components/databaseServices/CommandModal";
+import DatabaseServiceCard from "@/components/databaseServices/DatabaseServiceCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { createServiceApi } from "@/services/createServiceApi";
@@ -48,12 +49,13 @@ export default function ProjectPage() {
           <Button onClick={() => setOpen(true)}>Create +</Button>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 mt-3">
         {project.services.map((service) => (
-          <Card key={service.id} className="p-3">
-            <div className="text-lg font-bold">{service.name}</div>
-            <div>{service.id}</div>
-          </Card>
+          <DatabaseServiceCard
+            key={service.id}
+            service={service}
+            setServiceToDelete={(s) => {}}
+          />
         ))}
         {loading && <Card className="p-3">Loading...</Card>}
       </div>
