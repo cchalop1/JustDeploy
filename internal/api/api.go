@@ -1,7 +1,6 @@
 package api
 
 import (
-	"cchalop1.com/deploy/internal/adapter"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -24,9 +23,6 @@ func NewApplication() *Application {
 	}
 }
 
-func (app *Application) StartServer(openBrowser bool) {
-	if openBrowser {
-		adapter.OpenBrowser("http://localhost:8080")
-	}
+func (app *Application) StartServer() {
 	app.Echo.Start(":8080")
 }

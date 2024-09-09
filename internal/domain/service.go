@@ -11,6 +11,7 @@ type Service struct {
 	Status      string    `json:"status"`
 	Host        string    `json:"host"`
 	DeployId    *string   `json:"deployId"`
+	ProjectId   *string   `json:"ProjectId"`
 	ImageName   string    `json:"imageName"`
 	ImageUrl    string    `json:"imageUrl"`
 }

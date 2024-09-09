@@ -43,4 +43,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	app.Echo.GET("/api/deploy/:id/loading", handlers.SubscriptionCreateDeployLoadingState(deployService))
 
 	app.Echo.GET("/api/local/services", handlers.GetLocalServicesHandler(deployService))
+
+	app.Echo.GET("/api/project/:id", handlers.GetProjectByIdHandler(deployService))
+
 }

@@ -7,6 +7,7 @@ import (
 
 	"cchalop1.com/deploy/internal/adapter"
 	"cchalop1.com/deploy/internal/api"
+	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/application"
 	"cchalop1.com/deploy/internal/web"
@@ -39,6 +40,27 @@ func main() {
 	// TODO: try server connection
 	// TODO: do health check
 
+	currentPath := filesystemAdapter.GetCurrentPath()
+
+	project := databaseAdapter.GetProjectByPath(currentPath)
+
+	if project == nil {
+		createProjectDto := dto.CreateProjectDto{
+			Name: filesystemAdapter.GetFolderName(currentPath),
+			Path: currentPath,
+		}
+
+		projectId, err := application.CreateProject(&deployService, createProjectDto)
+		if err != nil {
+			fmt.Println("Erreur lors de la création du projet:", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Projet créé avec succès avec l'ID: %s\n", projectId)
+	} else {
+		fmt.Printf("Projet déjà existant: %s\n", project.Name)
+	}
+
 	getArgsOptions()
 
 	if flags.help {
@@ -52,7 +74,11 @@ func main() {
 		api.InitValidator(app)
 		api.CreateRoutes(app, &deployService)
 		web.CreateMiddlewareWebFiles(app)
-		app.StartServer(!flags.noBrowser)
+		if !flags.noBrowser {
+			fmt.Println("Opening browser")
+			adapter.OpenBrowser("http://localhost:8080/project/" + project.Id)
+		}
+		app.StartServer()
 
 	}
 }

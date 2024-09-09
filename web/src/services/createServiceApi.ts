@@ -3,7 +3,8 @@ import { ResponseApi, callApi } from "./api";
 export type CreateServiceApi = {
   serviceName: string;
   fromDockerCompose: boolean;
-  deployId: string | undefined;
+  deployId?: string;
+  projectId?: string;
 };
 
 export async function createServiceApi(body: CreateServiceApi) {

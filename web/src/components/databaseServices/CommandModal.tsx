@@ -1,4 +1,4 @@
-import { FileSlidersIcon } from "lucide-react";
+import { FileSlidersIcon, Folder } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -18,6 +18,7 @@ type CommandModalProps = {
   serviceFromDockerCompose: ResponseServiceFromDockerComposeDto;
   setOpen: (open: boolean) => void;
   createService: (serviceName: string, fromDockerCompose: boolean) => void;
+  currentPath?: string;
 };
 
 export default function CommandModal({
@@ -26,12 +27,25 @@ export default function CommandModal({
   preConfiguredServices,
   serviceFromDockerCompose,
   createService,
+  currentPath,
 }: CommandModalProps) {
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
       <CommandInput placeholder="Type to search and lauch a service in the list..." />
       <CommandList onSelect={() => setOpen(false)}>
         <CommandEmpty>No results found.</CommandEmpty>
+        {currentPath && (
+          <CommandGroup heading="Load your current folder">
+            <CommandItem
+              className="flex gap-3"
+              // TODO: edit to load the current folder as a service
+              onSelect={() => createService(currentPath, false)}
+            >
+              <Folder className="w-5" />
+              <span className="h-4">{currentPath}</span>
+            </CommandItem>
+          </CommandGroup>
+        )}
         {serviceFromDockerCompose && (
           <CommandGroup heading="Service from your docker compose file">
             {serviceFromDockerCompose.map((s) => (
@@ -47,7 +61,7 @@ export default function CommandModal({
           </CommandGroup>
         )}
         <CommandSeparator />
-        <CommandGroup heading="Other services">
+        <CommandGroup heading="Other databases">
           {preConfiguredServices.map((s) => (
             <NewServiceItem
               key={s.name}

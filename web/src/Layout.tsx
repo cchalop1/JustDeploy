@@ -4,11 +4,14 @@ import Footer from "@/components/Footer";
 
 export default function Layout() {
   return (
-    <div className="flex justify-center">
-      <div className="w-2/4 mt-10">
-        <Header />
+    // <div className="flex justify-center">
+    //   <div className="w-2/4 mt-10">
+
+    <div className="">
+      <div className="">
+        {/* <Header /> */}
         <Outlet />
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </div>
   );

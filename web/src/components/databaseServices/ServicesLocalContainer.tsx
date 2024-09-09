@@ -21,7 +21,6 @@ export default function ServicesLocalContainer() {
 
   return (
     <div className="mt-10 mb-20">
-      <div className="text-2xl font-bold mb-2">Local Databases</div>
       <ServicesManagements
         services={localServices}
         createService={createService}

@@ -120,10 +120,10 @@ func createServiceLinkToDeploy(deployService *service.DeployService, createServi
 	return nil
 }
 
-func createServiceOnly(deployService *service.DeployService, serviceName string) error {
+func createServiceOnly(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) error {
 	server := deployService.DockerAdapter.GetLocalHostServer()
 
-	service, err := database.GetServiceByName(serviceName)
+	service, err := database.GetServiceByName(createServiceDto.ServiceName)
 
 	if err != nil {
 		return err
@@ -146,6 +146,7 @@ func createServiceOnly(deployService *service.DeployService, serviceName string)
 	domainService := domain.Service{
 		Id:          utils.GenerateRandomPassword(5),
 		DeployId:    nil,
+		ProjectId:   createServiceDto.ProjectId,
 		Name:        containerHostname,
 		Envs:        envs,
 		VolumsNames: []string{},
@@ -161,7 +162,7 @@ func createServiceOnly(deployService *service.DeployService, serviceName string)
 
 func CreateService(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) error {
 	if createServiceDto.DeployId == nil {
-		return createServiceOnly(deployService, createServiceDto.ServiceName)
+		return createServiceOnly(deployService, createServiceDto)
 	} else {
 		return createServiceLinkToDeploy(deployService, createServiceDto)
 	}

@@ -71,8 +71,10 @@ func (d *DatabaseAdapter) Init() {
 	if !d.databaseFileIsCreated() {
 		d.createFoldeJustDeployFolderIfDontExist()
 		databaseData := domain.DatabaseModelsType{
-			Servers: []domain.Server{},
-			Deploys: []domain.Deploy{},
+			Servers:  []domain.Server{},
+			Deploys:  []domain.Deploy{},
+			Services: []domain.Service{},
+			Projects: []domain.Project{}, // Add this line
 		}
 		d.writeDeployConfigInDataBaseFile(databaseData)
 	}
@@ -325,4 +327,56 @@ func (d *DatabaseAdapter) GetServerFromService(serviceId string) (domain.Server,
 		}
 	}
 	return domain.Server{}, errors.New("service not found")
+}
+
+// Project
+
+func (d *DatabaseAdapter) SaveProject(project domain.Project) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+
+	// Check if the project already exists
+	for i, existingProject := range databaseModels.Projects {
+		if existingProject.Id == project.Id {
+			// Update existing project
+			databaseModels.Projects[i] = project
+			return d.writeDeployConfigInDataBaseFile(databaseModels)
+		}
+	}
+
+	// Add new project
+	databaseModels.Projects = append(databaseModels.Projects, project)
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}
+
+// Project
+func (d *DatabaseAdapter) GetProjectById(id string) (*domain.Project, error) {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	for _, project := range databaseModels.Projects {
+		if project.Id == id {
+			return &project, nil
+		}
+	}
+	return nil, errors.New("project not found")
+}
+
+func (d *DatabaseAdapter) GetProjectByPath(path string) *domain.Project {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+
+	for _, project := range databaseModels.Projects {
+		if project.Path == path {
+			return &project
+		}
+	}
+	return nil
+}
+
+func (d *DatabaseAdapter) GetServicesByProjectId(projectId string) []domain.Service {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	serviceList := []domain.Service{}
+	for _, s := range databaseModels.Services {
+		if s.ProjectId != nil && *s.ProjectId == projectId {
+			serviceList = append(serviceList, s)
+		}
+	}
+	return serviceList
 }
