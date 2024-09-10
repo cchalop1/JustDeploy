@@ -13,7 +13,7 @@ func CreateProject(deployService *service.DeployService, createProjectDto dto.Cr
 		Name:     createProjectDto.Name,
 		Path:     createProjectDto.Path,
 		Services: []domain.Service{},
-		Deploy:   []domain.Deploy{},
+		Apps:     []domain.App{},
 	}
 
 	err := deployService.DatabaseAdapter.SaveProject(project)

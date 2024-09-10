@@ -1,4 +1,4 @@
-import { FileSlidersIcon, Folder } from "lucide-react";
+import { FileSlidersIcon, Folder, Plus } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -12,12 +12,18 @@ import NewServiceItem from "./NewServiceItem";
 import { ServiceDto } from "@/services/getServicesApi";
 import { ResponseServiceFromDockerComposeDto } from "@/services/getServicesFromDockerCompose";
 
+export type CreateServiceFunc = (parms: {
+  serviceName?: string;
+  path?: string;
+  fromDockerCompose?: boolean;
+}) => void;
+
 type CommandModalProps = {
   open: boolean;
   preConfiguredServices: ServiceDto[];
   serviceFromDockerCompose: ResponseServiceFromDockerComposeDto;
   setOpen: (open: boolean) => void;
-  createService: (serviceName: string, fromDockerCompose: boolean) => void;
+  create: CreateServiceFunc;
   currentPath?: string;
 };
 
@@ -26,7 +32,7 @@ export default function CommandModal({
   setOpen,
   preConfiguredServices,
   serviceFromDockerCompose,
-  createService,
+  create,
   currentPath,
 }: CommandModalProps) {
   return (
@@ -38,20 +44,21 @@ export default function CommandModal({
           <CommandGroup heading="Load your current folder">
             <CommandItem
               className="flex gap-3"
-              // TODO: edit to load the current folder as a service
-              onSelect={() => createService(currentPath, false)}
+              onSelect={() => create({ path: currentPath })}
             >
               <Folder className="w-5" />
               <span className="h-4">{currentPath}</span>
             </CommandItem>
           </CommandGroup>
         )}
-        {serviceFromDockerCompose && (
+        {serviceFromDockerCompose && serviceFromDockerCompose.length > 0 && (
           <CommandGroup heading="Service from your docker compose file">
             {serviceFromDockerCompose.map((s) => (
               <CommandItem
                 className="flex gap-3"
-                onSelect={() => createService(s, true)}
+                onSelect={() =>
+                  create({ serviceName: s, fromDockerCompose: true })
+                }
                 key={s}
               >
                 <FileSlidersIcon className="w-5"></FileSlidersIcon>
@@ -66,10 +73,19 @@ export default function CommandModal({
             <NewServiceItem
               key={s.name}
               service={s}
-              onSelect={(serviceName) => createService(serviceName, false)}
+              onSelect={(serviceName) => create({ serviceName })}
             />
           ))}
-          {/* TODO: command item to add new service link to github issue template */}
+
+          <CommandItem
+            onSelect={() => {
+              window.open("https://github.com/cchalop1/JustDeploy/issues/new");
+            }}
+            className="flex gap-3"
+          >
+            <Plus className="w-5" />
+            <span className="h-4">Add new databases</span>
+          </CommandItem>
         </CommandGroup>
       </CommandList>
     </CommandDialog>

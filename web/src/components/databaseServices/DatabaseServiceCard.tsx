@@ -1,13 +1,6 @@
 import { Service } from "@/services/getServicesByDeployId";
 import { Card } from "../ui/card";
 import Status from "../ServerStatus";
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "../ui/tooltip";
-import { Copy } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
 
@@ -38,23 +31,7 @@ export default function DatabaseServiceCard({
         </div>
       </div>
       <div className="flex gap-3 items-center">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger
-              className="hover:bg-gray-200 p-1 rounded cursor-pointer"
-              onClick={copyEnv}
-            >
-              <Copy className="w-6 h-6" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>
-                {isCopied
-                  ? "Environment variable successfully copied!"
-                  : "Click to copy environment variable"}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        Click to copy
         <Button
           variant="destructive"
           onClick={() => setServiceToDelete(service)}

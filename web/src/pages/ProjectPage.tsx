@@ -1,7 +1,10 @@
-import CommandModal from "@/components/databaseServices/CommandModal";
+import CommandModal, {
+  CreateServiceFunc,
+} from "@/components/databaseServices/CommandModal";
 import DatabaseServiceCard from "@/components/databaseServices/DatabaseServiceCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { createAppApi } from "@/services/createAppApi";
 import { createServiceApi } from "@/services/createServiceApi";
 import { getProjectByIdApi, ProjectDto } from "@/services/getProjectById";
 import {
@@ -31,6 +34,30 @@ export default function ProjectPage() {
     setProject(project);
   }
 
+  const create: CreateServiceFunc = async ({
+    fromDockerCompose,
+    path,
+    serviceName,
+  }) => {
+    setLoading(true);
+    setOpen(false);
+    if (!project) return;
+    if (path) {
+      await createAppApi({
+        path,
+        projectId: project.id,
+      });
+    } else {
+      await createServiceApi({
+        serviceName,
+        fromDockerCompose,
+        projectId: project.id,
+      });
+    }
+    await getProjectById();
+    setLoading(false);
+  };
+
   useEffect(() => {
     getProjectById();
     getServices();
@@ -50,6 +77,14 @@ export default function ProjectPage() {
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3 mt-3">
+        {project.apps.map((app) => (
+          <Card key={app.id} className="p-3">
+            <div className="text-xl font-bold">{app.name}</div>
+            <div>{app.path}</div>
+          </Card>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-3 mt-3">
         {project.services.map((service) => (
           <DatabaseServiceCard
             key={service.id}
@@ -59,24 +94,13 @@ export default function ProjectPage() {
         ))}
         {loading && <Card className="p-3">Loading...</Card>}
       </div>
-      {/* // TODO: move to a other components */}
       <CommandModal
         open={openModal}
         setOpen={setOpen}
         preConfiguredServices={preConfiguredServices}
         serviceFromDockerCompose={[]}
         currentPath={project.path}
-        createService={async (serviceName, fromDockerCompose) => {
-          setLoading(true);
-          setOpen(false);
-          await createServiceApi({
-            serviceName,
-            fromDockerCompose,
-            projectId: project.id,
-          });
-          await getProjectById();
-          setLoading(false);
-        }}
+        create={create}
       />
     </div>
   );
