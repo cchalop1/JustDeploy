@@ -22,7 +22,10 @@ export default function DatabaseServiceCard({
   }
 
   return (
-    <Card key={service.name} className="flex justify-between p-3 mb-3 ">
+    <Card
+      key={service.name}
+      className="flex justify-between p-3 mb-3 hover:shadow-md cursor-pointer"
+    >
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-5">
           <img className="w-10" src={service.imageUrl}></img>

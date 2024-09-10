@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Card } from "../ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import ModalDeleteConfirmation from "../modals/ModalDeleteConfirmation";
-import { deleteServiceApi } from "@/services/deleteServiceApi";
+import { deleteServiceByIdApi } from "@/services/deleteServiceApi";
 import DatabaseServiceCard from "./DatabaseServiceCard";
 import DatabaseServiceCardLoading from "./DatabaseServiceCardLoading";
 
@@ -33,7 +33,7 @@ export default function ServiceListDeploy({
       return;
     }
     try {
-      await deleteServiceApi(serviceId, deployId);
+      await deleteServiceByIdApi(serviceId);
       await fetchServiceList(deployId);
       // TODO: send a toast to the user
     } catch (e) {

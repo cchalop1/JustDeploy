@@ -12,7 +12,6 @@ func GetProjectByIdHandler(deployService *service.DeployService) echo.HandlerFun
 	return func(c echo.Context) error {
 		projectId := c.Param("id")
 		project, err := deployService.DatabaseAdapter.GetProjectById(projectId)
-		project.Services = deployService.DatabaseAdapter.GetServicesByProjectId(projectId)
 
 		if err != nil {
 			return c.JSON(http.StatusNotFound, dto.ResponseApi{Message: err.Error()})

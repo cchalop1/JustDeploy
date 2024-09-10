@@ -1,6 +1,7 @@
 package application
 
 import (
+	"errors"
 	"strings"
 
 	"cchalop1.com/deploy/internal/adapter/database"
@@ -49,6 +50,13 @@ func generateContainerHostname(serviceName string, deployId *string) string {
 	}
 
 	return serviceName + utils.GenerateRandomPassword(5)
+}
+
+func getPortsForService(service database.ServicesConfig) string {
+	for port := range service.Config.ExposedPorts {
+		return strings.Split(string(port), "/")[0]
+	}
+	return ""
 }
 
 func createServiceLinkToDeploy(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) error {
@@ -120,13 +128,17 @@ func createServiceLinkToDeploy(deployService *service.DeployService, createServi
 	return nil
 }
 
-func createServiceOnly(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) error {
+func createServiceForProject(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) error {
 	server := deployService.DockerAdapter.GetLocalHostServer()
 
 	service, err := database.GetServiceByName(createServiceDto.ServiceName)
 
 	if err != nil {
 		return err
+	}
+
+	if createServiceDto.ProjectId == nil {
+		return errors.New("ProjectId is required")
 	}
 
 	deployService.DockerAdapter.ConnectClient(server)
@@ -143,6 +155,10 @@ func createServiceOnly(deployService *service.DeployService, createServiceDto dt
 
 	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_HOSTNAME", Value: "localhost"})
 
+	port := getPortsForService(service)
+
+	envs = append(envs, dto.Env{Name: "PORT", Value: port})
+
 	domainService := domain.Service{
 		Id:          utils.GenerateRandomPassword(5),
 		DeployId:    nil,
@@ -155,14 +171,22 @@ func createServiceOnly(deployService *service.DeployService, createServiceDto dt
 		ImageUrl:    service.Icon,
 	}
 
-	deployService.DatabaseAdapter.SaveService(domainService)
+	project, err := deployService.DatabaseAdapter.GetProjectById(*createServiceDto.ProjectId)
+
+	if err != nil {
+		return err
+	}
+
+	project.Services = append(project.Services, domainService)
+
+	deployService.DatabaseAdapter.SaveProject(*project)
 
 	return nil
 }
 
 func CreateService(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) error {
 	if createServiceDto.DeployId == nil {
-		return createServiceOnly(deployService, createServiceDto)
+		return createServiceForProject(deployService, createServiceDto)
 	} else {
 		return createServiceLinkToDeploy(deployService, createServiceDto)
 	}

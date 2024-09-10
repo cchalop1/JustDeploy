@@ -13,12 +13,12 @@ func CreateApp(deployService *service.DeployService, createApp dto.CreateAppDto)
 	if err != nil {
 		return domain.App{}, err
 	}
+	// TODO: check if the app already exists with path and product id
 
 	app := domain.App{
 		Id:   utils.GenerateRandomPassword(8),
 		Path: createApp.Path,
 		Name: deployService.FilesystemAdapter.GetFolderName(createApp.Path),
-
 		// TODO: get there information from the project
 		IsDockerFile:    false,
 		IsDockerCompose: false,

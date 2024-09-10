@@ -50,6 +50,8 @@ func main() {
 			Path: currentPath,
 		}
 
+		application.CreateApp(&deployService, dto.CreateAppDto{Path: currentPath, ProjectId: project.Id})
+
 		projectId, err := application.CreateProject(&deployService, createProjectDto)
 		if err != nil {
 			fmt.Println("Erreur lors de la création du projet:", err)

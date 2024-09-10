@@ -1,6 +1,7 @@
 package application
 
 import (
+	"fmt"
 	"slices"
 
 	"cchalop1.com/deploy/internal/api/dto"
@@ -9,15 +10,28 @@ import (
 )
 
 func DeleteService(deployService *service.DeployService, serviceId string) error {
-	s, err := deployService.DatabaseAdapter.GetServiceById(serviceId)
+	service, err := deployService.DatabaseAdapter.GetServiceById(serviceId)
+
 	if err != nil {
-		return err
+		fmt.Println(err)
 	}
 
-	if s.DeployId != nil {
-		return deleteServiceWithDeploy(deployService, s)
+	projects := deployService.DatabaseAdapter.GetProjects()
+
+	for _, p := range projects {
+		for _, s := range p.Services {
+			if s.Id == serviceId {
+				service = &s
+			}
+		}
+	}
+
+	// TODO: move to a other method
+
+	if service.DeployId != nil {
+		return deleteServiceWithDeploy(deployService, service)
 	} else {
-		return deleteServiceWithoutDeploy(deployService, s)
+		return deleteServiceWithoutDeploy(deployService, service)
 	}
 }
 

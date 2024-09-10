@@ -245,6 +245,16 @@ func (d *DatabaseAdapter) DeleteServiceById(id string) error {
 			newServices = append(newServices, s)
 		}
 	}
+
+	// TODO: move to other methode
+	for i, p := range databaseModels.Projects {
+		for j, s := range p.Services {
+			if s.Id == id {
+				databaseModels.Projects[i].Services = append(databaseModels.Projects[i].Services[:j], databaseModels.Projects[i].Services[j+1:]...)
+				break
+			}
+		}
+	}
 	databaseModels.Services = newServices
 	return d.writeDeployConfigInDataBaseFile(databaseModels)
 }
@@ -379,4 +389,9 @@ func (d *DatabaseAdapter) GetServicesByProjectId(projectId string) []domain.Serv
 		}
 	}
 	return serviceList
+}
+
+func (d *DatabaseAdapter) GetProjects() []domain.Project {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	return databaseModels.Projects
 }
