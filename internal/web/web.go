@@ -12,14 +12,32 @@ import (
 //go:embed dist
 var webAssets embed.FS
 
-func CreateMiddlewareWebFiles() {
+func EnableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173") // Allow all origins
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		// Handle preflight (OPTIONS) request
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		// Pass the request to the next handler
+		next.ServeHTTP(w, r)
+	})
+}
+
+func CreateMiddlewareWebFiles(mux *http.ServeMux) {
 	distFS, err := fs.Sub(webAssets, "dist")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Handle requests
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Suppression du '/' initial pour obtenir le chemin relatif
 		filePath := r.URL.Path
 		if filePath == "/" {

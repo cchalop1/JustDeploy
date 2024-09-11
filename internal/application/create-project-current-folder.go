@@ -8,7 +8,7 @@ import (
 	"cchalop1.com/deploy/internal/api/service"
 )
 
-func CreateProjectForCurrentFolder(deployService *service.DeployService) {
+func CreateProjectForCurrentFolder(deployService *service.DeployService) (string, error) {
 	currentPath := deployService.FilesystemAdapter.GetCurrentPath()
 	project := deployService.DatabaseAdapter.GetProjectByPath(currentPath)
 
@@ -26,8 +26,9 @@ func CreateProjectForCurrentFolder(deployService *service.DeployService) {
 
 		CreateApp(deployService, dto.CreateAppDto{Path: currentPath, ProjectId: projectId})
 		fmt.Printf("Projet créé avec succès avec l'ID: %s\n", projectId)
+		return projectId, nil
 	} else {
 		fmt.Printf("Projet déjà existant: %s\n", project.Name)
+		return project.Id, nil
 	}
-
 }

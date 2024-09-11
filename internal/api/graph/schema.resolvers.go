@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"cchalop1.com/deploy/internal/api/graph/model"
+	"cchalop1.com/deploy/internal/application"
 )
 
 // CreateService is the resolver for the createService field.
@@ -18,7 +19,7 @@ func (r *mutationResolver) CreateService(ctx context.Context, input model.NewSer
 
 // GetProject is the resolver for the getProject field.
 func (r *queryResolver) GetProject(ctx context.Context, id string) (*model.Project, error) {
-	panic(fmt.Errorf("not implemented: GetProject - getProject"))
+	return application.GetProjectById(r.deployService, id)
 }
 
 // Mutation returns MutationResolver implementation.

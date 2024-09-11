@@ -40,7 +40,11 @@ func main() {
 		EventAdapter:      adapter.NewAdapterEvent(),
 	}
 
-	application.CreateProjectForCurrentFolder(&deployService)
+	projectID, err := application.CreateProjectForCurrentFolder(&deployService)
+
+	if err != nil {
+		panic("Error creating project: " + err.Error())
+	}
 
 	getArgsOptions()
 
@@ -49,15 +53,21 @@ func main() {
 	}
 
 	port := "8080"
+	mux := http.NewServeMux()
+	// Add any other routes if needed, for example:
+	// mux.HandleFunc("/some-path", someHandler)
+	web.CreateMiddlewareWebFiles(mux)
+	createGraphServer(&deployService, port, mux)
 
-	web.CreateMiddlewareWebFiles()
+	// Wrap the mux with the CORS middleware
+	handlerWithCORS := web.EnableCORS(mux)
+
 	if !flags.noBrowser {
-		adapter.OpenBrowser("http://localhost:" + port)
+		adapter.OpenBrowser("http://localhost:" + port + "/project/" + projectID)
 	}
-	createGraphServer(&deployService, port)
 
 	log.Println("Server started on :" + port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, handlerWithCORS))
 
 	// if flags.redeploy.deployId != "" {
 	// 	application.ReDeployApplication(&deployService, flags.redeploy.deployId)
@@ -69,14 +79,11 @@ func main() {
 	// }
 }
 
-func createGraphServer(deployService *service.DeployService, port string) {
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+func createGraphServer(deployService *service.DeployService, port string, mux *http.ServeMux) {
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: graph.NewResolver(deployService)}))
 
-	http.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
-	http.Handle("/graphql", srv)
-
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	mux.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
+	mux.Handle("/graphql", srv)
 }
 
 func getArgsOptions() {
