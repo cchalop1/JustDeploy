@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"cchalop1.com/deploy/internal/adapter/database"
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/http/dto"
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/domain"
 	"cchalop1.com/deploy/internal/utils"

@@ -9,7 +9,7 @@ import (
 	"os/exec"
 
 	"cchalop1.com/deploy/internal/adapter/database"
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/http/dto"
 	"cchalop1.com/deploy/internal/domain"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"

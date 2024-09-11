@@ -2,7 +2,7 @@ package domain
 
 import (
 	"cchalop1.com/deploy/internal"
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/http/dto"
 )
 
 type Server struct {

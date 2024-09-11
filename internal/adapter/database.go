@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"cchalop1.com/deploy/internal"
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/http/dto"
 	"cchalop1.com/deploy/internal/domain"
 )
 

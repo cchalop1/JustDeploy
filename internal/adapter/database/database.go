@@ -1,7 +1,7 @@
 package database
 
 import (
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/http/dto"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/go-connections/nat"
 )

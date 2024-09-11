@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strconv"
 
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/http/dto"
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/domain"
 	"cchalop1.com/deploy/internal/utils"

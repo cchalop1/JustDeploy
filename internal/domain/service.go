@@ -1,6 +1,6 @@
 package domain
 
-import "cchalop1.com/deploy/internal/api/dto"
+import "cchalop1.com/deploy/internal/api/http/dto"
 
 // TODO: change to save serviceConfig
 type Service struct {

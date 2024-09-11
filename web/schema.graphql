@@ -1,0 +1,58 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"""
+The @defer directive may be specified on a fragment spread to imply de-prioritization, that causes the fragment to be omitted in the initial response, and delivered as a subsequent response afterward. A query with @defer directive will cause the request to potentially return multiple responses, where non-deferred data is delivered in the initial response and data deferred delivered in a subsequent response. @include and @skip take precedence over @defer.
+"""
+directive @defer(if: Boolean = true, label: String) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+type App {
+  id: ID!
+  isDockerCompose: Boolean!
+  isDockerFile: Boolean!
+  name: String!
+  path: String!
+}
+
+type Env {
+  name: String!
+  value: String!
+}
+
+type Mutation {
+  createService(input: NewService!): Service!
+}
+
+input NewService {
+  deployId: String
+  fromDockerCompose: Boolean!
+  projectId: String
+  serviceName: String!
+}
+
+type Project {
+  apps: [App!]!
+  id: ID!
+  name: String!
+  path: String!
+  services: [Service!]!
+}
+
+type Query {
+  getProject(id: ID!): Project
+}
+
+type Service {
+  deployId: String
+  envs: [Env!]!
+  host: String!
+  id: ID!
+  imageName: String!
+  imageUrl: String!
+  name: String!
+  projectId: String
+  status: String!
+  volumsNames: [String!]!
+}

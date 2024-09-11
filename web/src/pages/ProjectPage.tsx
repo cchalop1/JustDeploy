@@ -1,7 +1,6 @@
 import CommandModal, {
   CreateServiceFunc,
 } from "@/components/databaseServices/CommandModal";
-import DatabaseServiceCard from "@/components/databaseServices/DatabaseServiceCard";
 import ServiceCard from "@/components/ServiceCard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,9 +17,33 @@ import {
   ServiceDto,
 } from "@/services/getServicesApi";
 import { Service } from "@/services/getServicesByDeployId";
-import { Cross, Folder, RemoveFormatting, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Folder, X } from "lucide-react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
+
+import { useQuery } from "@tanstack/react-query";
+import request from "graphql-request";
+import { graphql } from "@/graphql";
+
+const getProjectQueryDocument = graphql(/* GraphQL */ `
+  query getProjectQuery($id: ID!) {
+    getProject(id: $id) {
+      id
+      name
+      path
+      apps {
+        id
+        name
+        path
+      }
+      services {
+        id
+        name
+        status
+      }
+    }
+  }
+`);
 
 export default function ProjectPage() {
   const { id } = useParams();
@@ -34,52 +57,62 @@ export default function ProjectPage() {
     Service | AppDto | null
   >(null);
 
-  async function getServices() {
-    const res = await getPreConfiguredServiceListApi();
-    setPreConfiguredServices(res);
-  }
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["project", id],
+    queryFn: async () =>
+      request("http://localhost:8080/graphql", getProjectQueryDocument, {
+        id: id,
+      }),
+  });
 
-  async function getProjectById() {
-    if (!id) return;
-    const project = await getProjectByIdApi(id);
-    setProject(project);
-  }
+  console.log(data);
 
-  const create: CreateServiceFunc = async ({
-    fromDockerCompose,
-    path,
-    serviceName,
-  }) => {
-    setLoading(true);
-    setOpen(false);
-    if (!project) return;
-    if (path) {
-      await createAppApi({
-        path,
-        projectId: project.id,
-      });
-    } else {
-      await createServiceApi({
-        serviceName,
-        fromDockerCompose,
-        projectId: project.id,
-      });
-    }
-    await getProjectById();
-    setLoading(false);
-  };
+  // async function getServices() {
+  //   const res = await getPreConfiguredServiceListApi();
+  //   setPreConfiguredServices(res);
+  // }
 
-  const deleteSelectedService = async () => {
-    if (!serviceSelected) return;
-    await deleteServiceByIdApi(serviceSelected.id);
-    setServiceSelected(null);
-    await getProjectById();
-  };
+  // async function getProjectById() {
+  //   if (!id) return;
+  //   const project = await getProjectByIdApi(id);
+  //   setProject(project);
+  // }
 
-  useEffect(() => {
-    getProjectById();
-    getServices();
-  }, [id]);
+  // const create: CreateServiceFunc = async ({
+  //   fromDockerCompose,
+  //   path,
+  //   serviceName,
+  // }) => {
+  //   setLoading(true);
+  //   setOpen(false);
+  //   if (!project) return;
+  //   if (path) {
+  //     await createAppApi({
+  //       path,
+  //       projectId: project.id,
+  //     });
+  //   } else {
+  //     await createServiceApi({
+  //       serviceName,
+  //       fromDockerCompose,
+  //       projectId: project.id,
+  //     });
+  //   }
+  //   await getProjectById();
+  //   setLoading(false);
+  // };
+
+  // const deleteSelectedService = async () => {
+  //   if (!serviceSelected) return;
+  //   await deleteServiceByIdApi(serviceSelected.id);
+  //   setServiceSelected(null);
+  //   await getProjectById();
+  // };
+
+  // useEffect(() => {
+  //   getProjectById();
+  //   getServices();
+  // }, [id]);
 
   if (!project) return <div>Loading...</div>;
 

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"cchalop1.com/deploy/internal/api/handlers"
+	"cchalop1.com/deploy/internal/api/http/handlers"
 	"cchalop1.com/deploy/internal/api/service"
 )
 

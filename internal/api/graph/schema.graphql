@@ -1,0 +1,55 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+# schema.graphql
+
+type Service {
+  id: ID!
+  name: String!
+  envs: [Env!]!
+  volumsNames: [String!]!
+  status: String!
+  host: String!
+  deployId: String
+  projectId: String
+  imageName: String!
+  imageUrl: String!
+}
+
+type App {
+  id: ID!
+  path: String!
+  name: String!
+  isDockerFile: Boolean!
+  isDockerCompose: Boolean!
+}
+
+type Project {
+  id: ID!
+  name: String!
+  path: String!
+  services: [Service!]!
+  apps: [App!]!
+}
+
+type Env {
+  name: String!
+  value: String!
+}
+
+input NewService {
+  serviceName: String!
+  fromDockerCompose: Boolean!
+  deployId: String
+  projectId: String
+}
+
+# Queries
+type Query {
+  getProject(id: ID!): Project
+}
+
+# Mutations
+type Mutation {
+  createService(input: NewService!): Service!
+}

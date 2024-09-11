@@ -11,7 +11,7 @@ import (
 
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/adapter/database"
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/http/dto"
 	"cchalop1.com/deploy/internal/domain"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/go-connections/nat"

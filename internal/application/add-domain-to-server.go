@@ -3,7 +3,7 @@ package application
 import (
 	"fmt"
 
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/http/dto"
 	"cchalop1.com/deploy/internal/api/service"
 )
 

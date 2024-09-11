@@ -3,7 +3,7 @@ package domain
 import (
 	"strings"
 
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/http/dto"
 )
 
 // TODO: replace the status by a enum

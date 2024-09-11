@@ -3,14 +3,17 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 
 	"cchalop1.com/deploy/internal/adapter"
-	"cchalop1.com/deploy/internal/api"
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/graph"
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/application"
 	"cchalop1.com/deploy/internal/web"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 )
 
 var flags struct {
@@ -22,7 +25,7 @@ var flags struct {
 }
 
 func main() {
-	app := api.NewApplication()
+	// app := api.NewApplication()
 
 	databaseAdapter := adapter.NewDatabaseAdapter()
 	filesystemAdapter := adapter.NewFilesystemAdapter()
@@ -37,31 +40,7 @@ func main() {
 		EventAdapter:      adapter.NewAdapterEvent(),
 	}
 
-	// TODO: try server connection
-	// TODO: do health check
-
-	// TODO: move this in a application
-	currentPath := filesystemAdapter.GetCurrentPath()
-
-	project := databaseAdapter.GetProjectByPath(currentPath)
-
-	if project == nil {
-		createProjectDto := dto.CreateProjectDto{
-			Name: filesystemAdapter.GetFolderName(currentPath),
-			Path: currentPath,
-		}
-
-		projectId, err := application.CreateProject(&deployService, createProjectDto)
-		if err != nil {
-			fmt.Println("Erreur lors de la création du projet:", err)
-			os.Exit(1)
-		}
-
-		application.CreateApp(&deployService, dto.CreateAppDto{Path: currentPath, ProjectId: projectId})
-		fmt.Printf("Projet créé avec succès avec l'ID: %s\n", projectId)
-	} else {
-		fmt.Printf("Projet déjà existant: %s\n", project.Name)
-	}
+	application.CreateProjectForCurrentFolder(&deployService)
 
 	getArgsOptions()
 
@@ -69,20 +48,35 @@ func main() {
 		showHelp()
 	}
 
-	if flags.redeploy.deployId != "" {
-		application.ReDeployApplication(&deployService, flags.redeploy.deployId)
-		os.Exit(0)
-	} else {
-		api.InitValidator(app)
-		api.CreateRoutes(app, &deployService)
-		web.CreateMiddlewareWebFiles(app)
-		if !flags.noBrowser {
-			fmt.Println("Opening browser")
-			// adapter.OpenBrowser("http://localhost:8080/project/" + project.Id)
-		}
-		app.StartServer()
+	port := "8080"
 
+	web.CreateMiddlewareWebFiles()
+	if !flags.noBrowser {
+		adapter.OpenBrowser("http://localhost:" + port)
 	}
+	createGraphServer(&deployService, port)
+
+	log.Println("Server started on :" + port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
+
+	// if flags.redeploy.deployId != "" {
+	// 	application.ReDeployApplication(&deployService, flags.redeploy.deployId)
+	// 	os.Exit(0)
+	// } else {
+	// 	api.InitValidator(app)
+	// 	// api.CreateRoutes(app, &deployService)
+	// 	app.StartServer()
+	// }
+}
+
+func createGraphServer(deployService *service.DeployService, port string) {
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+
+	http.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
+	http.Handle("/graphql", srv)
+
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func getArgsOptions() {

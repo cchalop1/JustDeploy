@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"cchalop1.com/deploy/internal/api/dto"
+	"cchalop1.com/deploy/internal/api/http/dto"
 	"golang.org/x/crypto/ssh"
 )
 

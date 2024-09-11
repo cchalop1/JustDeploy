@@ -7,7 +7,8 @@
     "dev": "bunx -bun vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.0",
@@ -21,10 +22,13 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@tanstack/react-query": "^5.55.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
     "dayjs": "^1.11.11",
+    "graphql": "^16.9.0",
+    "graphql-request": "^7.1.0",
     "lucide-react": "^0.336.0",
     "react": "rc",
     "react-dom": "rc",
@@ -33,6 +37,10 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "5.0.2",
+    "@graphql-codegen/client-preset": "4.3.3",
+    "@graphql-codegen/introspection": "4.0.3",
+    "@tanstack/eslint-plugin-query": "^5.53.0",
     "@types/node": "^20.11.19",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
@@ -45,7 +53,7 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.2.2",
+    "typescript": "^5.6.2",
     "vite": "^5.1.4",
     "vite-plugin-inspect": "^0.8.4",
     "vite-plugin-react-click-to-component": "^3.0.0"
