@@ -40,6 +40,7 @@ func main() {
 	// TODO: try server connection
 	// TODO: do health check
 
+	// TODO: move this in a application
 	currentPath := filesystemAdapter.GetCurrentPath()
 
 	project := databaseAdapter.GetProjectByPath(currentPath)
@@ -50,14 +51,13 @@ func main() {
 			Path: currentPath,
 		}
 
-		application.CreateApp(&deployService, dto.CreateAppDto{Path: currentPath, ProjectId: project.Id})
-
 		projectId, err := application.CreateProject(&deployService, createProjectDto)
 		if err != nil {
 			fmt.Println("Erreur lors de la création du projet:", err)
 			os.Exit(1)
 		}
 
+		application.CreateApp(&deployService, dto.CreateAppDto{Path: currentPath, ProjectId: projectId})
 		fmt.Printf("Projet créé avec succès avec l'ID: %s\n", projectId)
 	} else {
 		fmt.Printf("Projet déjà existant: %s\n", project.Name)
@@ -78,7 +78,7 @@ func main() {
 		web.CreateMiddlewareWebFiles(app)
 		if !flags.noBrowser {
 			fmt.Println("Opening browser")
-			adapter.OpenBrowser("http://localhost:8080/project/" + project.Id)
+			// adapter.OpenBrowser("http://localhost:8080/project/" + project.Id)
 		}
 		app.StartServer()
 

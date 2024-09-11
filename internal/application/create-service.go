@@ -157,7 +157,7 @@ func createServiceForProject(deployService *service.DeployService, createService
 
 	port := getPortsForService(service)
 
-	envs = append(envs, dto.Env{Name: "PORT", Value: port})
+	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_PORT", Value: port})
 
 	domainService := domain.Service{
 		Id:          utils.GenerateRandomPassword(5),
@@ -180,6 +180,8 @@ func createServiceForProject(deployService *service.DeployService, createService
 	project.Services = append(project.Services, domainService)
 
 	deployService.DatabaseAdapter.SaveProject(*project)
+
+	deployService.FilesystemAdapter.GenerateDotEnvFile(project.Path, envs)
 
 	return nil
 }

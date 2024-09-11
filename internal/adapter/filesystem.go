@@ -267,3 +267,37 @@ func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) ([]da
 
 	return services, nil
 }
+
+func (fs *FilesystemAdapter) GenerateDotEnvFile(path string, envs []dto.Env) error {
+	// Full path to the .env file
+	envFilePath := path + "/.env"
+
+	// Check if .env file exists
+	_, err := os.Stat(envFilePath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			// File does not exist, create it
+			fmt.Println(".env file does not exist, creating a new one")
+		} else {
+			// Other error when trying to check file
+			return err
+		}
+	}
+
+	// Open the file in append mode if it exists, otherwise create it
+	file, err := os.OpenFile(envFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Write environment variables to the file
+	for _, env := range envs {
+		_, err := file.WriteString(env.Name + "=" + env.Value + "\n")
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
