@@ -37,9 +37,12 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "5.0.2",
+    "@0no-co/graphqlsp": "^1.12.14",
+    "@graphql-codegen/cli": "^5.0.2",
     "@graphql-codegen/client-preset": "4.3.3",
     "@graphql-codegen/introspection": "4.0.3",
+    "@graphql-codegen/schema-ast": "^4.1.0",
+    "@parcel/watcher": "^2.4.1",
     "@tanstack/eslint-plugin-query": "^5.53.0",
     "@types/node": "^20.11.19",
     "@types/react": "^18.2.56",

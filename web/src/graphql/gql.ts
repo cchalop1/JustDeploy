@@ -14,13 +14,13 @@ import * as types from './graphql';
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  query getProjectQuery($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      path\n      apps {\n        id\n        name\n        path\n      }\n      services {\n        id\n        name\n        status\n      }\n    }\n  }\n": types.GetProjectQueryDocument,
+    "\n  query getProjectQuery($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      path\n      apps {\n        id\n        name\n        path\n      }\n      services {\n        id\n        name\n        status\n        imageUrl\n      }\n    }\n  }\n": types.GetProjectQueryDocument,
 };
 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query getProjectQuery($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      path\n      apps {\n        id\n        name\n        path\n      }\n      services {\n        id\n        name\n        status\n      }\n    }\n  }\n"): typeof import('./graphql').GetProjectQueryDocument;
+export function graphql(source: "\n  query getProjectQuery($id: ID!) {\n    getProject(id: $id) {\n      id\n      name\n      path\n      apps {\n        id\n        name\n        path\n      }\n      services {\n        id\n        name\n        status\n        imageUrl\n      }\n    }\n  }\n"): typeof import('./graphql').GetProjectQueryDocument;
 
 
 export function graphql(source: string) {

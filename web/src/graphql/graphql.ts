@@ -86,7 +86,7 @@ export type GetProjectQueryQueryVariables = Exact<{
 }>;
 
 
-export type GetProjectQueryQuery = { __typename?: 'Query', getProject?: { __typename?: 'Project', id: string, name: string, path: string, apps: Array<{ __typename?: 'App', id: string, name: string, path: string }>, services: Array<{ __typename?: 'Service', id: string, name: string, status: string }> } | null };
+export type GetProjectQueryQuery = { __typename?: 'Query', getProject?: { __typename?: 'Project', id: string, name: string, path: string, apps: Array<{ __typename?: 'App', id: string, name: string, path: string }>, services: Array<{ __typename?: 'Service', id: string, name: string, status: string, imageUrl: string }> } | null };
 
 export class TypedDocumentString<TResult, TVariables>
   extends String
@@ -118,6 +118,7 @@ export const GetProjectQueryDocument = new TypedDocumentString(`
       id
       name
       status
+      imageUrl
     }
   }
 }
