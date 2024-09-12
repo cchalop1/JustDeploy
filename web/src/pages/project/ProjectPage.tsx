@@ -1,18 +1,12 @@
 import SpinnerIcon from "@/assets/SpinnerIcon";
+import AlertModal from "@/components/alerts/AlertModal";
 import AddService from "@/components/databaseServices/AddServices";
-import CommandModal, {
-  CreateServiceFunc,
-} from "@/components/databaseServices/CommandModal";
+import { CreateServiceFunc } from "@/components/databaseServices/CommandModal";
 import ProjectPageHeader from "@/components/project/ProjectPageHeader";
 import ServiceSideBar from "@/components/project/ServiceSideBar";
 import ServiceCard from "@/components/ServiceCard";
-import { createAppApi } from "@/services/createAppApi";
 import { createServiceApi } from "@/services/createServiceApi";
 import { getProjectByIdApi, ProjectDto } from "@/services/getProjectById";
-import {
-  getPreConfiguredServiceListApi,
-  ServiceDto,
-} from "@/services/getServicesApi";
 import { Service } from "@/services/getServicesByDeployId";
 import { Folder } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -22,14 +16,14 @@ type ProjectPageProps = {
 };
 
 export default function ProjectPage({ id }: ProjectPageProps) {
-  const [openModal, setOpen] = useState(false);
   const [project, setProject] = useState<ProjectDto | null>(null);
   const [serviceSelected, setServiceSelected] = useState<Service | null>(null);
-  const [preConfiguredServices, setPreConfiguredServices] = useState<
-    ServiceDto[]
-  >([]);
+
   const apps = project?.services.filter((s) => s.isDevContainer) || [];
   const services = project?.services.filter((s) => !s.isDevContainer) || [];
+
+  // TODO: move to context
+  const [displayAlert, setDisplayAlert] = useState(false);
 
   async function getProjectById() {
     const project = await getProjectByIdApi(id);
@@ -41,7 +35,6 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     path,
     serviceName,
   }) => {
-    setOpen(false);
     if (!project) return;
     await createServiceApi({
       serviceName,
@@ -50,16 +43,26 @@ export default function ProjectPage({ id }: ProjectPageProps) {
       localPath: path,
     });
     await getProjectById();
+    setDisplayAlert(true);
+    setTimeout(() => {
+      setDisplayAlert(false);
+    }, 3000);
   };
 
   useEffect(() => {
     getProjectById();
-    getPreConfiguredServiceListApi().then(setPreConfiguredServices);
   }, [id]);
 
   return (
     <div className="p-6 bg-slate-100 h-screen">
-      <ProjectPageHeader setOpen={setOpen} />
+      {displayAlert && (
+        <AlertModal
+          type="success"
+          title="Service Created !"
+          message="Your service has been created successfully, you can find its variables in .env"
+        />
+      )}
+      <ProjectPageHeader />
       <div className="flex flex-col justify-center items-center h-3/5">
         <div>
           {apps.map((app) => (

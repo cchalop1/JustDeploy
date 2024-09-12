@@ -3,14 +3,10 @@ import {
   getPreConfiguredServiceListApi,
 } from "@/services/getServicesApi";
 import { useEffect, useState } from "react";
-import { Button } from "../ui/button";
 
 import { CreateServiceApi } from "@/services/createServiceApi";
 import CommandModal from "./CommandModal";
-import {
-  ResponseServiceFromDockerComposeDto,
-  getServicesFromDockerComposeApi,
-} from "@/services/getServicesFromDockerCompose";
+import { ResponseServiceFromDockerComposeDto } from "@/services/getServicesFromDockerCompose";
 import { Card } from "../ui/card";
 
 type AddServiceProps = {

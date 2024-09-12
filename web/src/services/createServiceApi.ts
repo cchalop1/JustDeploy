@@ -4,6 +4,7 @@ export type CreateServiceApi = {
   serviceName?: string;
   fromDockerCompose?: boolean;
   localPath?: string;
+  projectId: string;
 };
 
 export async function createServiceApi(body: CreateServiceApi) {
