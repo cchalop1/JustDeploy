@@ -391,6 +391,17 @@ func (d *DatabaseAdapter) GetServicesByProjectId(projectId string) []domain.Serv
 	return serviceList
 }
 
+func (d *DatabaseAdapter) SaveServiceByProjectId(service domain.Service) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	for i, p := range databaseModels.Projects {
+		if p.Id == *service.ProjectId {
+			databaseModels.Projects[i].Services = append(databaseModels.Projects[i].Services, service)
+			break
+		}
+	}
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}
+
 func (d *DatabaseAdapter) GetProjects() []domain.Project {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	return databaseModels.Projects

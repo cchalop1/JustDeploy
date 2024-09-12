@@ -12,6 +12,8 @@ export type Service = {
   deployId: string;
   imageName: string;
   imageUrl: string;
+  isDevContainer: boolean;
+  currentPath: string;
 };
 
 export async function getServicesByDeployIdApi(

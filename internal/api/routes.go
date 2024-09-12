@@ -46,6 +46,4 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	app.Echo.GET("/api/project/:id", handlers.GetProjectByIdHandler(deployService))
 
-	app.Echo.POST("/api/app", handlers.CreateAppForProjectHandler(deployService))
-
 }

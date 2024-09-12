@@ -59,15 +59,15 @@ func getPortsForService(service database.ServicesConfig) string {
 	return ""
 }
 
-func createServiceLinkToDeploy(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) error {
+func createServiceLinkToDeploy(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) (domain.Service, error) {
 	deploy, err := deployService.DatabaseAdapter.GetDeployById(*createServiceDto.DeployId)
 	if err != nil {
-		return err
+		return domain.Service{}, err
 	}
 
 	server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
 	if err != nil {
-		return err
+		return domain.Service{}, err
 	}
 
 	// extract service from deploy
@@ -77,7 +77,7 @@ func createServiceLinkToDeploy(deployService *service.DeployService, createServi
 		services, err := deployService.FilesystemAdapter.GetComposeConfigOfDeploy(deploy.PathToSource)
 
 		if err != nil {
-			return err
+			return domain.Service{}, err
 		}
 
 		for _, s := range services {
@@ -91,7 +91,7 @@ func createServiceLinkToDeploy(deployService *service.DeployService, createServi
 	}
 
 	if err != nil {
-		return err
+		return domain.Service{}, err
 	}
 
 	deployService.DockerAdapter.ConnectClient(server)
@@ -125,22 +125,41 @@ func createServiceLinkToDeploy(deployService *service.DeployService, createServi
 	EditDeploy(deployService, dto.EditDeployDto{Id: deploy.Id, Envs: append(envs, deploy.Envs...), SubDomain: deploy.SubDomain, DeployOnCommit: deploy.DeployOnCommit})
 	ReDeployApplication(deployService, deploy.Id)
 
-	return nil
+	return domainService, nil
 }
 
-func createServiceForProject(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) error {
-	server := deployService.DockerAdapter.GetLocalHostServer()
+func createDevContainerService(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) (domain.Service, error) {
+	domainService := domain.Service{
+		Id:             utils.GenerateRandomPassword(5),
+		Name:           createServiceDto.ServiceName,
+		Envs:           []dto.Env{},
+		VolumsNames:    []string{},
+		Status:         "Runing",
+		Host:           "localhost",
+		ProjectId:      createServiceDto.ProjectId,
+		IsDevContainer: true,
+		CurrentPath:    createServiceDto.LocalPath,
+	}
+	err := deployService.DatabaseAdapter.SaveServiceByProjectId(domainService)
+	return domainService, err
+}
+
+func createServiceForProject(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) (domain.Service, error) {
+	if createServiceDto.ProjectId == nil {
+		return domain.Service{}, errors.New("ProjectId is required")
+	}
+
+	if createServiceDto.LocalPath != nil {
+		return createDevContainerService(deployService, createServiceDto)
+	}
 
 	service, err := database.GetServiceByName(createServiceDto.ServiceName)
 
 	if err != nil {
-		return err
+		return domain.Service{}, err
 	}
 
-	if createServiceDto.ProjectId == nil {
-		return errors.New("ProjectId is required")
-	}
-
+	server := deployService.DockerAdapter.GetLocalHostServer()
 	deployService.DockerAdapter.ConnectClient(server)
 
 	deployService.DockerAdapter.PullImage(service.Config.Image)
@@ -174,7 +193,7 @@ func createServiceForProject(deployService *service.DeployService, createService
 	project, err := deployService.DatabaseAdapter.GetProjectById(*createServiceDto.ProjectId)
 
 	if err != nil {
-		return err
+		return domain.Service{}, err
 	}
 
 	project.Services = append(project.Services, domainService)
@@ -183,10 +202,10 @@ func createServiceForProject(deployService *service.DeployService, createService
 
 	deployService.FilesystemAdapter.GenerateDotEnvFile(project.Path, envs)
 
-	return nil
+	return domainService, nil
 }
 
-func CreateService(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) error {
+func CreateService(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) (domain.Service, error) {
 	if createServiceDto.DeployId == nil {
 		return createServiceForProject(deployService, createServiceDto)
 	} else {

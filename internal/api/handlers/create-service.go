@@ -19,12 +19,12 @@ func CreateServiceHandler(deployService *service.DeployService) echo.HandlerFunc
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		err = application.CreateService(deployService, createServiceDto)
+		service, err := application.CreateService(deployService, createServiceDto)
 
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, dto.ResponseApi{Message: err.Error()})
 		}
 
-		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Service Is created"})
+		return c.JSON(http.StatusOK, service)
 	}
 }

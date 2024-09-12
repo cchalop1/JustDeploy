@@ -14,4 +14,7 @@ type Service struct {
 	ProjectId   *string   `json:"ProjectId"`
 	ImageName   string    `json:"imageName"`
 	ImageUrl    string    `json:"imageUrl"`
+	// TODO: rethink this
+	IsDevContainer bool    `json:"isDevContainer"`
+	CurrentPath    *string `json:"currentPath"`
 }

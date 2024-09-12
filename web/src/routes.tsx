@@ -12,7 +12,7 @@ import { Suspense } from "react";
 import CreateServerLoading from "@/pages/CreateServerLoading";
 import CreateDeployLoading from "@/pages/CreateDeployLoading";
 import Layout from "@/Layout";
-import ProjectPage from "./pages/ProjectPage";
+import ProjectPageWrapper from "./pages/project/ProjectPageWrapper";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -32,7 +32,7 @@ const router = createBrowserRouter(
       <Route path="deploy/:id/installation" element={<CreateDeployLoading />} />
       <Route path="deploy/create" element={<CreateDeployForm />} />
       <Route path="deploy/:id" element={<DeployPage />} />
-      <Route path="project/:id" element={<ProjectPage />} />
+      <Route path="project/:id" element={<ProjectPageWrapper />} />
     </Route>
   )
 );

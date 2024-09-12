@@ -14,7 +14,6 @@ export type ProjectDto = {
   name: string;
   path: string;
   services: Service[];
-  apps: AppDto[];
 };
 
 export async function getProjectByIdApi(id: string): Promise<ProjectDto> {
