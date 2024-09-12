@@ -10,9 +10,9 @@ export default function ProjectPageHeader({ setOpen }: ProjectPageHeaderProps) {
       <div className="font-bold text-3xl">JustDeploy 🛵</div>
       <div className="p-2 flex flex-row-reverse gap-3 items-center bg-white w-1/4 rounded-lg border shadow-lg">
         <Button onClick={() => setOpen(true)}>Deploy</Button>
-        <Button variant="link" onClick={() => setOpen(true)}>
+        {/* <Button variant="link" onClick={() => setOpen(true)}>
           Create +
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

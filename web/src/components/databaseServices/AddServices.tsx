@@ -11,16 +11,17 @@ import {
   ResponseServiceFromDockerComposeDto,
   getServicesFromDockerComposeApi,
 } from "@/services/getServicesFromDockerCompose";
+import { Card } from "../ui/card";
 
 type AddServiceProps = {
   deployId?: string;
+  projectId?: string;
   setLoading: (loading: boolean) => void;
   createService: (serviceParams: CreateServiceApi) => Promise<void>;
   fetchServiceList: (deployId?: string) => Promise<void>;
 };
 
 export default function AddService({
-  deployId,
   setLoading,
   createService,
   fetchServiceList,
@@ -39,15 +40,15 @@ export default function AddService({
     setPreConfiguredServices(res);
   }
 
-  async function getServicesFromDockerCompose() {
-    if (!deployId) return;
-    const res = await getServicesFromDockerComposeApi(deployId);
-    setServiceFromDockerCompose(res);
-  }
+  // async function getServicesFromDockerCompose() {
+  //   if (!deployId) return;
+  //   const res = await getServicesFromDockerComposeApi(deployId);
+  //   setServiceFromDockerCompose(res);
+  // }
 
   useEffect(() => {
     getServices();
-    getServicesFromDockerCompose();
+    // getServicesFromDockerCompose();
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -60,28 +61,25 @@ export default function AddService({
 
   return (
     <>
-      <Button
-        variant="outline"
-        className="w-full mb-3"
+      <Card
         onClick={() => setOpen(true)}
+        className="hover:shadow-md hover:bg-slate-200 cursor-pointer pt-3 pb-6 pl-5 pr-5 flex gap-6 w-80 h-28 align-top"
       >
         {text}{" "}
         <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
           <span className="text-xs">⌘</span>K
         </kbd>
-      </Button>
+      </Card>
       <CommandModal
         open={open}
         setOpen={setOpen}
         preConfiguredServices={preConfiguredServices}
         serviceFromDockerCompose={serviceFromDockerCompose}
-        createService={async (serviceName, fromDockerCompose) => {
+        create={async (createServiceParams) => {
           setLoading(true);
           setOpen(false);
           await createService({
-            serviceName,
-            fromDockerCompose,
-            deployId,
+            ...createServiceParams,
           });
           await fetchServiceList(deployId);
           setLoading(false);

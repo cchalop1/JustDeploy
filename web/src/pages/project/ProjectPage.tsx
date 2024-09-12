@@ -1,4 +1,5 @@
 import SpinnerIcon from "@/assets/SpinnerIcon";
+import AddService from "@/components/databaseServices/AddServices";
 import CommandModal, {
   CreateServiceFunc,
 } from "@/components/databaseServices/CommandModal";
@@ -24,6 +25,9 @@ export default function ProjectPage({ id }: ProjectPageProps) {
   const [openModal, setOpen] = useState(false);
   const [project, setProject] = useState<ProjectDto | null>(null);
   const [serviceSelected, setServiceSelected] = useState<Service | null>(null);
+  const [preConfiguredServices, setPreConfiguredServices] = useState<
+    ServiceDto[]
+  >([]);
   const apps = project?.services.filter((s) => s.isDevContainer) || [];
   const services = project?.services.filter((s) => !s.isDevContainer) || [];
 
@@ -32,24 +36,25 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     setProject(project);
   }
 
-  // const create: CreateServiceFunc = async ({
-  //   fromDockerCompose,
-  //   path,
-  //   serviceName,
-  // }) => {
-  //   setOpen(false);
-  //   if (!project) return;
-  //   await createServiceApi({
-  //     serviceName,
-  //     fromDockerCompose,
-  //     projectId: project.id,
-  //     localPath: path,
-  //   });
-  //   await getProjectById();
-  // };
+  const create: CreateServiceFunc = async ({
+    fromDockerCompose,
+    path,
+    serviceName,
+  }) => {
+    setOpen(false);
+    if (!project) return;
+    await createServiceApi({
+      serviceName,
+      fromDockerCompose,
+      projectId: project.id,
+      localPath: path,
+    });
+    await getProjectById();
+  };
 
   useEffect(() => {
     getProjectById();
+    getPreConfiguredServiceListApi().then(setPreConfiguredServices);
   }, [id]);
 
   return (
@@ -68,7 +73,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
           ))}
         </div>
         {!project && <SpinnerIcon color="text-black" />}
-        <div className="grid grid-cols-2 gap-3 mt-3">
+        <div className="flex gap-3 mt-3 ">
           {services.map((service) => (
             <ServiceCard
               key={service.id}
@@ -78,6 +83,17 @@ export default function ProjectPage({ id }: ProjectPageProps) {
               onClick={() => setServiceSelected(service)}
             />
           ))}
+
+          <AddService
+            createService={async (serviceParams) => {
+              create({
+                serviceName: serviceParams.serviceName,
+                fromDockerCompose: serviceParams.fromDockerCompose,
+              });
+            }}
+            fetchServiceList={getProjectById}
+            setLoading={() => {}}
+          />
         </div>
       </div>
       {serviceSelected && (
@@ -87,14 +103,6 @@ export default function ProjectPage({ id }: ProjectPageProps) {
           getProjectById={getProjectById}
         />
       )}
-      {/* <CommandModal
-        open={openModal}
-        setOpen={setOpen}
-        preConfiguredServices={preConfiguredServices}
-        serviceFromDockerCompose={[]}
-        currentPath={project.path}
-        create={create}
-      /> */}
     </div>
   );
 }
