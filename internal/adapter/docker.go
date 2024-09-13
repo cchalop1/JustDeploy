@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"strconv"
 
 	"cchalop1.com/deploy/internal/adapter/database"
 	"cchalop1.com/deploy/internal/api/dto"
@@ -357,8 +358,20 @@ func (d *DockerAdapter) GetLogsOfContainer(containerName string) ([]string, erro
 	return lines, nil
 }
 
-func (d *DockerAdapter) RunService(service database.ServicesConfig, containerHostName string) {
-	con, err := d.client.ContainerCreate(context.Background(), &service.Config, &container.HostConfig{},
+func (d *DockerAdapter) RunService(service database.ServicesConfig, exposedPort string, containerHostName string) {
+	internalPort := strconv.Itoa(service.DefaultPort) + "/tcp"
+	hostConfig := &container.HostConfig{
+		PortBindings: nat.PortMap{
+			nat.Port(internalPort): []nat.PortBinding{
+				{
+					HostIP:   "0.0.0.0",
+					HostPort: exposedPort,
+				},
+			},
+		},
+	}
+
+	con, err := d.client.ContainerCreate(context.Background(), &service.Config, hostConfig,
 		&network.NetworkingConfig{}, &v1.Platform{}, containerHostName)
 
 	if err != nil {

@@ -21,7 +21,7 @@ var flags struct {
 }
 
 func main() {
-	port := adapter.FindOpenLocalPort()
+	port := adapter.FindOpenLocalPort(8080)
 
 	app := api.NewApplication(port)
 

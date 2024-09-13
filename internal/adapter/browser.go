@@ -49,8 +49,7 @@ func isPortIsUse(host string, port int) bool {
 	return true
 }
 
-func FindOpenLocalPort() string {
-	port := 8080
+func FindOpenLocalPort(port int) string {
 	for {
 		if !isPortIsUse("localhost", port) {
 			break

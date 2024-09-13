@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"cchalop1.com/deploy/internal/adapter"
 	"cchalop1.com/deploy/internal/adapter/database"
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
@@ -53,10 +54,7 @@ func generateContainerHostname(serviceName string, deployId *string) string {
 }
 
 func getPortsForService(service database.ServicesConfig) string {
-	for port := range service.Config.ExposedPorts {
-		return strings.Split(string(port), "/")[0]
-	}
-	return ""
+	return adapter.FindOpenLocalPort(service.DefaultPort)
 }
 
 func createServiceLinkToDeploy(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) (domain.Service, error) {
@@ -170,13 +168,13 @@ func createServiceForProject(deployService *service.DeployService, createService
 
 	containerHostname := generateContainerHostname(service.Name, nil)
 
-	deployService.DockerAdapter.RunService(service, containerHostname)
+	exposedPort := getPortsForService(service)
+
+	deployService.DockerAdapter.RunService(service, exposedPort, containerHostname)
 
 	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_HOSTNAME", Value: "localhost"})
 
-	port := getPortsForService(service)
-
-	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_PORT", Value: port})
+	envs = append(envs, dto.Env{Name: strings.ToUpper(service.Name) + "_PORT", Value: exposedPort})
 
 	domainService := domain.Service{
 		Id:          utils.GenerateRandomPassword(5),
