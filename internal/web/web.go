@@ -17,5 +17,4 @@ func CreateMiddlewareWebFiles(app *api.Application) {
 		Root:       "dist",
 		Filesystem: http.FS(webAssets),
 	}))
-
 }

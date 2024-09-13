@@ -1,4 +1,4 @@
-export const baseUrl = "http://localhost:8080/api";
+export const baseUrl = import.meta.env.VITE_BACKEND_URL;
 
 export async function callApi<T>(
   path: string,
@@ -6,7 +6,10 @@ export async function callApi<T>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any
 ): Promise<T> {
-  const res = await fetch(baseUrl + path, {
+  const apiUrl = baseUrl ? baseUrl : window.location.origin; // Fallback to the current URL
+  const fullUrl = new URL("api" + path, apiUrl).toString();
+  console.log(fullUrl);
+  const res = await fetch(fullUrl, {
     method,
     headers: {
       Accept: "application/json",

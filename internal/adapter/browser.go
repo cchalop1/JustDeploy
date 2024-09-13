@@ -2,8 +2,11 @@ package adapter
 
 import (
 	"fmt"
+	"net"
 	"os/exec"
 	"runtime"
+	"strconv"
+	"time"
 )
 
 func OpenBrowser(urlString string) error {
@@ -34,4 +37,25 @@ func OpenBrowser(urlString string) error {
 	}
 
 	return err
+}
+
+func isPortIsUse(host string, port int) bool {
+	address := fmt.Sprintf("%s:%d", host, port)
+	conn, err := net.DialTimeout("tcp", address, 1*time.Second)
+	if err != nil {
+		return false
+	}
+	defer conn.Close()
+	return true
+}
+
+func FindOpenLocalPort() string {
+	port := 8080
+	for {
+		if !isPortIsUse("localhost", port) {
+			break
+		}
+		port++
+	}
+	return strconv.Itoa(port)
 }

@@ -9,11 +9,11 @@ type Application struct {
 	Echo *echo.Echo
 }
 
-func NewApplication() *Application {
+func NewApplication(port string) *Application {
 	e := echo.New()
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:8080", "http://localhost:5173"},
+		AllowOrigins: []string{"http://localhost:" + port, "http://localhost:5173"},
 		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))
@@ -23,6 +23,6 @@ func NewApplication() *Application {
 	}
 }
 
-func (app *Application) StartServer() {
-	app.Echo.Start(":8080")
+func (app *Application) StartServer(port string) {
+	app.Echo.Start(":" + port)
 }

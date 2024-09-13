@@ -21,7 +21,9 @@ var flags struct {
 }
 
 func main() {
-	app := api.NewApplication()
+	port := adapter.FindOpenLocalPort()
+
+	app := api.NewApplication(port)
 
 	databaseAdapter := adapter.NewDatabaseAdapter()
 	filesystemAdapter := adapter.NewFilesystemAdapter()
@@ -55,12 +57,13 @@ func main() {
 	} else {
 		api.InitValidator(app)
 		api.CreateRoutes(app, &deployService)
+		// web.ReplaceEnvInEnvBuild(port)
 		web.CreateMiddlewareWebFiles(app)
 		if !flags.noBrowser {
 			fmt.Println("Opening browser")
-			adapter.OpenBrowser("http://localhost:8080/project/" + projectId)
+			adapter.OpenBrowser("http://localhost:" + port + "/project/" + projectId)
 		}
-		app.StartServer()
+		app.StartServer(port)
 	}
 }
 
