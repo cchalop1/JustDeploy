@@ -17,7 +17,11 @@ module.exports = {
       },
     },
     extend: {
+      backgroundImage: {
+        'grid-image': "url('/background-grid.jpg')",
+      },
       colors: {
+        "button": "#070F2A",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

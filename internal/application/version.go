@@ -11,7 +11,7 @@ var Version string
 
 func GetVersion() dto.VersionDto {
 	return dto.VersionDto{
-		Version:   Version,
+		TagName:   Version,
 		GithubUrl: "https://github.com/cchalop1/JustDeploy/releases/tag/" + Version,
 	}
 }

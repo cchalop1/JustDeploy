@@ -5,11 +5,12 @@ import { CreateServiceFunc } from "@/components/databaseServices/CommandModal";
 import ProjectPageHeader from "@/components/project/ProjectPageHeader";
 import ServiceSideBar from "@/components/project/ServiceSideBar";
 import ServiceCard from "@/components/ServiceCard";
+import Version from "@/components/Version";
 import { createServiceApi } from "@/services/createServiceApi";
 import { getProjectByIdApi, ProjectDto } from "@/services/getProjectById";
 import { Service } from "@/services/getServicesByDeployId";
 import { Folder } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 type ProjectPageProps = {
   id: string;
@@ -54,7 +55,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
   }, [id]);
 
   return (
-    <div className="p-6 bg-slate-100 h-screen">
+    <div className="bg-grid-image h-screen">
       {displayAlert && (
         <AlertModal
           type="success"
@@ -106,6 +107,11 @@ export default function ProjectPage({ id }: ProjectPageProps) {
           getProjectById={getProjectById}
         />
       )}
+      <div className="fixed bottom-6 right-4 pl-10 pr-10">
+        <Suspense fallback={<SpinnerIcon color="text-black" />}>
+          <Version />
+        </Suspense>
+      </div>
     </div>
   );
 }

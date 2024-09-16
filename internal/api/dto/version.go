@@ -1,6 +1,6 @@
 package dto
 
 type VersionDto struct {
-	Version   string `json:"version"`
+	TagName   string `json:"tagName"`
 	GithubUrl string `json:"githubUrl"`
 }
