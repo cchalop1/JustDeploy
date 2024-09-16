@@ -21,6 +21,9 @@ var flags struct {
 }
 
 func main() {
+	currentVersion := application.GetVersion()
+	fmt.Println("JustDeploy version: ", currentVersion.Version)
+
 	port := adapter.FindOpenLocalPort(8080)
 
 	app := api.NewApplication(port)
