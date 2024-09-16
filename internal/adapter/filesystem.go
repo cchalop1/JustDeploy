@@ -301,3 +301,64 @@ func (fs *FilesystemAdapter) GenerateDotEnvFile(path string, envs []dto.Env) err
 
 	return nil
 }
+
+func (fs *FilesystemAdapter) RemoveEnvsFromDotEnvFile(path string, envs []dto.Env) error {
+	envFilePath := path + "/.env"
+
+	// Check if .env file exists
+	_, err := os.Stat(envFilePath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			// File does not exist, nothing to remove
+			return nil
+		}
+		// Other error when trying to check file
+		return err
+	}
+
+	// Read the entire file
+	content, err := os.ReadFile(envFilePath)
+	if err != nil {
+		return err
+	}
+
+	// Create a map of environment variables to remove for quick lookup
+	envsToRemove := make(map[string]bool)
+	for _, env := range envs {
+		envsToRemove[env.Name] = true
+	}
+
+	// Process the file line by line
+	var newLines []string
+	lines := strings.Split(string(content), "\n")
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		if trimmedLine == "" || strings.HasPrefix(trimmedLine, "#") {
+			// Keep empty lines and comments
+			newLines = append(newLines, line)
+			continue
+		}
+
+		parts := strings.SplitN(trimmedLine, "=", 2)
+		if len(parts) < 2 {
+			// Keep lines that don't look like environment variable declarations
+			newLines = append(newLines, line)
+			continue
+		}
+
+		key := strings.TrimSpace(parts[0])
+		if !envsToRemove[key] {
+			// Keep lines for environment variables that are not in the removal list
+			newLines = append(newLines, line)
+		}
+	}
+
+	// Write the updated content back to the file
+	newContent := strings.Join(newLines, "\n")
+	err = os.WriteFile(envFilePath, []byte(newContent), 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

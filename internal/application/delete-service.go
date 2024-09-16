@@ -75,5 +75,17 @@ func deleteServiceWithoutDeploy(deployService *service.DeployService, s *domain.
 	deployService.DockerAdapter.ConnectClient(server)
 	deployService.DockerAdapter.Delete(s.Name)
 
+	project, err := deployService.DatabaseAdapter.GetProjectById(*s.ProjectId)
+
+	if err != nil {
+		return err
+	}
+
+	deployService.FilesystemAdapter.RemoveEnvsFromDotEnvFile(project.Path, s.Envs)
+
+	if err != nil {
+		return err
+	}
+
 	return deployService.DatabaseAdapter.DeleteServiceById(s.Id)
 }
