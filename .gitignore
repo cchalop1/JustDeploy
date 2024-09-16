@@ -25,3 +25,5 @@ dist-ssr
 cert-docker/
 bin/
 .justdeploy/
+
+.env

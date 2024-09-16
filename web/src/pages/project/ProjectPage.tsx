@@ -2,6 +2,7 @@ import SpinnerIcon from "@/assets/SpinnerIcon";
 import AlertModal from "@/components/alerts/AlertModal";
 import AddService from "@/components/databaseServices/AddServices";
 import { CreateServiceFunc } from "@/components/databaseServices/CommandModal";
+import ModalInfo from "@/components/modals/ModalInfo";
 import ProjectPageHeader from "@/components/project/ProjectPageHeader";
 import ServiceSideBar from "@/components/project/ServiceSideBar";
 import ServiceCard from "@/components/ServiceCard";
@@ -64,14 +65,13 @@ export default function ProjectPage({ id }: ProjectPageProps) {
         />
       )}
       <ProjectPageHeader />
+      <ModalInfo />
       <div className="flex flex-col justify-center items-center h-3/5">
         <div>
           {apps.map((app) => (
             <ServiceCard
               key={app.id}
-              Name={app.name}
-              logo={<Folder className="h4" />}
-              status="running"
+              service={app}
               onClick={() => setServiceSelected(app)}
             />
           ))}
@@ -81,14 +81,12 @@ export default function ProjectPage({ id }: ProjectPageProps) {
           {services.map((service) => (
             <ServiceCard
               key={service.id}
-              Name={service.name}
-              logo={service.imageUrl}
-              status="running"
+              service={service}
               onClick={() => setServiceSelected(service)}
             />
           ))}
 
-          <AddService
+          {/* <AddService
             createService={async (serviceParams) => {
               create({
                 serviceName: serviceParams.serviceName,
@@ -97,7 +95,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
             }}
             fetchServiceList={getProjectById}
             setLoading={() => {}}
-          />
+          /> */}
         </div>
       </div>
       {serviceSelected && (

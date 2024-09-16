@@ -79,63 +79,63 @@
 /* Geist Font */
 @font-face {
   font-family: "Geist";
-  src: url("fonts/Geist/Geist-UltraLight.woff2") format("woff2");
+  src: url("/fonts/Geist/Geist-UltraLight.woff2") format("woff2");
   font-weight: 200;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Geist";
-  src: url("fonts/Geist/Geist-Thin.woff2") format("woff2");
+  src: url("/fonts/Geist/Geist-Thin.woff2") format("woff2");
   font-weight: 300;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Geist";
-  src: url("fonts/Geist/Geist-Light.woff2") format("woff2");
+  src: url("/fonts/Geist/Geist-Light.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Geist";
-  src: url("fonts/Geist/Geist-Regular.woff2") format("woff2");
+  src: url("/fonts/Geist/Geist-Regular.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Geist";
-  src: url("fonts/Geist/Geist-Medium.woff2") format("woff2");
+  src: url("/fonts/Geist/Geist-Medium.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Geist";
-  src: url("fonts/Geist/Geist-SemiBold.woff2") format("woff2");
+  src: url("/fonts/Geist/Geist-SemiBold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Geist";
-  src: url("fonts/Geist/Geist-Bold.woff2") format("woff2");
+  src: url("/fonts/Geist/Geist-Bold.woff2") format("woff2");
   font-weight: 800;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Geist";
-  src: url("fonts/Geist/Geist-Black.woff2") format("woff2");
+  src: url("/fonts/Geist/Geist-Black.woff2") format("woff2");
   font-weight: 900;
   font-style: normal;
 }
 
 @font-face {
   font-family: "Geist";
-  src: url("fonts/Geist/Geist-UltraBlack.woff2") format("woff2");
+  src: url("/fonts/Geist/Geist-UltraBlack.woff2") format("woff2");
   font-weight: 950;
   font-style: normal;
 }
@@ -143,63 +143,63 @@
 /* GeistMono Font */
 @font-face {
   font-family: "GeistMono";
-  src: url("fonts/GeistMono/GeistMono-UltraLight.woff2") format("woff2");
+  src: url("/fonts/GeistMono/GeistMono-UltraLight.woff2") format("woff2");
   font-weight: 200;
   font-style: normal;
 }
 
 @font-face {
   font-family: "GeistMono";
-  src: url("fonts/GeistMono/GeistMono-Thin.woff2") format("woff2");
+  src: url("/fonts/GeistMono/GeistMono-Thin.woff2") format("woff2");
   font-weight: 300;
   font-style: normal;
 }
 
 @font-face {
   font-family: "GeistMono";
-  src: url("fonts/GeistMono/GeistMono-Light.woff2") format("woff2");
+  src: url("/fonts/GeistMono/GeistMono-Light.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: "GeistMono";
-  src: url("fonts/GeistMono/GeistMono-Regular.woff2") format("woff2");
+  src: url("/fonts/GeistMono/GeistMono-Regular.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
 }
 
 @font-face {
   font-family: "GeistMono";
-  src: url("fonts/GeistMono/GeistMono-Medium.woff2") format("woff2");
+  src: url("/fonts/GeistMono/GeistMono-Medium.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
 }
 
 @font-face {
   font-family: "GeistMono";
-  src: url("fonts/GeistMono/GeistMono-SemiBold.woff2") format("woff2");
+  src: url("/fonts/GeistMono/GeistMono-SemiBold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
 }
 
 @font-face {
   font-family: "GeistMono";
-  src: url("fonts/GeistMono/GeistMono-Bold.woff2") format("woff2");
+  src: url("/fonts/GeistMono/GeistMono-Bold.woff2") format("woff2");
   font-weight: 800;
   font-style: normal;
 }
 
 @font-face {
   font-family: "GeistMono";
-  src: url("fonts/GeistMono/GeistMono-Black.woff2") format("woff2");
+  src: url("/fonts/GeistMono/GeistMono-Black.woff2") format("woff2");
   font-weight: 900;
   font-style: normal;
 }
 
 @font-face {
   font-family: "GeistMono";
-  src: url("fonts/GeistMono/GeistMono-UltraBlack.woff2") format("woff2");
+  src: url("/fonts/GeistMono/GeistMono-UltraBlack.woff2") format("woff2");
   font-weight: 950;
   font-style: normal;
 }
