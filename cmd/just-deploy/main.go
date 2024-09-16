@@ -21,8 +21,11 @@ var flags struct {
 }
 
 func main() {
-	currentVersion := application.GetVersion()
-	fmt.Println("JustDeploy version: ", currentVersion.Version)
+	isNewVersion := application.CheckIsNewVersion()
+
+	if isNewVersion {
+		fmt.Println("There is a new version available. Please download it by typing: curl -fsSL https://get.justdeploy.app | bash")
+	}
 
 	port := adapter.FindOpenLocalPort(8080)
 
