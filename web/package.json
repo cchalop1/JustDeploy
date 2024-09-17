@@ -25,6 +25,7 @@
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
     "dayjs": "^1.11.11",
+    "framer-motion": "^11.5.4",
     "lucide-react": "^0.441.0",
     "react": "rc",
     "react-dom": "rc",

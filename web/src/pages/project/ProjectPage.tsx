@@ -2,15 +2,16 @@ import SpinnerIcon from "@/assets/SpinnerIcon";
 import AlertModal from "@/components/alerts/AlertModal";
 import AddService from "@/components/databaseServices/AddServices";
 import { CreateServiceFunc } from "@/components/databaseServices/CommandModal";
+import ModalInfo from "@/components/modals/ModalInfo";
 import ModalServiceSettings from "@/components/modals/ModalServiceSettings";
 import ProjectPageHeader from "@/components/project/ProjectPageHeader";
-import ServiceSideBar from "@/components/project/ServiceSideBar";
 import ServiceCard from "@/components/ServiceCard";
 import Version from "@/components/Version";
 import { createServiceApi } from "@/services/createServiceApi";
 import { getProjectByIdApi, ProjectDto } from "@/services/getProjectById";
 import { Service } from "@/services/getServicesByDeployId";
 import { Suspense, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 type ProjectPageProps = {
   id: string;
@@ -65,8 +66,16 @@ export default function ProjectPage({ id }: ProjectPageProps) {
           message="Your service has been created successfully, you can find its variables in .env"
         />
       )}
+
+      {serviceSelected && (
+        <ModalServiceSettings
+          service={serviceSelected}
+          setServiceSelected={setServiceSelected}
+          getProjectById={getProjectById}
+        />
+      )}
       <ProjectPageHeader />
-      {/* <ModalInfo /> */}
+      <ModalInfo />
       <div className="flex flex-col justify-center items-center h-3/5">
         <div>
           {apps.map((app) => (
@@ -98,13 +107,6 @@ export default function ProjectPage({ id }: ProjectPageProps) {
           />
         </div>
       </div>
-      {serviceSelected && (
-        <ModalServiceSettings
-          service={serviceSelected}
-          setServiceSelected={setServiceSelected}
-          getProjectById={getProjectById}
-        />
-      )}
       <div className="fixed bottom-6 right-4 pl-10 pr-10">
         <Suspense fallback={<SpinnerIcon color="text-black" />}>
           <Version />
