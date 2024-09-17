@@ -2,7 +2,7 @@ import SpinnerIcon from "@/assets/SpinnerIcon";
 import AlertModal from "@/components/alerts/AlertModal";
 import AddService from "@/components/databaseServices/AddServices";
 import { CreateServiceFunc } from "@/components/databaseServices/CommandModal";
-import ModalInfo from "@/components/modals/ModalInfo";
+import ModalServiceSettings from "@/components/modals/ModalServiceSettings";
 import ProjectPageHeader from "@/components/project/ProjectPageHeader";
 import ServiceSideBar from "@/components/project/ServiceSideBar";
 import ServiceCard from "@/components/ServiceCard";
@@ -10,7 +10,6 @@ import Version from "@/components/Version";
 import { createServiceApi } from "@/services/createServiceApi";
 import { getProjectByIdApi, ProjectDto } from "@/services/getProjectById";
 import { Service } from "@/services/getServicesByDeployId";
-import { Folder } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 
 type ProjectPageProps = {
@@ -31,6 +30,8 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     const project = await getProjectByIdApi(id);
     setProject(project);
   }
+
+  console.log("serviceSelected", serviceSelected);
 
   const create: CreateServiceFunc = async ({
     fromDockerCompose,
@@ -65,7 +66,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
         />
       )}
       <ProjectPageHeader />
-      <ModalInfo />
+      {/* <ModalInfo /> */}
       <div className="flex flex-col justify-center items-center h-3/5">
         <div>
           {apps.map((app) => (
@@ -85,8 +86,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
               onClick={() => setServiceSelected(service)}
             />
           ))}
-
-          {/* <AddService
+          <AddService
             createService={async (serviceParams) => {
               create({
                 serviceName: serviceParams.serviceName,
@@ -95,12 +95,12 @@ export default function ProjectPage({ id }: ProjectPageProps) {
             }}
             fetchServiceList={getProjectById}
             setLoading={() => {}}
-          /> */}
+          />
         </div>
       </div>
       {serviceSelected && (
-        <ServiceSideBar
-          serviceSelected={serviceSelected}
+        <ModalServiceSettings
+          service={serviceSelected}
           setServiceSelected={setServiceSelected}
           getProjectById={getProjectById}
         />
