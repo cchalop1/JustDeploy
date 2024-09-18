@@ -8,7 +8,6 @@ export async function callApi<T>(
 ): Promise<T> {
   const apiUrl = baseUrl ? baseUrl : window.location.origin; // Fallback to the current URL
   const fullUrl = new URL("api" + path, apiUrl).toString();
-  console.log(fullUrl);
   const res = await fetch(fullUrl, {
     method,
     headers: {

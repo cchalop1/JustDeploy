@@ -24,7 +24,15 @@ export default function ModalServiceSettings({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 100 }}
+      initial={{
+        opacity: 0,
+        x: 100,
+        height: "95%",
+        position: "absolute",
+        right: 5,
+        top: 28,
+        width: "100%",
+      }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0 }}
     >
@@ -50,12 +58,7 @@ export default function ModalServiceSettings({
           <Button variant="destructive" onClick={() => deleteSelectedService()}>
             Delete
           </Button>
-          <div>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eum unde
-            voluptates, illum sit earum quisquam odit rem nesciunt praesentium
-            aut quis mollitia velit cupiditate dolor deserunt culpa laboriosam
-            nostrum perferendis.
-          </div>
+          <div></div>
         </div>
       </div>
     </motion.div>

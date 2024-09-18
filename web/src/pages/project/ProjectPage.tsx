@@ -2,7 +2,7 @@ import SpinnerIcon from "@/assets/SpinnerIcon";
 import AlertModal from "@/components/alerts/AlertModal";
 import AddService from "@/components/databaseServices/AddServices";
 import { CreateServiceFunc } from "@/components/databaseServices/CommandModal";
-import ModalInfo from "@/components/modals/ModalInfo";
+import ModalWelcome from "@/components/modals/ModalWelcome";
 import ModalServiceSettings from "@/components/modals/ModalServiceSettings";
 import ProjectPageHeader from "@/components/project/ProjectPageHeader";
 import ServiceCard from "@/components/ServiceCard";
@@ -11,7 +11,7 @@ import { createServiceApi } from "@/services/createServiceApi";
 import { getProjectByIdApi, ProjectDto } from "@/services/getProjectById";
 import { Service } from "@/services/getServicesByDeployId";
 import { Suspense, useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 
 type ProjectPageProps = {
   id: string;
@@ -20,6 +20,10 @@ type ProjectPageProps = {
 export default function ProjectPage({ id }: ProjectPageProps) {
   const [project, setProject] = useState<ProjectDto | null>(null);
   const [serviceSelected, setServiceSelected] = useState<Service | null>(null);
+
+  const { search } = useLocation();
+  const queryParams = new URLSearchParams(search);
+  const displayWelcomeModal = queryParams.get("welcome");
 
   const apps = project?.services.filter((s) => s.isDevContainer) || [];
   const services = project?.services.filter((s) => !s.isDevContainer) || [];
@@ -31,8 +35,6 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     const project = await getProjectByIdApi(id);
     setProject(project);
   }
-
-  console.log("serviceSelected", serviceSelected);
 
   const create: CreateServiceFunc = async ({
     fromDockerCompose,
@@ -75,7 +77,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
         />
       )}
       <ProjectPageHeader />
-      <ModalInfo />
+      {displayWelcomeModal && <ModalWelcome />}
       <div className="flex flex-col justify-center items-center h-3/5">
         <div>
           {apps.map((app) => (

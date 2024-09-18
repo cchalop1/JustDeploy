@@ -67,7 +67,7 @@ func main() {
 		web.CreateMiddlewareWebFiles(app)
 		if !flags.noBrowser {
 			fmt.Println("Opening browser")
-			adapter.OpenBrowser("http://localhost:" + port + "/project/" + projectId)
+			adapter.OpenBrowser("http://localhost:" + port + "/project/" + projectId + "?welcome=true")
 		}
 		app.StartServer(port)
 	}
