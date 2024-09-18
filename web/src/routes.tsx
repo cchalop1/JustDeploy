@@ -13,6 +13,7 @@ import CreateServerLoading from "@/pages/CreateServerLoading";
 import CreateDeployLoading from "@/pages/CreateDeployLoading";
 import Layout from "@/Layout";
 import ProjectPageWrapper from "./pages/project/ProjectPageWrapper";
+import { NotificationProvider } from "./contexts/Notifications";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -32,7 +33,14 @@ const router = createBrowserRouter(
       <Route path="deploy/:id/installation" element={<CreateDeployLoading />} />
       <Route path="deploy/create" element={<CreateDeployForm />} />
       <Route path="deploy/:id" element={<DeployPage />} />
-      <Route path="project/:id" element={<ProjectPageWrapper />} />
+      <Route
+        path="project/:id"
+        element={
+          <NotificationProvider>
+            <ProjectPageWrapper />
+          </NotificationProvider>
+        }
+      />
     </Route>
   )
 );

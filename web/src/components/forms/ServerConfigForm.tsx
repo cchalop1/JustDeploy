@@ -23,7 +23,7 @@ import { useState } from "react";
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import { ButtonStateEnum } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
-import AlertDestructive from "@/components/alerts/AlertDestructive";
+// import AlertDestructive from "@/components/alerts/AlertDestructive";
 
 export default function ServerConfigForm() {
   const navigate = useNavigate();
@@ -89,7 +89,7 @@ export default function ServerConfigForm() {
   };
   return (
     <>
-      {error && <AlertDestructive message={error} />}
+      {/* {error && <AlertDestructive message={error} />} */}
       <div className="mt-16 flex justify-center">
         <Card className="w-[500px]">
           <CardHeader>

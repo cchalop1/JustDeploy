@@ -1,5 +1,4 @@
 import SpinnerIcon from "@/assets/SpinnerIcon";
-import AlertModal from "@/components/alerts/AlertModal";
 import AddService from "@/components/databaseServices/AddServices";
 import { CreateServiceFunc } from "@/components/databaseServices/CommandModal";
 import ModalWelcome from "@/components/modals/ModalWelcome";
@@ -12,6 +11,7 @@ import { getProjectByIdApi, ProjectDto } from "@/services/getProjectById";
 import { Service } from "@/services/getServicesByDeployId";
 import { Suspense, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { useNotification } from "@/hooks/useNotifications";
 
 type ProjectPageProps = {
   id: string;
@@ -21,15 +21,14 @@ export default function ProjectPage({ id }: ProjectPageProps) {
   const [project, setProject] = useState<ProjectDto | null>(null);
   const [serviceSelected, setServiceSelected] = useState<Service | null>(null);
 
+  const notif = useNotification();
+
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
   const displayWelcomeModal = queryParams.get("welcome");
 
   const apps = project?.services.filter((s) => s.isDevContainer) || [];
   const services = project?.services.filter((s) => !s.isDevContainer) || [];
-
-  // TODO: move to context
-  const [displayAlert, setDisplayAlert] = useState(false);
 
   async function getProjectById() {
     const project = await getProjectByIdApi(id);
@@ -49,10 +48,10 @@ export default function ProjectPage({ id }: ProjectPageProps) {
       localPath: path,
     });
     await getProjectById();
-    setDisplayAlert(true);
-    setTimeout(() => {
-      setDisplayAlert(false);
-    }, 3000);
+    notif.success({
+      title: "Service is started",
+      content: `${serviceName} is started you can now connect to if the env is generate and store in .env file in your project folder`,
+    });
   };
 
   useEffect(() => {
@@ -61,14 +60,6 @@ export default function ProjectPage({ id }: ProjectPageProps) {
 
   return (
     <div className="bg-grid-image h-screen">
-      {displayAlert && (
-        <AlertModal
-          type="success"
-          title="Service Created !"
-          message="Your service has been created successfully, you can find its variables in .env"
-        />
-      )}
-
       {serviceSelected && (
         <ModalServiceSettings
           service={serviceSelected}

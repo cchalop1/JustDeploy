@@ -30,7 +30,6 @@ import { useNavigate } from "react-router-dom";
 import { DeployConfigDto, getDeployConfig } from "@/services/getDeployConfig";
 import EnvsManagements from "./EnvsManagements";
 import ConfigDeployInfos from "../ConfigDeployInfos";
-import AlertDestructive from "../alerts/AlertDestructive";
 
 const createDeploymentEmptyState = (): CreateDeployDto => {
   return {
@@ -124,7 +123,7 @@ export function CreateDeployForm() {
 
   return (
     <div className="flex flex-col gap-4 mt-16 items-center">
-      {error && <AlertDestructive message={error} />}
+      {/* {error && <AlertDestructive message={error} />} */}
       {config && <ConfigDeployInfos config={config} />}
       <Card className="w-[500px]">
         <CardHeader>
