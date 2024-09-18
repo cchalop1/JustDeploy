@@ -44,6 +44,10 @@ func main() {
 		EventAdapter:      adapter.NewAdapterEvent(),
 	}
 
+	currentPath := deployService.FilesystemAdapter.GetCurrentPath()
+
+	project := deployService.DatabaseAdapter.GetProjectByPath(currentPath)
+
 	projectId, err := application.CreateProjectCurrentFolder(&deployService)
 
 	if err != nil {
@@ -67,7 +71,11 @@ func main() {
 		web.CreateMiddlewareWebFiles(app)
 		if !flags.noBrowser {
 			fmt.Println("Opening browser")
-			adapter.OpenBrowser("http://localhost:" + port + "/project/" + projectId + "?welcome=true")
+			if project == nil {
+				adapter.OpenBrowser("http://localhost:" + port + "/project/" + projectId + "?welcome=true")
+			} else {
+				adapter.OpenBrowser("http://localhost:" + port + "/project/" + projectId)
+			}
 		}
 		app.StartServer(port)
 	}

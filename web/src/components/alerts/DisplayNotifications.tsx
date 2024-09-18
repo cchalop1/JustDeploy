@@ -11,7 +11,7 @@ export default function DisplayNotifications({
   removeNotif,
 }: DisplayNotificationsProps) {
   return (
-    <div className="absolute top-3 left-1/2 transform -translate-x-1/2 flex flex-col gap-3 w-1/3 z-20">
+    <div className="absolute top-28 left-2 flex flex-col gap-3 w-1/3 z-20">
       {notifications.map((notification) => (
         <Notif
           key={notification.id}

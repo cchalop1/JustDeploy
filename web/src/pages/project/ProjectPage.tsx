@@ -9,7 +9,7 @@ import Version from "@/components/Version";
 import { createServiceApi } from "@/services/createServiceApi";
 import { getProjectByIdApi, ProjectDto } from "@/services/getProjectById";
 import { Service } from "@/services/getServicesByDeployId";
-import { Suspense, useEffect, useState } from "react";
+import { KeyboardEvent, Suspense, use, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useNotification } from "@/hooks/useNotifications";
 
@@ -57,6 +57,17 @@ export default function ProjectPage({ id }: ProjectPageProps) {
   useEffect(() => {
     getProjectById();
   }, [id]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", (ev: globalThis.KeyboardEvent) => {
+      if (ev.key === "Escape") {
+        setServiceSelected(null);
+      }
+    });
+    return () => {
+      window.removeEventListener("keydown", () => {});
+    };
+  }, []);
 
   return (
     <div className="bg-grid-image h-screen">
