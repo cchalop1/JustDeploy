@@ -15,7 +15,7 @@ export default function ServiceCard({ service, onClick }: ServiceCardProps) {
   return (
     <div
       className={`relative w-80 h-32 bg-white border ${
-        isDevContainer ? "rounded-b-lg rounded-e-lg" : "rounded-lg"
+        isDevContainer ? "rounded-b-lg rounded-e-lg" : "rounded-lg pt-3"
       }  shadow-lg hover:shadow-xl cursor-pointer`}
       onClick={onClick}
     >

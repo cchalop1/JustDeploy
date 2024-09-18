@@ -9,7 +9,7 @@ export default function Notif({ notification, removeNotif }: NotifProps) {
   const iconPath = "/icons/" + notification.type + ".jpg";
 
   return (
-    <div className="bg-white border rounded-lg p-4 flex gap-4 justify-between">
+    <div className="bg-white border rounded-lg p-4 flex gap-4 justify-between z-20">
       <img src={iconPath} className="h-8" />
       <div className="flex flex-col items-start w-3/4">
         <div className="font-bold">{notification.title}</div>
