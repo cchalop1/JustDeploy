@@ -32,13 +32,13 @@ func CreateProjectCurrentFolder(deployService *service.DeployService) (string, e
 		return "", err
 	}
 
-	createServiceDto := dto.CreateServiceDto{
-		ServiceName: Name,
-		ProjectId:   &projectId,
-		LocalPath:   &currentPath,
-	}
+	// createServiceDto := dto.CreateServiceDto{
+	// 	ServiceName: Name,
+	// 	ProjectId:   &projectId,
+	// 	LocalPath:   &currentPath,
+	// }
 
-	CreateService(deployService, createServiceDto)
+	// CreateService(deployService, createServiceDto)
 	fmt.Printf("Projet créé avec succès avec l'ID: %s\n", projectId)
 	return projectId, nil
 }

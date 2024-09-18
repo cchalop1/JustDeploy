@@ -59,7 +59,7 @@ export default function AddService({
     <>
       <Card
         onClick={() => setOpen(true)}
-        className="hover:shadow-md hover:bg-slate-200 cursor-pointer pt-3 pb-6 pl-5 pr-5 flex gap-6 w-80 h-32 align-top"
+        className="hover:shadow-md hover:bg-slate-200 cursor-pointer pt-3 pb-6 pl-5 pr-5 flex gap-6 w-80 h-36 align-top"
       >
         {text}{" "}
         <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
