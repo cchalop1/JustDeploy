@@ -269,96 +269,108 @@ func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) ([]da
 }
 
 // .env file management
-func (fs *FilesystemAdapter) GenerateDotEnvFile(path string, envs []dto.Env) error {
+func (fs *FilesystemAdapter) GenerateDotEnvFile(project *domain.Project) error {
 	// Full path to the .env file
-	envFilePath := path + "/.env"
+	for _, service := range project.Services {
+		if service.IsDevContainer {
 
-	// Check if .env file exists
-	_, err := os.Stat(envFilePath)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			// File does not exist, create it
-			fmt.Println(".env file does not exist, creating a new one")
-		} else {
-			// Other error when trying to check file
-			return err
-		}
-	}
+			envFilePath := service.CurrentPath + "/.env"
 
-	// Open the file in append mode if it exists, otherwise create it
-	file, err := os.OpenFile(envFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+			// Check if .env file exists
+			_, err := os.Stat(envFilePath)
+			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					// File does not exist, create it
+					fmt.Println(".env file does not exist, creating a new one")
+				} else {
+					// Other error when trying to check file
+					return err
+				}
+			}
 
-	// Write environment variables to the file
-	for _, env := range envs {
-		_, err := file.WriteString(env.Name + "=" + env.Value + "\n")
-		if err != nil {
-			return err
+			// Open the file in append mode if it exists, otherwise create it
+			file, err := os.OpenFile(envFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			// Write environment variables to the file
+			for _, env := range service.Envs {
+				_, err := file.WriteString(env.Name + "=" + env.Value + "\n")
+				if err != nil {
+					return err
+				}
+			}
+
 		}
 	}
 
 	return nil
 }
 
-func (fs *FilesystemAdapter) RemoveEnvsFromDotEnvFile(path string, envs []dto.Env) error {
-	envFilePath := path + "/.env"
+func (fs *FilesystemAdapter) RemoveEnvsFromDotEnvFile(project *domain.Project, envToRemove []dto.Env) error {
+	for _, service := range project.Services {
+		if service.IsDevContainer {
 
-	// Check if .env file exists
-	_, err := os.Stat(envFilePath)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			// File does not exist, nothing to remove
-			return nil
+			envFilePath := service.CurrentPath + "/.env"
+
+			// Check if .env file exists
+			_, err := os.Stat(envFilePath)
+			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					// File does not exist, nothing to remove
+					return nil
+				}
+				// Other error when trying to check file
+				return err
+			}
+
+			// Read the entire file
+			content, err := os.ReadFile(envFilePath)
+			if err != nil {
+				return err
+			}
+
+			// Create a map of environment variables to remove for quick lookup
+			envsToRemove := make(map[string]bool)
+			for _, env := range envToRemove {
+				envsToRemove[env.Name] = true
+			}
+
+			// Process the file line by line
+			var newLines []string
+			lines := strings.Split(string(content), "\n")
+			for _, line := range lines {
+				trimmedLine := strings.TrimSpace(line)
+				if trimmedLine == "" || strings.HasPrefix(trimmedLine, "#") {
+					// Keep empty lines and comments
+					newLines = append(newLines, line)
+					continue
+				}
+
+				parts := strings.SplitN(trimmedLine, "=", 2)
+				if len(parts) < 2 {
+					// Keep lines that don't look like environment variable declarations
+					newLines = append(newLines, line)
+					continue
+				}
+
+				key := strings.TrimSpace(parts[0])
+				if !envsToRemove[key] {
+					// Keep lines for environment variables that are not in the removal list
+					newLines = append(newLines, line)
+				}
+			}
+
+			// Write the updated content back to the file
+			newContent := strings.Join(newLines, "\n")
+			err = os.WriteFile(envFilePath, []byte(newContent), 0644)
+			if err != nil {
+				return err
+			}
+
 		}
-		// Other error when trying to check file
-		return err
-	}
-
-	// Read the entire file
-	content, err := os.ReadFile(envFilePath)
-	if err != nil {
-		return err
-	}
-
-	// Create a map of environment variables to remove for quick lookup
-	envsToRemove := make(map[string]bool)
-	for _, env := range envs {
-		envsToRemove[env.Name] = true
-	}
-
-	// Process the file line by line
-	var newLines []string
-	lines := strings.Split(string(content), "\n")
-	for _, line := range lines {
-		trimmedLine := strings.TrimSpace(line)
-		if trimmedLine == "" || strings.HasPrefix(trimmedLine, "#") {
-			// Keep empty lines and comments
-			newLines = append(newLines, line)
-			continue
-		}
-
-		parts := strings.SplitN(trimmedLine, "=", 2)
-		if len(parts) < 2 {
-			// Keep lines that don't look like environment variable declarations
-			newLines = append(newLines, line)
-			continue
-		}
-
-		key := strings.TrimSpace(parts[0])
-		if !envsToRemove[key] {
-			// Keep lines for environment variables that are not in the removal list
-			newLines = append(newLines, line)
-		}
-	}
-
-	// Write the updated content back to the file
-	newContent := strings.Join(newLines, "\n")
-	err = os.WriteFile(envFilePath, []byte(newContent), 0644)
-	if err != nil {
-		return err
 	}
 
 	return nil

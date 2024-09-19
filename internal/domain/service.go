@@ -15,7 +15,7 @@ type Service struct {
 	ImageName   string    `json:"imageName"`
 	ImageUrl    string    `json:"imageUrl"`
 	// TODO: rethink this
-	IsDevContainer bool    `json:"isDevContainer"`
-	CurrentPath    *string `json:"currentPath"`
-	ExposePort     string  `json:"exposePort"`
+	IsDevContainer bool   `json:"isDevContainer"`
+	CurrentPath    string `json:"currentPath"`
+	ExposePort     string `json:"exposePort"`
 }

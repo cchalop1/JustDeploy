@@ -140,7 +140,7 @@ func createDevContainerService(deployService *service.DeployService, createServi
 		Host:           "localhost",
 		ProjectId:      createServiceDto.ProjectId,
 		IsDevContainer: true,
-		CurrentPath:    createServiceDto.Path,
+		CurrentPath:    *createServiceDto.Path,
 		ExposePort:     exposedPort,
 	}
 	err := deployService.DatabaseAdapter.SaveServiceByProjectId(domainService)
@@ -206,7 +206,7 @@ func createServiceForProject(deployService *service.DeployService, createService
 
 	deployService.DatabaseAdapter.SaveProject(*project)
 
-	deployService.FilesystemAdapter.GenerateDotEnvFile(project.Path, envs)
+	deployService.FilesystemAdapter.GenerateDotEnvFile(project)
 
 	return domainService, nil
 }
