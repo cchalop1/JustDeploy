@@ -12,6 +12,11 @@ type Env struct {
 	Value    string `json:"value"`
 	IsSecret bool   `json:"isSecret"`
 }
+
+func (e Env) Equals(env Env) bool {
+	return e.Name == env.Name && e.Value == env.Value && e.IsSecret == env.IsSecret
+}
+
 type NewDeployDto struct {
 	ServerId       string `json:"serverId" validate:"required"`
 	EnableTls      bool   `json:"enableTls"`

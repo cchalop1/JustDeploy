@@ -17,5 +17,5 @@ type Service struct {
 	// TODO: rethink this
 	IsDevContainer bool    `json:"isDevContainer"`
 	CurrentPath    *string `json:"currentPath"`
-	ExposePort     *string `json:"exposePort"`
+	ExposePort     string  `json:"exposePort"`
 }

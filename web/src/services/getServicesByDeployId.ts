@@ -14,6 +14,7 @@ export type Service = {
   imageUrl: string;
   isDevContainer: boolean;
   currentPath: string;
+  exposePort: string;
 };
 
 export async function getServicesByDeployIdApi(

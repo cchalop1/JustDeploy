@@ -81,6 +81,14 @@ func deleteServiceWithoutDeploy(deployService *service.DeployService, s *domain.
 		return err
 	}
 
+	removeEnvsFromProject(project, s.Envs)
+
+	err = deployService.DatabaseAdapter.SaveProject(*project)
+
+	if err != nil {
+		return err
+	}
+
 	err = deployService.FilesystemAdapter.RemoveEnvsFromDotEnvFile(project.Path, s.Envs)
 
 	if err != nil {
@@ -88,4 +96,27 @@ func deleteServiceWithoutDeploy(deployService *service.DeployService, s *domain.
 	}
 
 	return deployService.DatabaseAdapter.DeleteServiceById(s.Id)
+}
+
+func removeEnvsFromProject(project *domain.Project, envsToRemove []dto.Env) {
+	for i, _ := range project.Services {
+		if project.Services[i].IsDevContainer {
+			filteredEnvs := []dto.Env{}
+			for _, env := range project.Services[i].Envs {
+				if !envIsContained(env, envsToRemove) {
+					filteredEnvs = append(filteredEnvs, env)
+				}
+			}
+			project.Services[i].Envs = filteredEnvs
+		}
+	}
+}
+
+func envIsContained(env dto.Env, envs []dto.Env) bool {
+	for _, e := range envs {
+		if e.Equals(env) {
+			return true
+		}
+	}
+	return false
 }

@@ -1,6 +1,6 @@
 import { callApi } from "./api";
 
-type VersionDto = {
+export type VersionDto = {
   tagName: string;
   githubUrl: string;
 };

@@ -16,6 +16,7 @@ export default function ModalServiceSettings({
   getProjectById,
 }: ModalServiceSettingsProps) {
   const isDevContainer = service.isDevContainer;
+  const url = `http://localhost:${service.exposePort}`;
 
   const deleteSelectedService = async () => {
     await deleteServiceByIdApi(service.id);
@@ -61,6 +62,13 @@ export default function ModalServiceSettings({
             Delete
           </Button>
           <div>
+            <div>
+              {isDevContainer && (
+                <a href={url} target="_blank" className="underline">
+                  {url}
+                </a>
+              )}
+            </div>
             <div>
               <div className="font-bold">Environment variables</div>
               <EnvsManagements envs={service.envs} setEnvs={() => {}} />
