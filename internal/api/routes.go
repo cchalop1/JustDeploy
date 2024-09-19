@@ -46,6 +46,8 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	app.Echo.GET("/api/project/:id", handlers.GetProjectByIdHandler(deployService))
 
+	app.Echo.GET("/api/project/:id/settings", handlers.GetProjectSettingsHandler(deployService))
+
 	app.Echo.GET("/api/version", handlers.GetVersionHandler(deployService))
 
 }

@@ -82,6 +82,7 @@ export default function DeploySettings({
       <EnvsManagements
         envs={deploySetting.envs}
         setEnvs={(newEnvs) => editDeploy({ ...deploySetting, envs: newEnvs })}
+        canEdit
       />
     </div>
   );

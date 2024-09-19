@@ -5,6 +5,6 @@ type VersionDto = {
   githubUrl: string;
 };
 
-export async function getVersion(): Promise<VersionDto> {
+export async function getVersionApi(): Promise<VersionDto> {
   return await callApi<VersionDto>("/version", "GET");
 }

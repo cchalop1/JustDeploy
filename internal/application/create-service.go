@@ -2,6 +2,7 @@ package application
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"cchalop1.com/deploy/internal/adapter"
@@ -128,15 +129,18 @@ func createServiceLinkToDeploy(deployService *service.DeployService, createServi
 
 func createDevContainerService(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) (domain.Service, error) {
 	domainService := domain.Service{
-		Id:             utils.GenerateRandomPassword(5),
-		Name:           createServiceDto.ServiceName,
-		Envs:           []dto.Env{},
+		Id:   utils.GenerateRandomPassword(5),
+		Name: deployService.FilesystemAdapter.GetFolderName(*createServiceDto.Path),
+		Envs: []dto.Env{
+			// TODO: find a avalaible port
+			{Name: "PORT", Value: "9999"},
+		},
 		VolumsNames:    []string{},
 		Status:         "Runing",
 		Host:           "localhost",
 		ProjectId:      createServiceDto.ProjectId,
 		IsDevContainer: true,
-		CurrentPath:    createServiceDto.LocalPath,
+		CurrentPath:    createServiceDto.Path,
 	}
 	err := deployService.DatabaseAdapter.SaveServiceByProjectId(domainService)
 	return domainService, err
@@ -147,7 +151,8 @@ func createServiceForProject(deployService *service.DeployService, createService
 		return domain.Service{}, errors.New("ProjectId is required")
 	}
 
-	if createServiceDto.LocalPath != nil {
+	fmt.Println("createServiceDto.Path", createServiceDto.Path)
+	if createServiceDto.Path != nil {
 		return createDevContainerService(deployService, createServiceDto)
 	}
 
@@ -186,6 +191,7 @@ func createServiceForProject(deployService *service.DeployService, createService
 		Status:      "Runing",
 		ImageName:   service.Config.Image,
 		ImageUrl:    service.Icon,
+		ExposePort:  &exposedPort,
 	}
 
 	project, err := deployService.DatabaseAdapter.GetProjectById(*createServiceDto.ProjectId)
@@ -195,6 +201,13 @@ func createServiceForProject(deployService *service.DeployService, createService
 	}
 
 	project.Services = append(project.Services, domainService)
+
+	// TODO: add envs to devContainers service in project
+	for i, service := range project.Services {
+		if project.Services[i].IsDevContainer {
+			project.Services[i].Envs = append(service.Envs, domainService.Envs...)
+		}
+	}
 
 	deployService.DatabaseAdapter.SaveProject(*project)
 

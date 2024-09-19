@@ -217,7 +217,11 @@ export function CreateDeployForm() {
                 </div>
               )}
               <div className="space-y-2">
-                <EnvsManagements envs={newDeploy.envs} setEnvs={setEnvs} />
+                <EnvsManagements
+                  envs={newDeploy.envs}
+                  setEnvs={setEnvs}
+                  canEdit
+                />
               </div>
             </div>
           </CardContent>

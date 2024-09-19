@@ -1,3 +1,6 @@
+import { Suspense, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import AddService from "@/components/databaseServices/AddServices";
 import { CreateServiceFunc } from "@/components/databaseServices/CommandModal";
@@ -9,23 +12,26 @@ import Version from "@/components/Version";
 import { createServiceApi } from "@/services/createServiceApi";
 import { getProjectByIdApi, ProjectDto } from "@/services/getProjectById";
 import { Service } from "@/services/getServicesByDeployId";
-import { KeyboardEvent, Suspense, use, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { useNotification } from "@/hooks/useNotifications";
+import {
+  getProjectSettingsByIdApi,
+  ProjectSettingsDto,
+} from "@/services/getProjectSettings";
+import { useIsWelcome } from "@/hooks/useIsWelcome";
 
 type ProjectPageProps = {
   id: string;
 };
 
 export default function ProjectPage({ id }: ProjectPageProps) {
-  const [project, setProject] = useState<ProjectDto | null>(null);
-  const [serviceSelected, setServiceSelected] = useState<Service | null>(null);
-
   const notif = useNotification();
 
-  const { search } = useLocation();
-  const queryParams = new URLSearchParams(search);
-  const displayWelcomeModal = queryParams.get("welcome");
+  const [project, setProject] = useState<ProjectDto | null>(null);
+  const [serviceSelected, setServiceSelected] = useState<Service | null>(null);
+  const [projectSettings, setProjectSettings] =
+    useState<ProjectSettingsDto | null>(null);
+
+  const displayWelcomeModal = useIsWelcome();
 
   const apps = project?.services.filter((s) => s.isDevContainer) || [];
   const services = project?.services.filter((s) => !s.isDevContainer) || [];
@@ -45,7 +51,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
       serviceName,
       fromDockerCompose,
       projectId: project.id,
-      localPath: path,
+      path,
     });
     await getProjectById();
     notif.success({
@@ -54,8 +60,14 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     });
   };
 
+  async function getProjectSettings() {
+    const res = await getProjectSettingsByIdApi(id);
+    setProjectSettings(res);
+  }
+
   useEffect(() => {
     getProjectById();
+    getProjectSettings();
   }, [id]);
 
   useEffect(() => {
@@ -99,22 +111,24 @@ export default function ProjectPage({ id }: ProjectPageProps) {
               onClick={() => setServiceSelected(service)}
             />
           ))}
-          <AddService
-            createService={async (serviceParams) => {
-              create({
-                serviceName: serviceParams.serviceName,
-                fromDockerCompose: serviceParams.fromDockerCompose,
-              });
-            }}
-            fetchServiceList={getProjectById}
-            setLoading={() => {}}
-          />
+          {projectSettings && (
+            <AddService
+              projectSettings={projectSettings}
+              createService={async (serviceParams) => {
+                create({
+                  serviceName: serviceParams.serviceName,
+                  fromDockerCompose: serviceParams.fromDockerCompose,
+                  path: serviceParams.path,
+                });
+              }}
+              fetchServiceList={getProjectById}
+              setLoading={() => {}}
+            />
+          )}
         </div>
       </div>
       <div className="fixed bottom-6 right-4 pl-10 pr-10">
-        <Suspense fallback={<SpinnerIcon color="text-black" />}>
-          <Version />
-        </Suspense>
+        <Version />
       </div>
     </div>
   );

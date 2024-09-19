@@ -268,6 +268,7 @@ func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) ([]da
 	return services, nil
 }
 
+// .env file management
 func (fs *FilesystemAdapter) GenerateDotEnvFile(path string, envs []dto.Env) error {
 	// Full path to the .env file
 	envFilePath := path + "/.env"
@@ -361,4 +362,50 @@ func (fs *FilesystemAdapter) RemoveEnvsFromDotEnvFile(path string, envs []dto.En
 	}
 
 	return nil
+}
+
+// Get list of folders
+func (fs *FilesystemAdapter) GetFolders(path string) ([]dto.PathDto, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil, fmt.Errorf("path does not exist: %s", path)
+	}
+
+	return fs.getFoldersRecursive(path, 0, 2)
+}
+
+func (fs *FilesystemAdapter) getFoldersRecursive(path string, currentDepth, maxDepth int) ([]dto.PathDto, error) {
+	if currentDepth >= maxDepth {
+		return nil, nil
+	}
+
+	var result []dto.PathDto
+
+	files, err := os.ReadDir(path)
+	if err != nil {
+		return nil, fmt.Errorf("error reading directory: %v", err)
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			fullPath := filepath.Join(path, file.Name())
+			if strings.HasPrefix(file.Name(), ".") {
+				continue
+			}
+
+			folder := dto.PathDto{
+				Name:     file.Name(),
+				FullPath: fullPath,
+			}
+
+			subFolders, err := fs.getFoldersRecursive(fullPath, currentDepth+1, maxDepth)
+			if err != nil {
+				return nil, err
+			}
+
+			folder.Folders = subFolders
+			result = append(result, folder)
+		}
+	}
+
+	return result, nil
 }

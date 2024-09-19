@@ -5,11 +5,13 @@ import { Env } from "@/services/postFormDetails";
 type EnvsManagementsProps = {
   envs: Env[];
   setEnvs: (envs: Env[]) => void;
+  canEdit?: boolean;
 };
 
 export default function EnvsManagements({
   envs,
   setEnvs,
+  canEdit,
 }: EnvsManagementsProps) {
   const addNewEnv = () => {
     setEnvs([...envs, { name: "", value: "" }]);
@@ -30,6 +32,7 @@ export default function EnvsManagements({
                 id="envName"
                 name="envName"
                 type="envName"
+                readOnly={!canEdit}
                 placeholder="Env Name"
                 autoComplete="off"
                 value={env.name}
@@ -45,6 +48,7 @@ export default function EnvsManagements({
               <Input
                 id="envSecret"
                 name="envSecret"
+                readOnly={!canEdit}
                 type="envSecret"
                 placeholder="Env Secret"
                 autoComplete="off"
@@ -58,19 +62,21 @@ export default function EnvsManagements({
                   setEnvs(updatedEnvs);
                 }}
               />
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  if (lastEnv) {
-                    addNewEnv();
-                  } else {
-                    removeEnv(idx);
-                  }
-                }}
-              >
-                {lastEnv ? "+" : "-"}
-              </Button>
+              {canEdit && (
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (lastEnv) {
+                      addNewEnv();
+                    } else {
+                      removeEnv(idx);
+                    }
+                  }}
+                >
+                  {lastEnv ? "+" : "-"}
+                </Button>
+              )}
             </div>
           );
         })}

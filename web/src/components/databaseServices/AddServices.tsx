@@ -8,10 +8,12 @@ import { CreateServiceApi } from "@/services/createServiceApi";
 import CommandModal from "./CommandModal";
 import { ResponseServiceFromDockerComposeDto } from "@/services/getServicesFromDockerCompose";
 import { Card } from "../ui/card";
+import { ProjectSettingsDto } from "@/services/getProjectSettings";
 
 type AddServiceProps = {
   deployId?: string;
   projectId?: string;
+  projectSettings: ProjectSettingsDto;
   setLoading: (loading: boolean) => void;
   createService: (serviceParams: CreateServiceApi) => Promise<void>;
   fetchServiceList: (deployId?: string) => Promise<void>;
@@ -20,14 +22,15 @@ type AddServiceProps = {
 export default function AddService({
   setLoading,
   createService,
+  projectSettings,
   fetchServiceList,
 }: AddServiceProps) {
   const [preConfiguredServices, setPreConfiguredServices] = useState<
     Array<ServiceDto>
   >([]);
   const text = "Click here for create and connect new database or press";
-  const [serviceFromDockerCompose, setServiceFromDockerCompose] =
-    useState<ResponseServiceFromDockerComposeDto>(null);
+  // const [serviceFromDockerCompose, setServiceFromDockerCompose] =
+  //   useState<ResponseServiceFromDockerComposeDto>(null);
 
   const [open, setOpen] = useState(false);
 
@@ -70,14 +73,12 @@ export default function AddService({
         open={open}
         setOpen={setOpen}
         preConfiguredServices={preConfiguredServices}
-        serviceFromDockerCompose={serviceFromDockerCompose}
+        projectSettings={projectSettings}
+        serviceFromDockerCompose={[]}
         create={async (createServiceParams) => {
           setLoading(true);
           setOpen(false);
-          await createService({
-            ...createServiceParams,
-          });
-          await fetchServiceList(deployId);
+          await createService(createServiceParams);
           setLoading(false);
         }}
       />

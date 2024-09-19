@@ -3,7 +3,7 @@ import { ResponseApi, callApi } from "./api";
 export type CreateServiceApi = {
   serviceName?: string;
   fromDockerCompose?: boolean;
-  localPath?: string;
+  path?: string;
   projectId: string;
 };
 

@@ -3,6 +3,7 @@ import { Service } from "@/services/getServicesByDeployId";
 import { CircleX } from "lucide-react";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion";
+import EnvsManagements from "../forms/EnvsManagements";
 
 type ModalServiceSettingsProps = {
   service: Service;
@@ -58,7 +59,12 @@ export default function ModalServiceSettings({
           <Button variant="destructive" onClick={() => deleteSelectedService()}>
             Delete
           </Button>
-          <div></div>
+          <div>
+            <div>
+              <div className="font-bold">Environment variables</div>
+              <EnvsManagements envs={service.envs} setEnvs={() => {}} />
+            </div>
+          </div>
         </div>
       </div>
     </motion.div>

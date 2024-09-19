@@ -16,5 +16,5 @@ type CreateServiceDto struct {
 	FromDockerCompose bool    `json:"fromDockerCompose"`
 	DeployId          *string `json:"deployId"`
 	ProjectId         *string `json:"projectId"`
-	LocalPath         *string `json:"localPath"`
+	Path              *string `json:"path"`
 }
