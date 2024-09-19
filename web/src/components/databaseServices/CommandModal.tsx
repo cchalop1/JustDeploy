@@ -45,6 +45,7 @@ export default function CommandModal({
           <CommandItem
             className="flex gap-3"
             onSelect={() => create({ path: projectSettings.currentPath })}
+            key={projectSettings.currentPath}
           >
             <Folder className="w-5" />
             <span className="h-4">{projectSettings.currentPath}</span>
