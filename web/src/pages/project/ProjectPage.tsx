@@ -93,7 +93,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
       <ProjectPageHeader />
       {displayWelcomeModal && <ModalWelcome />}
       <div className="flex flex-col justify-center items-center h-3/5">
-        <div>
+        <div className="flex gap-3">
           {apps.map((app) => (
             <ServiceCard
               key={app.id}
