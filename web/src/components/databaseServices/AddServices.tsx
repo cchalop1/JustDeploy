@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 
 import { CreateServiceApi } from "@/services/createServiceApi";
 import CommandModal from "./CommandModal";
-import { ResponseServiceFromDockerComposeDto } from "@/services/getServicesFromDockerCompose";
 import { Card } from "../ui/card";
 import { ProjectSettingsDto } from "@/services/getProjectSettings";
 
@@ -78,7 +77,10 @@ export default function AddService({
         create={async (createServiceParams) => {
           setLoading(true);
           setOpen(false);
-          await createService(createServiceParams);
+          await createService({
+            path: createServiceParams.path,
+            serviceName: createServiceParams.serviceName,
+          });
           setLoading(false);
         }}
       />

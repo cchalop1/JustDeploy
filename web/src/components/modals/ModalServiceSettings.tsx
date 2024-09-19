@@ -32,12 +32,13 @@ export default function ModalServiceSettings({
         position: "absolute",
         right: 5,
         top: 28,
-        width: "100%",
+        width: "35%",
+        zIndex: 20,
       }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0 }}
     >
-      <div className="absolute right-5 top-28 w-1/3 border border-spacing-3 rounded-lg h-3/4 bg-slate-100 shadow-lg">
+      <div className="absolute right-5 top-28 w-full border border-spacing-3 rounded-lg h-3/4 bg-slate-100 shadow-lg z-20">
         <div className="flex justify-between p-3 bg-white">
           <div className="flex items-center gap-4">
             {isDevContainer ? (
