@@ -63,11 +63,9 @@ export default function ModalServiceSettings({
           </Button>
           <div>
             <div>
-              {isDevContainer && (
-                <a href={url} target="_blank" className="underline">
-                  {url}
-                </a>
-              )}
+              <a href={url} target="_blank" className="underline">
+                {url}
+              </a>
             </div>
             <div>
               <div className="font-bold">Environment variables</div>

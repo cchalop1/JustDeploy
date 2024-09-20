@@ -18,6 +18,7 @@ import {
   ProjectSettingsDto,
 } from "@/services/getProjectSettings";
 import { useIsWelcome } from "@/hooks/useIsWelcome";
+import { get } from "http";
 
 type ProjectPageProps = {
   id: string;
@@ -54,6 +55,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
       path,
     });
     await getProjectById();
+    await getProjectSettings();
     notif.success({
       title: "Service is started",
       content: `${serviceName} is started you can now connect to if the env is generate and store in .env file in your project folder`,
@@ -61,8 +63,9 @@ export default function ProjectPage({ id }: ProjectPageProps) {
   };
 
   async function getProjectSettings() {
-    const res = await getProjectSettingsByIdApi(id);
-    setProjectSettings(res);
+    const projectSettingsResponse = await getProjectSettingsByIdApi(id);
+
+    setProjectSettings(projectSettingsResponse);
   }
 
   useEffect(() => {
@@ -113,9 +116,10 @@ export default function ProjectPage({ id }: ProjectPageProps) {
           ))}
           {projectSettings && (
             <AddService
+              projectId={project?.id}
               projectSettings={projectSettings}
               createService={async (serviceParams) => {
-                create({
+                await create({
                   serviceName: serviceParams.serviceName,
                   fromDockerCompose: serviceParams.fromDockerCompose,
                   path: serviceParams.path,

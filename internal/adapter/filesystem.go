@@ -409,12 +409,12 @@ func (fs *FilesystemAdapter) getFoldersRecursive(path string, currentDepth, maxD
 				FullPath: fullPath,
 			}
 
-			subFolders, err := fs.getFoldersRecursive(fullPath, currentDepth+1, maxDepth)
-			if err != nil {
-				return nil, err
-			}
+			// subFolders, err := fs.getFoldersRecursive(fullPath, currentDepth+1, maxDepth)
+			// if err != nil {
+			// 	return nil, err
+			// }
 
-			folder.Folders = subFolders
+			// folder.Folders = subFolders
 			result = append(result, folder)
 		}
 	}

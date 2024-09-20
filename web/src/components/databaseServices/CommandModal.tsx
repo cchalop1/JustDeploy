@@ -41,17 +41,7 @@ export default function CommandModal({
       <CommandInput placeholder="Type to search and lauch a service in the list..." />
       <CommandList onSelect={() => setOpen(false)}>
         <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup heading="Load your current folder">
-          <CommandItem
-            className="flex gap-3"
-            onSelect={() => create({ path: projectSettings.currentPath })}
-            key={projectSettings.currentPath}
-          >
-            <Folder className="w-5" />
-            <span className="h-4">{projectSettings.currentPath}</span>
-          </CommandItem>
-        </CommandGroup>
-        <CommandGroup heading="chose a folders in the list">
+        <CommandGroup heading="Chose a folders in the list">
           {projectSettings.folders.map((folder) => (
             <CommandItem
               className="flex gap-3"
@@ -63,7 +53,6 @@ export default function CommandModal({
             </CommandItem>
           ))}
         </CommandGroup>
-
         {serviceFromDockerCompose && serviceFromDockerCompose.length > 0 && (
           <CommandGroup heading="Service from your docker compose file">
             {serviceFromDockerCompose.map((s) => (

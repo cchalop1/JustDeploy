@@ -29,7 +29,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	app.Echo.GET("/api/deploy/logs/:id", handlers.GetLogsHandler(deployService))
 
-	app.Echo.GET("/api/service", handlers.GetServicesListHandler(deployService))
+	app.Echo.GET("/api/service/:productId", handlers.GetServicesListHandler(deployService))
 	app.Echo.GET("/api/deploy/:deployId/service-docker-compose", handlers.GetServicesFromDockerComposeHandler(deployService))
 
 	app.Echo.POST("/api/deploy/service", handlers.CreateServiceHandler(deployService))

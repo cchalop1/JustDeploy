@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 
 import { CreateServiceApi } from "@/services/createServiceApi";
 import CommandModal from "./CommandModal";
-import { Card } from "../ui/card";
 import { ProjectSettingsDto } from "@/services/getProjectSettings";
 
 type AddServiceProps = {
@@ -19,6 +18,7 @@ type AddServiceProps = {
 };
 
 export default function AddService({
+  projectId,
   setLoading,
   createService,
   projectSettings,
@@ -27,14 +27,16 @@ export default function AddService({
   const [preConfiguredServices, setPreConfiguredServices] = useState<
     Array<ServiceDto>
   >([]);
-  const text = "Click here for create and connect new database or press";
+  const text =
+    "Click here to add a new folder or create a new service. You can also press";
   // const [serviceFromDockerCompose, setServiceFromDockerCompose] =
   //   useState<ResponseServiceFromDockerComposeDto>(null);
 
   const [open, setOpen] = useState(false);
 
   async function getServices() {
-    const res = await getPreConfiguredServiceListApi();
+    const res = await getPreConfiguredServiceListApi(projectId);
+    console.log(res);
     setPreConfiguredServices(res);
   }
 
@@ -84,6 +86,7 @@ export default function AddService({
             serviceName: createServiceParams.serviceName,
           });
           setLoading(false);
+          await getServices();
         }}
       />
     </>

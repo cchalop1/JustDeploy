@@ -11,9 +11,9 @@ type CreateAppDto struct {
 }
 
 type PathDto struct {
-	Name     string    `json:"name"`
-	FullPath string    `json:"fullPath"`
-	Folders  []PathDto `json:"folders"`
+	Name     string `json:"name"`
+	FullPath string `json:"fullPath"`
+	// Folders  []PathDto `json:"folders"`
 }
 
 type ProjectSettingsDto struct {
