@@ -4,6 +4,7 @@ import { CircleX } from "lucide-react";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 import EnvsManagements from "../forms/EnvsManagements";
+import { useNotification } from "@/hooks/useNotifications";
 
 type ModalServiceSettingsProps = {
   service: Service;
@@ -15,6 +16,7 @@ export default function ModalServiceSettings({
   setServiceSelected,
   getProjectById,
 }: ModalServiceSettingsProps) {
+  const notif = useNotification();
   const isDevContainer = service.isDevContainer;
   const url = `http://localhost:${service.exposePort}`;
 
@@ -23,6 +25,15 @@ export default function ModalServiceSettings({
     setServiceSelected(null);
     await getProjectById();
   };
+
+  function copyEnv() {
+    const env = service.envs.map((e) => `${e.name}=${e.value}`).join("\n");
+    navigator.clipboard.writeText(env);
+    notif.success({
+      title: "Copied",
+      content: "Environment variables copied to clipboard",
+    });
+  }
 
   return (
     <motion.div
@@ -61,6 +72,7 @@ export default function ModalServiceSettings({
           <Button variant="destructive" onClick={() => deleteSelectedService()}>
             Delete
           </Button>
+          <Button onClick={copyEnv}>Copy Env</Button>
           <div>
             <div>
               <a href={url} target="_blank" className="underline">
