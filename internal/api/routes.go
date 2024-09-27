@@ -50,4 +50,6 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	app.Echo.GET("/api/version", handlers.GetVersionHandler(deployService))
 
+	// app.Echo.POST("/api/deploy/project", handlers.DeployProjectHandler(deployService))
+
 }

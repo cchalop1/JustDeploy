@@ -18,7 +18,8 @@ import {
   ProjectSettingsDto,
 } from "@/services/getProjectSettings";
 import { useIsWelcome } from "@/hooks/useIsWelcome";
-import { get } from "http";
+import { deployProjectApi } from "@/services/deployProjectApi";
+import { ServiceCardLoading } from "@/components/ServiceCardLoading";
 
 type ProjectPageProps = {
   id: string;
@@ -34,6 +35,11 @@ export default function ProjectPage({ id }: ProjectPageProps) {
 
   const displayWelcomeModal = useIsWelcome();
 
+  const [isGlobalSettingsModalOpen, setIsGlobalSettingsModalOpen] =
+    useState(false);
+
+  const [serviceIsLoading, setServiceIsCreating] = useState(false);
+
   const apps = project?.services.filter((s) => s.isDevContainer) || [];
   const services = project?.services.filter((s) => !s.isDevContainer) || [];
 
@@ -48,6 +54,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     serviceName,
   }) => {
     if (!project) return;
+    setServiceIsCreating(true);
     await createServiceApi({
       serviceName,
       fromDockerCompose,
@@ -60,12 +67,17 @@ export default function ProjectPage({ id }: ProjectPageProps) {
       title: "Service is started",
       content: `${serviceName} is started you can now connect to if the env is generate and store in .env file in your project folder`,
     });
+    setServiceIsCreating(false);
   };
 
   async function getProjectSettings() {
     const projectSettingsResponse = await getProjectSettingsByIdApi(id);
 
     setProjectSettings(projectSettingsResponse);
+  }
+
+  async function deployProject() {
+    const response = await deployProjectApi(id);
   }
 
   useEffect(() => {
@@ -93,7 +105,14 @@ export default function ProjectPage({ id }: ProjectPageProps) {
           getProjectById={getProjectById}
         />
       )}
-      <ProjectPageHeader />
+
+      {/* {isGlobalSettingsModalOpen && <ModalGlobalSettings />} */}
+      <ProjectPageHeader
+        onClickDeploy={() => {}}
+        onClickSettings={() =>
+          setIsGlobalSettingsModalOpen(!isGlobalSettingsModalOpen)
+        }
+      />
       {displayWelcomeModal && <ModalWelcome />}
       <div className="flex flex-col justify-center items-center h-3/5">
         <div className="flex gap-3">
@@ -114,6 +133,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
               onClick={() => setServiceSelected(service)}
             />
           ))}
+          {serviceIsLoading && <ServiceCardLoading />}
           {projectSettings && (
             <AddService
               projectId={project?.id}

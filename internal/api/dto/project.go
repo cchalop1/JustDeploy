@@ -21,3 +21,8 @@ type ProjectSettingsDto struct {
 	CurrentFolderName string    `json:"currentFolderName"`
 	Folders           []PathDto `json:"folders"`
 }
+
+type DeployProjectDto struct {
+	ProjectId string `json:"projectId"`
+	ServerId  string `json:"serverId"`
+}
