@@ -53,7 +53,7 @@ func (s *SshAdapter) CloseConnection() {
 }
 
 func (s *SshAdapter) RunCommand(command string) (string, error) {
-	fmt.Println("$ " + command)
+	log.Println("Run SSH : $ ", command)
 	session, err := s.client.NewSession()
 	if err != nil {
 		return "", err

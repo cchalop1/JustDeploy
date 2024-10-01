@@ -23,6 +23,8 @@ type ProjectSettingsDto struct {
 }
 
 type DeployProjectDto struct {
-	ProjectId string `json:"projectId"`
-	ServerId  string `json:"serverId"`
+	ProjectId   string  `json:"projectId"`
+	ServerId    string  `json:"serverId"`
+	Domain      *string `json:"domain"`
+	IsTLSDomain bool    `json:"isTLSDomain"`
 }

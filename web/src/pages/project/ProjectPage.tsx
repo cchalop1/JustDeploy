@@ -1,6 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-
+import { useEffect, useState } from "react";
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import AddService from "@/components/databaseServices/AddServices";
 import { CreateServiceFunc } from "@/components/databaseServices/CommandModal";
@@ -18,8 +16,13 @@ import {
   ProjectSettingsDto,
 } from "@/services/getProjectSettings";
 import { useIsWelcome } from "@/hooks/useIsWelcome";
-import { deployProjectApi } from "@/services/deployProjectApi";
+import {
+  DeployProjectDto,
+  deployProjectApi,
+} from "@/services/deployProjectApi";
 import { ServiceCardLoading } from "@/components/ServiceCardLoading";
+import ModalGlobalSettings from "@/components/modals/ModalGlobalSettings";
+import ModalDeployProject from "@/components/modals/ModalDeployProject";
 
 type ProjectPageProps = {
   id: string;
@@ -37,8 +40,9 @@ export default function ProjectPage({ id }: ProjectPageProps) {
 
   const [isGlobalSettingsModalOpen, setIsGlobalSettingsModalOpen] =
     useState(false);
-
   const [serviceIsLoading, setServiceIsCreating] = useState(false);
+
+  const [displayDeployModal, setDisplayDeployModal] = useState(false);
 
   const apps = project?.services.filter((s) => s.isDevContainer) || [];
   const services = project?.services.filter((s) => !s.isDevContainer) || [];
@@ -76,8 +80,8 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     setProjectSettings(projectSettingsResponse);
   }
 
-  async function deployProject() {
-    const response = await deployProjectApi(id);
+  async function deployProject(deployProjectDto: DeployProjectDto) {
+    const response = await deployProjectApi(deployProjectDto);
   }
 
   useEffect(() => {
@@ -101,14 +105,24 @@ export default function ProjectPage({ id }: ProjectPageProps) {
       {serviceSelected && (
         <ModalServiceSettings
           service={serviceSelected}
-          setServiceSelected={setServiceSelected}
+          onClose={() => setServiceSelected(null)}
           getProjectById={getProjectById}
         />
       )}
-
-      {/* {isGlobalSettingsModalOpen && <ModalGlobalSettings />} */}
+      {isGlobalSettingsModalOpen && (
+        <ModalGlobalSettings
+          onClose={() => setIsGlobalSettingsModalOpen(false)}
+        />
+      )}
+      {displayDeployModal && (
+        <ModalDeployProject
+          projectId={id}
+          onClose={() => setDisplayDeployModal(false)}
+          deployProject={deployProject}
+        />
+      )}
       <ProjectPageHeader
-        onClickDeploy={() => {}}
+        onClickDeploy={() => setDisplayDeployModal(true)}
         onClickSettings={() =>
           setIsGlobalSettingsModalOpen(!isGlobalSettingsModalOpen)
         }

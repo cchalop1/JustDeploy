@@ -14,39 +14,41 @@ import (
 )
 
 func ConnectAndSetupServer(deployService *service.DeployService, server domain.Server) *adapter.DockerAdapter {
+	log.Println("Starting ConnectAndSetupServer function")
 	sshAdapter := adapter.NewSshAdapter()
 
-	eventsList := []adapter.EventServer{
-		{
-			Title:     "Connect to the server by ssh",
-			EventType: "create_server",
-		},
-		{
-			Title:     "Install packages and docker",
-			EventType: "create_server",
-		},
-		{
-			Title:     "Genereates certificates",
-			EventType: "create_server",
-		},
-		{
-			Title:     "Setting up docker port",
-			EventType: "create_server",
-		},
-		{
-			Title:     "Connect to the docker client",
-			EventType: "create_server",
-		},
-	}
+	// eventsList := []adapter.EventServer{
+	// 	{
+	// 		Title:     "Connect to the server by ssh",
+	// 		EventType: "create_server",
+	// 	},
+	// 	{
+	// 		Title:     "Install packages and docker",
+	// 		EventType: "create_server",
+	// 	},
+	// 	{
+	// 		Title:     "Genereates certificates",
+	// 		EventType: "create_server",
+	// 	},
+	// 	{
+	// 		Title:     "Setting up docker port",
+	// 		EventType: "create_server",
+	// 	},
+	// 	{
+	// 		Title:     "Connect to the docker client",
+	// 		EventType: "create_server",
+	// 	},
+	// }
 
-	eventWrapper := adapter.EventServerWrapper{
-		ServerName:       server.Name,
-		ServerId:         server.Id,
-		EventServersList: eventsList,
-		CurrentStep:      0,
-	}
+	// eventWrapper := adapter.EventServerWrapper{
+	// 	ServerName:       server.Name,
+	// 	ServerId:         server.Id,
+	// 	EventServersList: eventsList,
+	// 	CurrentStep:      0,
+	// }
 
 	// Connect to the server by ssh
+	log.Println("Connecting to the server via SSH")
 	sshAdapter.Connect(dto.ConnectNewServerDto{
 		Ip:       server.Ip,
 		SshKey:   server.SshKey,
@@ -56,78 +58,82 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 
 	// Install packages and docker
 
-	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewServerEvent(eventWrapper)
+	// eventWrapper.NextStep()
+	// deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
+	log.Println("Checking if Docker is installed")
 	dockerIsInstalled := checkIfDockerIsIntalled(sshAdapter)
+	fmt.Println("dockerIsInstalled", dockerIsInstalled)
 
 	var err error
 
 	if !dockerIsInstalled {
+		log.Println("Docker not installed. Installing Docker...")
 		err = installDocker(sshAdapter)
 		if err != nil {
-			eventWrapper.SetStepError(err.Error())
-			deployService.EventAdapter.SendNewServerEvent(eventWrapper)
+			log.Printf("Error installing Docker: %v", err)
 			return nil
 		}
+		log.Println("Docker installation completed")
+	} else {
+		log.Println("Docker is already installed")
 	}
 
 	// Genereates certificates
 
-	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewServerEvent(eventWrapper)
+	// eventWrapper.NextStep()
+	// deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
-	// certificateIsCreated := checkIsCertificateIsCreate(sshAdapter, server.Id)
-
-	// if !certificateIsCreated {
+	log.Println("Setting up Docker certificates")
 	err = setupDockerCertificates(sshAdapter, server)
+	if err != nil {
+		log.Printf("Error setting up Docker certificates: %v", err)
+		return nil
+	}
+	log.Println("Docker certificates setup completed")
+
+	log.Println("Copying certificates")
 	copyCertificates(sshAdapter, server.Id)
 
-	if err != nil {
-		eventWrapper.SetStepError(err.Error())
-		deployService.EventAdapter.SendNewServerEvent(eventWrapper)
-		return nil
-	}
-	// }
-
 	// Setting up docker port
-	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewServerEvent(eventWrapper)
+	// eventWrapper.NextStep()
+	// deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
-	// portIsOpen := checkIfDockerPortIsOpen(sshAdapter)
-
-	// if !portIsOpen {
+	log.Println("Opening Docker port")
 	err = openPortDockerConfig(sshAdapter)
 	if err != nil {
-		eventWrapper.SetStepError(err.Error())
-		deployService.EventAdapter.SendNewServerEvent(eventWrapper)
+		log.Printf("Error opening Docker port: %v", err)
 		return nil
 	}
-	// }
+	log.Println("Docker port configuration completed")
 
+	log.Println("Closing SSH connection")
 	sshAdapter.CloseConnection()
 
+	log.Println("Creating new Docker adapter")
 	adapterDocker := adapter.NewDockerAdapter()
 
 	// Connect to the docker client
 
-	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewServerEvent(eventWrapper)
+	// eventWrapper.NextStep()
+	// deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
+	log.Println("Connecting to Docker client")
 	err = adapterDocker.ConnectClient(server)
 
 	if err != nil {
-		eventWrapper.SetStepError(err.Error())
-		deployService.EventAdapter.SendNewServerEvent(eventWrapper)
+		log.Printf("Error connecting to Docker client: %v", err)
 		return nil
 	}
+	log.Println("Successfully connected to Docker client")
 
 	server.Status = "Runing"
 
+	log.Println("Updating server status")
 	deployService.DatabaseAdapter.UpdateServer(server)
 
-	eventWrapper.NextStep()
-	deployService.EventAdapter.SendNewServerEvent(eventWrapper)
+	// eventWrapper.NextStep()
+	// deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
 	return nil
 }

@@ -1,6 +1,6 @@
 import { use } from "react";
 import DeployList from "@/components/DeployList";
-import ServerList from "@/components/ServerList";
+import ServerList from "@/components/ServerList/ServerList";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { getServersListApi } from "@/services/getServerListApi";
@@ -41,7 +41,7 @@ export default function Home() {
           <div className="text-2xl font-bold">Servers</div>
           <Button onClick={onClickNewServer}>New Server</Button>
         </div>
-        <ServerList serverList={serverList} />
+        <ServerList />
       </div>
     </>
   );

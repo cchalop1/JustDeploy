@@ -1,8 +1,10 @@
 import { callApi, ResponseApi } from "./api";
 
-type DeployProjectDto = {
+export type DeployProjectDto = {
   projectId: string;
   serverId: string;
+  domain: string | null;
+  isTLSDomain: boolean;
 };
 
 export async function deployProjectApi(deployProjectDto: DeployProjectDto) {

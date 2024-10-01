@@ -37,8 +37,13 @@ export default function ServerButtons({
   }
 
   async function fetchServerProxyLogsById(): Promise<Array<Logs>> {
-    const logs = await getServerProxyLogs(server.id);
-    return logs;
+    try {
+      const logs = await getServerProxyLogs(server.id);
+      return logs;
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
   }
 
   return (

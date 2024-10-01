@@ -1,14 +1,12 @@
-import { ServerDto } from "@/services/getServerListApi";
-import { Card, CardContent } from "./ui/card";
-import Status from "./ServerStatus";
+import { getServersListApi } from "@/services/getServerListApi";
+import { Card, CardContent } from "../ui/card";
+import Status from "../ServerStatus";
 import { useNavigate } from "react-router-dom";
+import { use } from "react";
 
-type ServerListProps = {
-  serverList: Array<ServerDto>;
-};
-
-export default function ServerList({ serverList }: ServerListProps) {
+export default function ServerList() {
   const navigate = useNavigate();
+  const serverList = use(getServersListApi());
 
   if (serverList.length === 0) {
     return (

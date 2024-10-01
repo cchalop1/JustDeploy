@@ -60,7 +60,7 @@ export default function ServerConfigForm() {
     try {
       const { id } = await connectServerApi(connectServerData);
       setConnectButtonState(ButtonStateEnum.SUCESS);
-      navigate(`/server/${id}/installation`);
+      // navigate(`/server/${id}/installation`);
       // TODO: handle error
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
