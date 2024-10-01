@@ -36,12 +36,11 @@ export default function ProjectPage({ id }: ProjectPageProps) {
   const [projectSettings, setProjectSettings] =
     useState<ProjectSettingsDto | null>(null);
 
+  // Modals states
   const displayWelcomeModal = useIsWelcome();
-
   const [isGlobalSettingsModalOpen, setIsGlobalSettingsModalOpen] =
     useState(false);
   const [serviceIsLoading, setServiceIsCreating] = useState(false);
-
   const [displayDeployModal, setDisplayDeployModal] = useState(false);
 
   const apps = project?.services.filter((s) => s.isDevContainer) || [];
@@ -118,7 +117,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
         <ModalDeployProject
           projectId={id}
           onClose={() => setDisplayDeployModal(false)}
-          deployProject={deployProject}
+          onDeployProject={deployProject}
         />
       )}
       <ProjectPageHeader

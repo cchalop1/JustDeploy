@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func DeployProjectHandler(deployService service.DeployService) echo.HandlerFunc {
+func DeployProjectHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var deployProjectDto dto.DeployProjectDto
 
@@ -17,7 +17,11 @@ func DeployProjectHandler(deployService service.DeployService) echo.HandlerFunc 
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		application.DeployProject(deployProjectDto.ProjectId, deployProjectDto.ServerId)
+		err := application.DeployProject(deployService, deployProjectDto)
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err.Error())
+		}
 
 		return c.JSON(http.StatusOK, "ok")
 	}

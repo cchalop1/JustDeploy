@@ -21,7 +21,7 @@ type NotifFuncParams = {
 
 type NotificationFunc = (params: NotifFuncParams) => void;
 
-interface NotificationContextProps {
+export interface NotificationContextProps {
   success: NotificationFunc;
   error: NotificationFunc;
   info: NotificationFunc;

@@ -8,6 +8,7 @@ import { Label } from "../ui/label";
 import { DeployProjectDto } from "@/services/deployProjectApi";
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import Modal from "./Modal";
+import { useNotification } from "@/hooks/useNotifications";
 
 type ModalDeployProjectProps = {
   projectId: string;
@@ -20,6 +21,7 @@ export default function ModalDeployProject({
   onClose,
   onDeployProject,
 }: ModalDeployProjectProps) {
+  const notif = useNotification();
   const [serverList, setServerList] = useState<Array<ServerDto>>([]);
   const [selectedServer, setSelectedServer] = useState<ServerDto | null>();
   const serverUrl = selectedServer?.domain || selectedServer?.ip;
@@ -75,6 +77,11 @@ export default function ModalDeployProject({
                 domain: "",
               });
               setIsLoading(false);
+              onClose();
+              notif.success({
+                title: "Project deployed",
+                content: "Your project has been deployed successfully",
+              });
             }}
           >
             {isLoading ? <SpinnerIcon color="text-white" /> : "Deploy"}
