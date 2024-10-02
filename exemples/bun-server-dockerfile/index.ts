@@ -1,7 +1,7 @@
 import pg from "pg";
 
 Bun.serve({
-  port: 80,
+  port: Bun.env.PORT,
   async fetch(req) {
     try {
       const client = new pg.Client({
@@ -26,4 +26,4 @@ Bun.serve({
   },
 });
 
-console.log("Server is running on http://localhost:80");
+console.log("Server is running on http://localhost:" + Bun.env.PORT);

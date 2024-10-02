@@ -296,13 +296,15 @@ func (d *DockerAdapter) ConfigContainer(service domain.Service) container.Config
 type ExposeContainerParams struct {
 	IsTls  bool
 	Domain string
+	Port   string
 }
 
 func (d *DockerAdapter) ExposeContainer(containersConfig *container.Config, exposeContainerParams ExposeContainerParams) {
 	Labels := map[string]string{
 		"traefik.enable": "true",
-		"traefik.http.routers." + containersConfig.Image + ".rule":        "Host(`" + exposeContainerParams.Domain + "`)",
-		"traefik.http.routers." + containersConfig.Image + ".entrypoints": "web",
+		"traefik.http.routers." + containersConfig.Image + ".rule":                      "Host(`" + exposeContainerParams.Domain + "`)",
+		"traefik.http.routers." + containersConfig.Image + ".entrypoints":               "web",
+		"traefik.http.services." + containersConfig.Image + ".loadbalancer.server.port": exposeContainerParams.Port,
 	}
 
 	if exposeContainerParams.IsTls {

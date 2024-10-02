@@ -12,6 +12,4 @@ COPY tsconfig.json .
 
 RUN bun check
 
-EXPOSE 80
-
 CMD ["bun", "run", "index.ts"]
