@@ -202,14 +202,21 @@ func (d *DockerAdapter) PullTreafikImage() error {
 }
 
 func (d *DockerAdapter) PullImage(image string) error {
-	log.Printf("Pull image", image)
+	log.Printf("Pulling image: %s", image)
 	reader, err := d.client.ImagePull(context.Background(), image, types.ImagePullOptions{})
 
 	if err != nil {
+		log.Printf("Error pulling image %s: %v", image, err)
 		return err
 	}
 
-	io.Copy(io.Discard, reader)
+	_, err = io.Copy(io.Discard, reader)
+	if err != nil {
+		log.Printf("Error discarding image pull output for %s: %v", image, err)
+		return err
+	}
+
+	log.Printf("Successfully pulled image: %s", image)
 	return nil
 }
 
@@ -317,6 +324,8 @@ func (d *DockerAdapter) ExposeContainer(containersConfig *container.Config, expo
 }
 
 func (d *DockerAdapter) RunImage(config container.Config, networkName string) error {
+	d.Stop(config.Hostname)
+	d.Remove(config.Hostname)
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
 			"databases_default": {},

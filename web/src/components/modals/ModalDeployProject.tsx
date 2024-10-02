@@ -55,15 +55,15 @@ export default function ModalDeployProject({
           <Globe className="w-4 h-4" />
           <div className="font-bold">Domain</div>
           <div className="underline">
-            <a href={"http://" + serverUrl} target="_blank">
+            <a href={"https://" + serverUrl} target="_blank">
               {serverUrl}
             </a>
           </div>
         </div>
-        <div className="flex flex-row items-center gap-2 p-1 mt-2">
+        {/* <div className="flex flex-row items-center gap-2 p-1 mt-2">
           <Checkbox />
           <Label className="font-bold">Setup TLS / HTTPS</Label>
-        </div>
+        </div> */}
         <div className="w-full mt-2">
           <Button
             className="w-full"
