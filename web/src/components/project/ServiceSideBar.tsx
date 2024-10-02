@@ -26,7 +26,7 @@ export default function ServiceSideBar({
       className="absolute right-5 top-28 w-1/4 rounded-lg border shadow-lg h-full bg-white p-8"
     >
       <div className="flex justify-between">
-        <div className="font-bold text-2xl">{serviceSelected?.name}</div>
+        <div className="font-bold text-2xl">{serviceSelected?.hostName}</div>
         <X
           className="h-6 cursor-pointer"
           onClick={() => setServiceSelected(null)}

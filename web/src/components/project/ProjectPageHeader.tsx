@@ -1,6 +1,4 @@
-import { FileText, Settings } from "lucide-react";
-import { Tooltip, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
-import { TooltipContent } from "@radix-ui/react-tooltip";
+import { PlayCircle, Settings } from "lucide-react";
 
 type ProjectPageHeaderProps = {
   onClickDeploy: () => void;
@@ -17,32 +15,23 @@ export default function ProjectPageHeader({
       <div className="font-semibold border rounded-full shadow-lg bg-white pl-4 pr-4 flex items-center">
         🛵 JustDeploy
       </div>
-      <TooltipProvider>
-        <div className="border rounded-full shadow-lg bg-white p-2 flex gap-3">
-          <Tooltip>
-            <TooltipTrigger>
-              <button
-                className="rounded-full bg-green-50 w-9 h-9 flex justify-center items-center"
-                onClick={onClickSettings}
-              >
-                <Settings />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <div className="p-2">Settings</div>
-            </TooltipContent>
-          </Tooltip>
-          <button className="rounded-full bg-green-50 w-9 h-9 flex justify-center items-center">
-            <FileText />
-          </button>
-          <button
-            className="font-mono bg-button text-white p-1 pl-4 pr-4 rounded-xl border border-green-200"
-            onClick={onClickDeploy}
-          >
-            Deploy
-          </button>
-        </div>
-      </TooltipProvider>
+      <div className="border rounded-full shadow-lg bg-white p-2 flex gap-3">
+        <button
+          className="rounded-full bg-green-50 w-9 h-9 flex justify-center items-center"
+          onClick={onClickSettings}
+        >
+          <Settings />
+        </button>
+        {/* <button className="rounded-full bg-green-50 w-9 h-9 flex justify-center items-center">
+          <PlayCircle />
+        </button> */}
+        <button
+          className="font-mono bg-button text-white p-1 pl-4 pr-4 rounded-xl border border-green-200"
+          onClick={onClickDeploy}
+        >
+          Deploy
+        </button>
+      </div>
     </div>
   );
 }

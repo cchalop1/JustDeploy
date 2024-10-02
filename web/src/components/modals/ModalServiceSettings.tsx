@@ -61,7 +61,7 @@ export default function ModalServiceSettings({
             ) : (
               <img src="/icons/service.png" className="w-8" />
             )}
-            <div className="font-bold">{service.name}</div>
+            <div className="font-bold">{service.hostName}</div>
           </div>
         }
       >

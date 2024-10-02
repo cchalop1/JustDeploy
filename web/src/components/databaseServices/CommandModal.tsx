@@ -41,6 +41,15 @@ export default function CommandModal({
       <CommandInput placeholder="Type to search and lauch a service in the list..." />
       <CommandList onSelect={() => setOpen(false)}>
         <CommandEmpty>No results found.</CommandEmpty>
+        <CommandGroup heading="Current Folder">
+          <CommandItem
+            onSelect={() => create({ path: projectSettings.currentPath })}
+            className="flex gap-3"
+          >
+            <Folder className="w-5" />
+            <span className="h-4">{projectSettings.currentFolderName}</span>
+          </CommandItem>
+        </CommandGroup>
         <CommandGroup heading="Chose a folders in the list">
           {projectSettings.folders.map((folder) => (
             <CommandItem

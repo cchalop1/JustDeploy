@@ -40,7 +40,7 @@ func DeployProject(deployService *service.DeployService, deployProjectDto dto.De
 	for _, service := range project.Services {
 		if service.IsDevContainer {
 			exposeServiceId = service.Id
-			fmt.Println("Service to expose found:", service.Name)
+			fmt.Println("Service to expose found:", service.HostName)
 			break
 		}
 	}
@@ -64,13 +64,13 @@ func DeployProject(deployService *service.DeployService, deployProjectDto dto.De
 
 	// Build all services
 	for _, service := range project.Services {
-		fmt.Println("Building service:", service.Name)
+		fmt.Println("Building service:", service.HostName)
 		err = pullAndBuildService(deployService, service, server)
 		if err != nil {
-			fmt.Println("Error building service:", service.Name, err)
+			fmt.Println("Error building service:", service.HostName, err)
 			return domain.Deploy{}, err
 		}
-		fmt.Println("Service built:", service.Name)
+		fmt.Println("Service built:", service.HostName)
 	}
 
 	containersConfig := []container.Config{}
@@ -92,7 +92,7 @@ func DeployProject(deployService *service.DeployService, deployProjectDto dto.De
 		if !service.IsDevContainer {
 			hostNameEnvs = append(hostNameEnvs, dto.Env{
 				//TODO: get the real name of the service
-				Name:  strings.ToUpper(strings.Split(service.ImageName, ":")[0]) + "_HOSTNAME",
+				Name:  strings.ToUpper(service.Name) + "_HOSTNAME",
 				Value: service.GetDockerName(),
 			})
 		}
@@ -106,10 +106,10 @@ func DeployProject(deployService *service.DeployService, deployProjectDto dto.De
 
 	// Configure all services
 	for _, service := range project.Services {
-		fmt.Println("Configuring service:", service.Name)
+		fmt.Println("Configuring service:", service.HostName)
 		config := deployService.DockerAdapter.ConfigContainer(service)
 		if service.Id == exposeServiceId {
-			fmt.Println("Exposing service:", service.Name)
+			fmt.Println("Exposing service:", service.HostName)
 			deployService.DockerAdapter.ExposeContainer(&config, adapter.ExposeContainerParams{
 				IsTls:  true,
 				Domain: server.Domain,
@@ -117,7 +117,7 @@ func DeployProject(deployService *service.DeployService, deployProjectDto dto.De
 			})
 		}
 		containersConfig = append(containersConfig, config)
-		fmt.Println("Service configured:", service.Name)
+		fmt.Println("Service configured:", service.HostName)
 	}
 
 	// Run all services

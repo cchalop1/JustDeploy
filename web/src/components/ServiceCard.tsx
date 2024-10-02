@@ -30,7 +30,7 @@ export default function ServiceCard({ service, onClick }: ServiceCardProps) {
         </div>
       </div>
       <div className="font-bold text-xl mt-2 ml-4 mr-4 mb-2">
-        {service.name}
+        {service.hostName}
       </div>
       {isDevContainer ? (
         <div className="font-mono ml-4 mr-4 text-sm">{service.currentPath}</div>

@@ -78,6 +78,23 @@ var servicesConfigMap = map[string]ServicesConfig{
 			},
 		},
 	},
+	"Minio": {
+		DefaultPort: 9000,
+		Name:        "Minio",
+		Icon:        "https://min.io/resources/img/logo.svg",
+		Env: []dto.Env{
+			{Name: "MINIO_ACCESS_KEY", Value: "", IsSecret: false},
+			{Name: "MINIO_SECRET_KEY", Value: "", IsSecret: true},
+		},
+		Config: container.Config{
+			Image: "minio/minio:latest",
+			Cmd:   []string{"server", "/data"},
+			Env: []string{
+				"MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY",
+				"MINIO_SECRET_KEY=$MINIO_SECRET_KEY",
+			},
+		},
+	},
 }
 
 func GetListOfDatabasesServices() []ServicesConfig {

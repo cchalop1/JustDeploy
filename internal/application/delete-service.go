@@ -27,7 +27,7 @@ func DeleteService(deployService *service.DeployService, projectId string, servi
 func deleteServiceWithoutDeploy(deployService *service.DeployService, project *domain.Project, s *domain.Service) error {
 	server := deployService.DockerAdapter.GetLocalHostServer()
 	deployService.DockerAdapter.ConnectClient(server)
-	deployService.DockerAdapter.Delete(s.Name)
+	deployService.DockerAdapter.Delete(s.HostName)
 
 	removeEnvsFromProject(project, s.Envs)
 

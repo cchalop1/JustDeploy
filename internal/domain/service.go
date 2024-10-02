@@ -9,6 +9,7 @@ import (
 // TODO: change to save serviceConfig
 type Service struct {
 	Id          string    `json:"id"`
+	HostName    string    `json:"hostName"`
 	Name        string    `json:"name"`
 	Envs        []dto.Env `json:"envs"`
 	VolumsNames []string  `json:"volumsNames"`
@@ -23,5 +24,5 @@ type Service struct {
 }
 
 func (s *Service) GetDockerName() string {
-	return strings.ToLower(s.Name + "-" + s.Id)
+	return strings.ToLower(s.HostName + "-" + s.Id)
 }

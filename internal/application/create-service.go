@@ -129,8 +129,8 @@ func getPortsForService(service database.ServicesConfig) string {
 func createDevContainerService(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) (domain.Service, error) {
 	exposedPort := "9999"
 	domainService := domain.Service{
-		Id:   utils.GenerateRandomPassword(5),
-		Name: deployService.FilesystemAdapter.GetFolderName(*createServiceDto.Path),
+		Id:       utils.GenerateRandomPassword(5),
+		HostName: deployService.FilesystemAdapter.GetFolderName(*createServiceDto.Path),
 		Envs: []dto.Env{
 			// TODO: find a avalaible port
 			{Name: "PORT", Value: exposedPort},
@@ -182,10 +182,11 @@ func createServiceForProject(deployService *service.DeployService, createService
 
 	domainService := domain.Service{
 		Id:          utils.GenerateRandomPassword(5),
-		Name:        containerHostname,
+		HostName:    containerHostname,
 		Envs:        envs,
 		VolumsNames: []string{},
 		Status:      "Runing",
+		Name:        strings.ToLower(service.Name),
 		ImageName:   service.Config.Image,
 		ImageUrl:    service.Icon,
 		ExposePort:  exposedPort,

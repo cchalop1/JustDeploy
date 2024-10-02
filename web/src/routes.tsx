@@ -14,6 +14,7 @@ import CreateDeployLoading from "@/pages/CreateDeployLoading";
 import Layout from "@/Layout";
 import ProjectPageWrapper from "./pages/project/ProjectPageWrapper";
 import { NotificationProvider } from "./contexts/Notifications";
+import Background from "./components/ui/background";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -37,7 +38,9 @@ const router = createBrowserRouter(
         path="project/:id"
         element={
           <NotificationProvider>
-            <ProjectPageWrapper />
+            <Background>
+              <ProjectPageWrapper />
+            </Background>
           </NotificationProvider>
         }
       />

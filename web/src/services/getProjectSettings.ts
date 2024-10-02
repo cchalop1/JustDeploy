@@ -8,6 +8,7 @@ export type PathDto = {
 
 export type ProjectSettingsDto = {
   currentPath: string;
+  currentFolderName: string;
   folders: PathDto[];
 };
 

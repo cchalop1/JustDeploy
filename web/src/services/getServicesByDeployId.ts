@@ -4,7 +4,7 @@ import { Env } from "./postFormDetails";
 
 export type Service = {
   id: string;
-  name: string;
+  hostName: string;
   status: ServerStatusType;
   envs: Array<Env>;
   volumsNames: Array<string>;
