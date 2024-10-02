@@ -12,8 +12,9 @@ import (
 func DeleteServiceHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		serviceId := c.Param("serviceId")
+		projectId := c.Param("projectId")
 
-		err := application.DeleteService(deployService, serviceId)
+		err := application.DeleteService(deployService, projectId, serviceId)
 
 		if err != nil {
 			fmt.Println(err)

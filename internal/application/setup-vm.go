@@ -127,9 +127,25 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	}
 	log.Println("Successfully connected to Docker client")
 
-	server.Status = "Runing"
+	log.Println("Pull the traefik router")
+
+	err = adapterDocker.PullTreafikImage()
+
+	if err != nil {
+		log.Printf("Error pulling the traefik router: %v", err)
+		return nil
+	}
+
+	// Run the traefik router
+	err = adapterDocker.RunRouter(server.Email)
+
+	if err != nil {
+		log.Printf("Error running the traefik router: %v", err)
+		return nil
+	}
 
 	log.Println("Updating server status")
+	server.Status = "Runing"
 	deployService.DatabaseAdapter.UpdateServer(server)
 
 	// eventWrapper.NextStep()

@@ -3,6 +3,7 @@ package application
 import (
 	"errors"
 	"strconv"
+	"time"
 
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
@@ -17,12 +18,13 @@ func CreateServer(deployService *service.DeployService, createNewServer dto.Conn
 	server := domain.Server{
 		Id:          utils.GenerateRandomPassword(5),
 		Name:        Name,
-		Domain:      "",
+		Domain:      createNewServer.Domain,
 		Password:    createNewServer.Password,
 		SshKey:      createNewServer.SshKey,
 		Ip:          createNewServer.Ip,
-		CreatedDate: "",
+		CreatedDate: time.Now(),
 		Status:      "Installing",
+		Email:       createNewServer.Email,
 	}
 
 	serverList := deployService.DatabaseAdapter.GetServers()
@@ -31,7 +33,6 @@ func CreateServer(deployService *service.DeployService, createNewServer dto.Conn
 		if s.Ip == server.Ip {
 			return server.Id, errors.New("server already exist")
 		}
-
 	}
 
 	deployService.DatabaseAdapter.SaveServer(server)

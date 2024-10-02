@@ -17,12 +17,12 @@ func DeployProjectHandler(deployService *service.DeployService) echo.HandlerFunc
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		err := application.DeployProject(deployService, deployProjectDto)
+		deploy, err := application.DeployProject(deployService, deployProjectDto)
 
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, "ok")
+		return c.JSON(http.StatusOK, deploy)
 	}
 }

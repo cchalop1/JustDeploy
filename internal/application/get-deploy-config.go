@@ -6,43 +6,44 @@ import (
 )
 
 func GetDeployConfig(deployService *service.DeployService, paramsDeployConfig dto.ParamsDeployConfigDto) dto.DeployConfigDto {
-	deployConfig := dto.DeployConfigDto{}
+	// deployConfig := dto.DeployConfigDto{}
 
-	currentPath := ""
+	// currentPath := ""
 
-	if paramsDeployConfig.Path == "" {
-		currentPath = deployService.FilesystemAdapter.GetCurrentPath()
-	} else {
-		currentPath = paramsDeployConfig.Path
-	}
+	// if paramsDeployConfig.Path == "" {
+	// 	currentPath = deployService.FilesystemAdapter.GetCurrentPath()
+	// } else {
+	// 	currentPath = paramsDeployConfig.Path
+	// }
 
-	if paramsDeployConfig.DeployId != "" {
-		deploy, err := deployService.DatabaseAdapter.GetDeployById(paramsDeployConfig.DeployId)
+	// if paramsDeployConfig.DeployId != "" {
+	// 	deploy, err := deployService.DatabaseAdapter.GetDeployById(paramsDeployConfig.DeployId)
 
-		if err != nil {
-			return dto.DeployConfigDto{}
-		}
-		currentPath = deploy.PathToSource
-	}
+	// 	if err != nil {
+	// 		return dto.DeployConfigDto{}
+	// 	}
+	// 	currentPath = deploy.PathToSource
+	// }
 
-	dockerfileIsFound := deployService.FilesystemAdapter.FindDockerFile(currentPath)
-	dockercomposeIsFound := deployService.FilesystemAdapter.FindDockerComposeFile(currentPath)
-	envs := deployService.FilesystemAdapter.LoadEnvsFromFileSystem(currentPath)
+	// dockerfileIsFound := deployService.FilesystemAdapter.FindDockerFile(currentPath)
+	// dockercomposeIsFound := deployService.FilesystemAdapter.FindDockerComposeFile(currentPath)
+	// envs := deployService.FilesystemAdapter.LoadEnvsFromFileSystem(currentPath)
 
-	deployConfig.DockerFileFound = dockerfileIsFound
-	deployConfig.ComposeFileFound = dockercomposeIsFound
+	// deployConfig.DockerFileFound = dockerfileIsFound
+	// deployConfig.ComposeFileFound = dockercomposeIsFound
 
-	if len(envs) > 0 {
-		deployConfig.EnvFileFound = true
-	} else {
-		deployConfig.EnvFileFound = false
-	}
+	// if len(envs) > 0 {
+	// 	deployConfig.EnvFileFound = true
+	// } else {
+	// 	deployConfig.EnvFileFound = false
+	// }
 
-	deployConfig.Envs = envs
+	// deployConfig.Envs = envs
 
-	deployConfig.PathToSource = currentPath
+	// deployConfig.PathToSource = currentPath
 
-	deployConfig.SourceType = "Local Folder"
+	// deployConfig.SourceType = "Local Folder"
 
-	return deployConfig
+	// return deployConfig
+	return dto.DeployConfigDto{}
 }

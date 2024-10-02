@@ -23,6 +23,7 @@ import {
 import { ServiceCardLoading } from "@/components/ServiceCardLoading";
 import ModalGlobalSettings from "@/components/modals/ModalGlobalSettings";
 import ModalDeployProject from "@/components/modals/ModalDeployProject";
+import ModalCreateServer from "@/components/modals/ModalCreateServer";
 
 type ProjectPageProps = {
   id: string;
@@ -42,6 +43,8 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     useState(false);
   const [serviceIsLoading, setServiceIsCreating] = useState(false);
   const [displayDeployModal, setDisplayDeployModal] = useState(false);
+  const [isCreateServiceModalOpen, setIsCreateServiceModalOpen] =
+    useState(false);
 
   const apps = project?.services.filter((s) => s.isDevContainer) || [];
   const services = project?.services.filter((s) => !s.isDevContainer) || [];
@@ -103,14 +106,21 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     <div className="bg-grid-image h-screen">
       {serviceSelected && (
         <ModalServiceSettings
+          projectId={id}
           service={serviceSelected}
           onClose={() => setServiceSelected(null)}
           getProjectById={getProjectById}
         />
       )}
+      {isCreateServiceModalOpen && (
+        <ModalCreateServer onClose={() => setIsCreateServiceModalOpen(false)} />
+      )}
       {isGlobalSettingsModalOpen && (
         <ModalGlobalSettings
           onClose={() => setIsGlobalSettingsModalOpen(false)}
+          onClickNewServer={() => {
+            setIsCreateServiceModalOpen(true);
+          }}
         />
       )}
       {displayDeployModal && (

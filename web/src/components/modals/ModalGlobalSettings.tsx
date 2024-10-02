@@ -7,17 +7,13 @@ import Modal from "./Modal";
 
 type ModalGlobalSettingsProps = {
   onClose: () => void;
+  onClickNewServer: () => void;
 };
 
 export default function ModalGlobalSettings({
   onClose,
+  onClickNewServer,
 }: ModalGlobalSettingsProps) {
-  const navigate = useNavigate();
-
-  const onClickNewServer = () => {
-    navigate("/server/create");
-  };
-
   return (
     <Modal
       onClose={onClose}
@@ -30,7 +26,14 @@ export default function ModalGlobalSettings({
         <div className="mt-4 mb-20">
           <div className="flex justify-between">
             <div className="text-2xl font-bold">Servers</div>
-            <Button onClick={onClickNewServer}>New Server</Button>
+            <Button
+              onClick={() => {
+                onClose();
+                onClickNewServer();
+              }}
+            >
+              New Server
+            </Button>
           </div>
           <Suspense fallback={<ServerListSkeleton />}>
             <ServerList />

@@ -14,12 +14,11 @@ func mapServersToDto(servers []domain.Server) []dto.ServerDto {
 	serverDtos := make([]dto.ServerDto, len(servers))
 	for i, server := range servers {
 		serverDtos[i] = dto.ServerDto{
-			Id:          server.Id,
-			Name:        server.Name,
-			Ip:          server.Ip,
-			Domain:      server.Domain,
-			CreatedDate: server.CreatedDate,
-			Status:      server.Status,
+			Id:     server.Id,
+			Name:   server.Name,
+			Ip:     server.Ip,
+			Domain: server.Domain,
+			Status: server.Status,
 		}
 	}
 	return serverDtos

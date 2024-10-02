@@ -2,24 +2,17 @@ package domain
 
 import (
 	"strings"
-
-	"cchalop1.com/deploy/internal/api/dto"
 )
 
 // TODO: replace the status by a enum
 type Deploy struct {
-	Id             string    `json:"id"`
-	Name           string    `json:"name"`
-	ServerId       string    `json:"serverId"`
-	EnableTls      bool      `json:"enableTls"`
-	Email          string    `json:"email"`
-	PathToSource   string    `json:"pathToSource"`
-	Envs           []dto.Env `json:"envs"`
-	DeployOnCommit bool      `json:"deployOnCommit"`
-	Status         string    `json:"status"`
-	Url            string    `json:"url"`
-	SubDomain      string    `json:"subDomain"`
-	DockerFileName string    `json:"dockerFileName"`
+	Id              string    `json:"id"`
+	ServerId        string    `json:"serverId"`
+	ProjectId       string    `json:"projectId"`
+	EnableTls       bool      `json:"enableTls"`
+	Email           string    `json:"email"`
+	ExposeServiceId string    `json:"ExposeServiceId"`
+	ServicesDeploy  []Service `json:"servicesDeploy"`
 }
 
 func (d *Deploy) GetDockerName() string {

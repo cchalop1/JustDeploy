@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os/exec"
 	"strconv"
+	"time"
 
 	"cchalop1.com/deploy/internal/adapter/database"
 	"cchalop1.com/deploy/internal/api/dto"
@@ -71,16 +73,16 @@ type DockerMessage struct {
 }
 
 // BuildImage builds a Docker image from the specified Dockerfile and context directory.
-func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) error {
-	fmt.Println("Make a tar of", deploy.PathToSource)
-	tar, err := makeTar(deploy.PathToSource)
+func (d *DockerAdapter) BuildImage(service domain.Service) error {
+	fmt.Println("Make a tar of", service.CurrentPath)
+	tar, err := makeTar(service.CurrentPath)
 	if err != nil {
 		return err
 	}
 
 	buildOptions := types.ImageBuildOptions{
-		Dockerfile: deploy.DockerFileName,
-		Tags:       []string{deploy.GetDockerName()},
+		Dockerfile: "Dockerfile",
+		Tags:       []string{service.GetDockerName()},
 		Remove:     true,
 	}
 
@@ -121,16 +123,16 @@ func (d *DockerAdapter) BuildImage(deploy *domain.Deploy) error {
 
 }
 
-func (d *DockerAdapter) BuildNixpacksImage(deploy *domain.Deploy, server domain.Server) error {
+func (d *DockerAdapter) BuildNixpacksImage(server domain.Server, service domain.Service) error {
 	// Construct the nixpacks command
 
 	nixpacksCmd := exec.Command("nixpacks", "build",
 		// TODO: chose the ip or the domain depends of what is in the server
 		"--docker-host", server.Ip+":2376",
-		"--name", deploy.GetDockerName(),
+		"--name", service.GetDockerName(),
 		"--docker-tls-verify", "1",
 		"--docker-cert-path", server.GetSshKeyPath(),
-		deploy.PathToSource)
+		service.CurrentPath)
 
 	// Set up pipes for stdout and stderr
 	stdout, _ := nixpacksCmd.StdoutPipe()
@@ -160,6 +162,7 @@ func (d *DockerAdapter) checkIsRouterImageIsPull() (bool, error) {
 	imageList, err := d.client.ImageList(context.Background(), types.ImageListOptions{})
 
 	if err != nil {
+
 		return false, err
 	}
 
@@ -198,16 +201,16 @@ func (d *DockerAdapter) PullTreafikImage() error {
 	return nil
 }
 
-func (d *DockerAdapter) PullImage(image string) {
-	fmt.Println("Pull image", image)
+func (d *DockerAdapter) PullImage(image string) error {
+	log.Printf("Pull image", image)
 	reader, err := d.client.ImagePull(context.Background(), image, types.ImagePullOptions{})
 
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
 	io.Copy(io.Discard, reader)
+	return nil
 }
 
 func (d *DockerAdapter) RunRouter(email string) error {
@@ -275,36 +278,48 @@ func envToSlice(envVars []dto.Env) []string {
 	return envSlice
 }
 
-func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) error {
-	Name := deploy.GetDockerName()
+func (d *DockerAdapter) ConfigContainer(service domain.Service) container.Config {
+	Image := service.ImageName
 
-	Labels := map[string]string{
-		"traefik.enable":                                "true",
-		"traefik.http.routers." + Name + ".rule":        "Host(`" + domain + "`)",
-		"traefik.http.routers." + Name + ".entrypoints": "web",
-	}
-
-	if deploy.EnableTls {
-		Labels["traefik.http.routers."+Name+".tls"] = "true"
-		Labels["traefik.http.routers."+Name+".tls.certresolver"] = "myresolver"
-		Labels["traefik.http.routers."+Name+".entrypoints"] = "websecure"
+	if service.IsDevContainer {
+		Image = service.GetDockerName()
 	}
 
 	config := container.Config{
-		Image:  Name,
-		Labels: Labels,
-		Env:    envToSlice(deploy.Envs),
-		ExposedPorts: nat.PortSet{
-			// TODO: get the port from the envs
-			"80/tcp": struct{}{},
-		},
+		Image:    Image,
+		Env:      envToSlice(service.Envs),
+		Hostname: service.GetDockerName(),
+	}
+	return config
+}
+
+type ExposeContainerParams struct {
+	IsTls  bool
+	Domain string
+}
+
+func (d *DockerAdapter) ExposeContainer(containersConfig *container.Config, exposeContainerParams ExposeContainerParams) {
+	Labels := map[string]string{
+		"traefik.enable": "true",
+		"traefik.http.routers." + containersConfig.Image + ".rule":        "Host(`" + exposeContainerParams.Domain + "`)",
+		"traefik.http.routers." + containersConfig.Image + ".entrypoints": "web",
 	}
 
+	if exposeContainerParams.IsTls {
+		Labels["traefik.http.routers."+containersConfig.Image+".tls"] = "true"
+		Labels["traefik.http.routers."+containersConfig.Image+".tls.certresolver"] = "myresolver"
+		Labels["traefik.http.routers."+containersConfig.Image+".entrypoints"] = "websecure"
+	}
+
+	containersConfig.Labels = Labels
+}
+
+func (d *DockerAdapter) RunImage(config container.Config, networkName string) error {
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
 			"databases_default": {},
 		},
-	}, &v1.Platform{}, Name)
+	}, &v1.Platform{}, config.Hostname)
 
 	if err != nil {
 		return err
@@ -313,7 +328,7 @@ func (d *DockerAdapter) RunImage(deploy *domain.Deploy, domain string) error {
 	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
 	fmt.Printf("Container %s is started", con.ID)
 
-	fmt.Println("Run image", Name)
+	fmt.Println("Run image", config.Hostname)
 	return nil
 }
 
@@ -406,13 +421,14 @@ func (d *DockerAdapter) RunServiceWithDeploy(service database.ServicesConfig, co
 
 func (d *DockerAdapter) GetLocalHostServer() domain.Server {
 	return domain.Server{
-		Id:          "local",
-		Name:        "local",
-		Ip:          "localhost",
-		Domain:      "localhost",
-		Password:    nil,
-		SshKey:      nil,
-		CreatedDate: "2021-09-01",
+		Id:       "local",
+		Name:     "local",
+		Ip:       "localhost",
+		Domain:   "localhost",
+		Password: nil,
+		SshKey:   nil,
+		// TODO: change the date
+		CreatedDate: time.Now(),
 		Status:      "active",
 	}
 }

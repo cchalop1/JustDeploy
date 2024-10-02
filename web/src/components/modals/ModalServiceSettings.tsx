@@ -7,11 +7,13 @@ import { useNotification } from "@/hooks/useNotifications";
 import Modal from "./Modal";
 
 type ModalServiceSettingsProps = {
+  projectId: string;
   service: Service;
   onClose: () => void;
   getProjectById: () => Promise<void>;
 };
 export default function ModalServiceSettings({
+  projectId,
   service,
   onClose,
   getProjectById,
@@ -21,7 +23,7 @@ export default function ModalServiceSettings({
   const url = `http://localhost:${service.exposePort}`;
 
   const deleteSelectedService = async () => {
-    await deleteServiceByIdApi(service.id);
+    await deleteServiceByIdApi(projectId, service.id);
     onClose();
     await getProjectById();
   };

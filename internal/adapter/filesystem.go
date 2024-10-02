@@ -131,29 +131,29 @@ func (fs *FilesystemAdapter) CopyFileToRemoteServer(sourcePath string, serverIp 
 }
 
 func (fs *FilesystemAdapter) CreateGitPostCommitHooks(deploy domain.Deploy) error {
-	hooksFilePath := deploy.PathToSource + ".git/hooks/post-commit"
-	fileContent := []byte("#!/bin/sh\njustdeploy --redeploy " + deploy.Id + "\n")
+	// hooksFilePath := deploy.PathToSource + ".git/hooks/post-commit"
+	// fileContent := []byte("#!/bin/sh\njustdeploy --redeploy " + deploy.Id + "\n")
 
-	err := os.WriteFile(hooksFilePath, fileContent, 0755)
+	// err := os.WriteFile(hooksFilePath, fileContent, 0755)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	fmt.Println("Create file ", deploy.PathToSource+".git/hooks/post-commit")
+	// fmt.Println("Create file ", deploy.PathToSource+".git/hooks/post-commit")
 	return nil
 }
 
 func (fs *FilesystemAdapter) DeleteGitPostCommitHooks(deploy domain.Deploy) error {
-	hooksFilePath := deploy.PathToSource + ".git/hooks/post-commit"
+	// hooksFilePath := deploy.PathToSource + ".git/hooks/post-commit"
 
-	err := os.Remove(hooksFilePath)
+	// err := os.Remove(hooksFilePath)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	fmt.Println("Remove file", deploy.PathToSource+".git/hooks/post-commit")
+	// fmt.Println("Remove file", deploy.PathToSource+".git/hooks/post-commit")
 
 	return nil
 }

@@ -6,16 +6,17 @@ import (
 )
 
 func GetServicesFromDockerCompose(deployService *service.DeployService, deployId string) ([]database.ServicesConfig, error) {
-	deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
-	if err != nil {
-		return []database.ServicesConfig{}, err
-	}
+	// deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
+	// if err != nil {
+	// 	return []database.ServicesConfig{}, err
+	// }
 
-	services, err := deployService.FilesystemAdapter.GetComposeConfigOfDeploy(deploy.PathToSource)
+	// services, err := deployService.FilesystemAdapter.GetComposeConfigOfDeploy(deploy.PathToSource)
 
-	if err != nil {
-		return []database.ServicesConfig{}, err
-	}
+	// if err != nil {
+	// 	return []database.ServicesConfig{}, err
+	// }
 
-	return services, nil
+	// return services, nil
+	return nil, nil
 }

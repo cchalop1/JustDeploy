@@ -138,12 +138,11 @@ func createDevContainerService(deployService *service.DeployService, createServi
 		VolumsNames:    []string{},
 		Status:         "Runing",
 		Host:           "localhost",
-		ProjectId:      createServiceDto.ProjectId,
 		IsDevContainer: true,
 		CurrentPath:    *createServiceDto.Path,
 		ExposePort:     exposedPort,
 	}
-	err := deployService.DatabaseAdapter.SaveServiceByProjectId(domainService)
+	err := deployService.DatabaseAdapter.SaveServiceByProjectId(*createServiceDto.ProjectId, domainService)
 	return domainService, err
 }
 
@@ -183,8 +182,6 @@ func createServiceForProject(deployService *service.DeployService, createService
 
 	domainService := domain.Service{
 		Id:          utils.GenerateRandomPassword(5),
-		DeployId:    nil,
-		ProjectId:   createServiceDto.ProjectId,
 		Name:        containerHostname,
 		Envs:        envs,
 		VolumsNames: []string{},

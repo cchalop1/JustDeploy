@@ -1,19 +1,22 @@
 package domain
 
 import (
+	"time"
+
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/api/dto"
 )
 
 type Server struct {
-	Id          string  `json:"id"`
-	Name        string  `json:"name"`
-	Ip          string  `json:"ip"`
-	Domain      string  `json:"domain"`
-	Password    *string `json:"password"`
-	SshKey      *string `json:"sshKey"`
-	CreatedDate string  `json:"createdDate"`
-	Status      string  `json:"status"`
+	Id          string    `json:"id"`
+	Name        string    `json:"name"`
+	Ip          string    `json:"ip"`
+	Domain      string    `json:"domain"`
+	Password    *string   `json:"password"`
+	SshKey      *string   `json:"sshKey"`
+	CreatedDate time.Time `json:"createdDate"`
+	Status      string    `json:"status"`
+	Email       string    `json:"email"`
 }
 
 type ServerCertsPath struct {
@@ -24,12 +27,11 @@ type ServerCertsPath struct {
 
 func (s *Server) ToServerDto() dto.ServerDto {
 	return dto.ServerDto{
-		Id:          s.Id,
-		Name:        s.Name,
-		Ip:          s.Ip,
-		Domain:      s.Domain,
-		CreatedDate: s.CreatedDate,
-		Status:      s.Status,
+		Id:     s.Id,
+		Name:   s.Name,
+		Ip:     s.Ip,
+		Domain: s.Domain,
+		Status: s.Status,
 	}
 }
 

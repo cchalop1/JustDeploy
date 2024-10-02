@@ -25,7 +25,11 @@ import { ButtonStateEnum } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 // import AlertDestructive from "@/components/alerts/AlertDestructive";
 
-export default function ServerConfigForm() {
+type ServerConfigFormProps = {
+  onClose?: () => void;
+};
+
+export default function ServerConfigForm({ onClose }: ServerConfigFormProps) {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [connectButtonState, setConnectButtonState] = useState<ButtonStateEnum>(
@@ -33,6 +37,8 @@ export default function ServerConfigForm() {
   );
   const [connectServerData, setConnectServerData] = useState<ConnectServerDto>({
     ip: "",
+    email: "",
+    domain: "",
     password: null,
     sshKey: "",
     user: "root",
@@ -60,6 +66,7 @@ export default function ServerConfigForm() {
     try {
       const { id } = await connectServerApi(connectServerData);
       setConnectButtonState(ButtonStateEnum.SUCESS);
+      if (onClose) onClose();
       // navigate(`/server/${id}/installation`);
       // TODO: handle error
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -90,7 +97,7 @@ export default function ServerConfigForm() {
   return (
     <>
       {/* {error && <AlertDestructive message={error} />} */}
-      <div className="mt-16 flex justify-center">
+      <div className="flex justify-center">
         <Card className="w-[500px]">
           <CardHeader>
             <CardTitle>Connect Your Server</CardTitle>
@@ -130,6 +137,36 @@ export default function ServerConfigForm() {
                       setConnectServerData({
                         ...connectServerData,
                         ip: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="server-domain">Server domain</Label>
+                  <Input
+                    id="server-domain"
+                    name="server-domain"
+                    placeholder="Domain to your server"
+                    value={connectServerData.domain}
+                    onChange={(e) =>
+                      setConnectServerData({
+                        ...connectServerData,
+                        domain: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="server-email">Email</Label>
+                  <Input
+                    id="server-email"
+                    name="server-email"
+                    placeholder="Email associated with the server"
+                    value={connectServerData.email}
+                    onChange={(e) =>
+                      setConnectServerData({
+                        ...connectServerData,
+                        email: e.target.value,
                       })
                     }
                   />

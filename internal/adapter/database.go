@@ -206,25 +206,27 @@ func (d *DatabaseAdapter) SaveService(service domain.Service) error {
 }
 
 func (d *DatabaseAdapter) GetServicesByDeployId(deployId string) []domain.Service {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	serviceList := []domain.Service{}
-	for _, s := range databaseModels.Services {
-		if *s.DeployId == deployId {
-			serviceList = append(serviceList, s)
-		}
-	}
-	return serviceList
+	// databaseModels := d.readDeployConfigInDataBaseFile()
+	// serviceList := []domain.Service{}
+	// for _, s := range databaseModels.Services {
+	// 	if *s.DeployId == deployId {
+	// 		serviceList = append(serviceList, s)
+	// 	}
+	// }
+	// return serviceList
+	return []domain.Service{}
 }
 
 func (d *DatabaseAdapter) GetLocalService() []domain.Service {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	serviceList := []domain.Service{}
-	for _, s := range databaseModels.Services {
-		if s.DeployId == nil {
-			serviceList = append(serviceList, s)
-		}
-	}
-	return serviceList
+	// databaseModels := d.readDeployConfigInDataBaseFile()
+	// serviceList := []domain.Service{}
+	// for _, s := range databaseModels.Services {
+	// 	if s.DeployId == nil {
+	// 		serviceList = append(serviceList, s)
+	// 	}
+	// }
+	// return serviceList
+	return []domain.Service{}
 }
 
 func (d *DatabaseAdapter) GetServiceById(id string) (*domain.Service, error) {
@@ -306,37 +308,38 @@ func (d *DatabaseAdapter) DeleteLogFile(deployId string) error {
 
 // refactor with new database
 func (d *DatabaseAdapter) GetServerFromService(serviceId string) (domain.Server, error) {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	for _, s := range databaseModels.Services {
-		if s.Id == serviceId {
-			if s.DeployId == nil {
-				return domain.Server{}, errors.New("deploy not found")
-			}
-			if s.DeployId == nil {
-				// return Localhost server
-				return domain.Server{
-					Id:     "localhost",
-					Name:   "localhost",
-					Ip:     "localhost",
-					Domain: "localhost",
-				}, nil
-			} else {
-				deploy, err := d.GetDeployById(*s.DeployId)
-				if err != nil {
-					return domain.Server{}, errors.New("deploy not found")
-				}
-				server, err := d.GetServerById(deploy.ServerId)
+	// databaseModels := d.readDeployConfigInDataBaseFile()
+	// for _, s := range databaseModels.Services {
+	// 	if s.Id == serviceId {
+	// 		if s.DeployId == nil {
+	// 			return domain.Server{}, errors.New("deploy not found")
+	// 		}
+	// 		if s.DeployId == nil {
+	// 			// return Localhost server
+	// 			return domain.Server{
+	// 				Id:     "localhost",
+	// 				Name:   "localhost",
+	// 				Ip:     "localhost",
+	// 				Domain: "localhost",
+	// 			}, nil
+	// 		} else {
+	// 			deploy, err := d.GetDeployById(*s.DeployId)
+	// 			if err != nil {
+	// 				return domain.Server{}, errors.New("deploy not found")
+	// 			}
+	// 			server, err := d.GetServerById(deploy.ServerId)
 
-				if err != nil {
-					return domain.Server{}, errors.New("server not found")
-				}
-				return server, nil
+	// 			if err != nil {
+	// 				return domain.Server{}, errors.New("server not found")
+	// 			}
+	// 			return server, nil
 
-			}
+	// 		}
 
-		}
-	}
-	return domain.Server{}, errors.New("service not found")
+	// 	}
+	// }
+	// return domain.Server{}, errors.New("service not found")
+	return domain.Server{}, nil
 }
 
 // Project
@@ -348,12 +351,14 @@ func (d *DatabaseAdapter) SaveProject(project domain.Project) error {
 	for i, existingProject := range databaseModels.Projects {
 		if existingProject.Id == project.Id {
 			// Update existing project
+			log.Printf("Updating existing project with ID: %s", project.Id)
 			databaseModels.Projects[i] = project
 			return d.writeDeployConfigInDataBaseFile(databaseModels)
 		}
 	}
 
 	// Add new project
+	log.Printf("Adding new project with ID: %s", project.Id)
 	databaseModels.Projects = append(databaseModels.Projects, project)
 	return d.writeDeployConfigInDataBaseFile(databaseModels)
 }
@@ -381,20 +386,21 @@ func (d *DatabaseAdapter) GetProjectByPath(path string) *domain.Project {
 }
 
 func (d *DatabaseAdapter) GetServicesByProjectId(projectId string) []domain.Service {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	serviceList := []domain.Service{}
-	for _, s := range databaseModels.Services {
-		if s.ProjectId != nil && *s.ProjectId == projectId {
-			serviceList = append(serviceList, s)
-		}
-	}
-	return serviceList
+	// databaseModels := d.readDeployConfigInDataBaseFile()
+	// serviceList := []domain.Service{}
+	// for _, s := range databaseModels.Services {
+	// 	if s.ProjectId != nil && *s.ProjectId == projectId {
+	// 		serviceList = append(serviceList, s)
+	// 	}
+	// }
+	// return serviceList
+	return []domain.Service{}
 }
 
-func (d *DatabaseAdapter) SaveServiceByProjectId(service domain.Service) error {
+func (d *DatabaseAdapter) SaveServiceByProjectId(projectId string, service domain.Service) error {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	for i, p := range databaseModels.Projects {
-		if p.Id == *service.ProjectId {
+		if p.Id == projectId {
 			databaseModels.Projects[i].Services = append(databaseModels.Projects[i].Services, service)
 			break
 		}
