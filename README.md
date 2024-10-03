@@ -1,124 +1,84 @@
-# 🛵 JustDeploy
+<h2 align="center">JustDeploy 🛵</h2>
+<p align="center">Streamline your development process and deploy where you want</p>
 
-[![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true)](https://discord.gg/nrTCzpRF)
+<p align="center">
+  <a href="https://www.producthunt.com/posts/justdeploy-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-justdeploy&#0045;2" target="_blank">
+    <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=478298&theme=light" alt="JustDeploy - Deploy&#0032;your&#0032;app&#0032;with&#0032;no&#0032;lock&#0045;in&#0032;&#0038;&#0032;extra&#0032;cost | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" />
+  </a>
+</p>
 
-JustDeploy is an open-source application designed to simplify the deployment process for developers. It allows you to deploy your applications on your own server. JustDeploy handles server connection, Docker installation, and secure certificate generation, making the deployment process seamless and efficient. JustDeploy read your app source (.env, Dockfile, docker-compose) and allow you to deploy it.
+![Screenshot4](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/ScreenProjectMode.png)
 
-## How JustDeploy work
+<br>
 
-This CLI tool is designed to be installed directly on the developer’s computer, not on the deployment server. It connects remotely to the server via the Docker socket, allowing container management and deployment orchestration from the local machine. This eliminates the need for server-side installation, streamlining integration with remote environments and ensuring smooth interaction between the developer's machine and the server.
+JustDeploy is a command-line tool designed to simplify the lives of developers. Install it on your machine to easily manage databases, environments, and projects, all while deploying to any VPS of your choice. Forget about vendor lock-in—deploy wherever you want.
 
-![Schema image](./images/JustDeploySchema.png)
-
-JustDeploy is that it **doesn't install anything on your server other than your application.** This makes it an ideal choice for small servers with limited resources or development environments
+<br>
 
 ## Features
 
-- Connects to your server
-- Installs Docker
-- Deploys your application from Dockerfile
-- Create tls certificates with let's encrypt
-- Create git hooks to deploy on every commit
-- Deploy and connect database from docker-compose
+- 🚀 **Start a database locally in one click**
+- 🔧 **Manage environments seamlessly**
+- 🗂️ **Project Management**
+- 🌐 **Deploy on any VPS**
+- 🔓 **No vendor lock-in—deploy wherever you want**
 
-## Screen
+<br>
 
-![Screenshot4](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/Screen1.png)
+---
 
-## Install
+## Prerequisites
+
+Before getting started, ensure your development machine has the following installed:
+
+- **SSH**: For secure connection and deployment.
+- **Docker**: To manage containers and environments.
+- **OpenSSL**: For generating certificates.
+
+---
+
+## Installation
+
+To install JustDeploy on your local machine, run the following command:
 
 ```bash
 curl -fsSL https://get.justdeploy.app | bash
 ```
 
+---
+
 ## Usage
 
-To create a new deployment you must run the justdeploy command at the bottom of your project where your dockerfile is.
+After installation, JustDeploy runs locally on your development machine (not on the VPS). Simply run the following command to launch the CLI tool and start managing your projects, databases, and deployments:
 
 ```bash
 justdeploy
 ```
 
-JustDeploy will create a `./justdeploy` folder at the root of your project to be able to store the deployment information and the certificates that certify to communicate with the docker engine.
+With this, you'll be able to:
 
-For now JustDeploy only support debian base VMs.
+- Set up new databases in just one click.
+- Manage and configure environments for your applications.
+- Deploy your project to any VPS of your choice without being locked into a particular provider.
 
-After running `justdeploy`, follow the prompts to connect to your server and deploy your application.
+---
 
-it should open your browser on this page.
+## Why Choose JustDeploy?
 
-In this step you can connect you server and when you click on the button JustDeploy install and setup everything he needs.
+- **Full Control**: Deploy where you want without extra costs or limitations.
+- **Local First**: Manage everything from your local environment.
+- **Developer-Friendly**: Intuitive and designed to simplify everyday tasks for developers.
 
-In this 2nd step you can configure your application with name and enable tls if you want.
+---
 
-You can see all the process on [this video.](https://youtu.be/u2nQGLpXTxM)
+## Join the Community
 
-### Add Database
+- ⭐ Star the repository on [GitHub](https://github.com/cchalop1/JustDeploy)
+- 📖 Follow [discussions](https://github.com/cchalop1/JustDeploy/discussions)
+- 🐛 Report issues [here](https://github.com/cchalop1/JustDeploy/issues)
 
-When you have deploy your app you can create and connect a database services from preconfigured services or your local docker-compose settings.
-
-On the Deploy page click on on the databases services tab and create one from the modal.
-
-![ModalCreateService](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/ScreenCreateServices.png)
-
-Feel free to add more preconfigured services with `databases.go` by create a pull request.
-
-[file is here](https://github.com/cchalop1/JustDeploy/blob/main/internal/adapter/database/database.go)
-
-### Prerequisites
-
-- openssl
-- ssh
-
-Before deploying your application using JustDeploy, it is required that a domain name is associated with your server. This is a necessary step to generate the certificate, even if you disable
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-To compile it in local you need to install bunjs. You can find the install process on there website [bun website](https://bun.sh)
-
-### Build in local
-
-1. Clone the repository
-
-```bash
-git clone https://github.com/cchalop1/JustDeploy.git
-```
-
-2. Navigate to the project directory
-
-```bash
-cd JustDeploy
-```
-
-3. Run Make to build the project
-
-```bash
-make
-```
-
-4. Run JustDeploy
-
-```bash
-./bin/justdeploy
-```
+---
 
 ## License
 
-This project is licensed under the AGPLv3 License - see the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-For any questions or suggestions, please open an issue or contact the project maintainer (cchalop1).
-
-<!--
-
-
-## TODO
-
-- [ ] socket
-<!-- - [ ] update status with -->
-
-<!-- - [ ] Usage graph on the sucess deploy page
-- [ ] From github Url -->
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/cchalop1/JustDeploy/blob/main/LICENSE) file for more details.
