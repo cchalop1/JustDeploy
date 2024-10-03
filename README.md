@@ -1,4 +1,4 @@
-<h2 align="center">JustDeploy 🛵</h2>
+<h1 align="center">JustDeploy 🛵</h1>
 <p align="center">Streamline your development process and deploy where you want</p>
 
 <p align="center">
@@ -7,7 +7,7 @@
   </a>
 </p>
 
-![Screenshot4](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/ScreenProjectMode.png)
+![ScreenshotMain](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/ScreenProjectMode.png)
 
 <br>
 
@@ -25,7 +25,7 @@ JustDeploy is a command-line tool designed to simplify the lives of developers. 
 
 <br>
 
----
+## ![Screenshot](https://raw.githubusercontent.com/cchalop1/JustDeploy/main/images/ScreenCreateServices.png)
 
 ## Prerequisites
 
@@ -76,6 +76,8 @@ With this, you'll be able to:
 - ⭐ Star the repository on [GitHub](https://github.com/cchalop1/JustDeploy)
 - 📖 Follow [discussions](https://github.com/cchalop1/JustDeploy/discussions)
 - 🐛 Report issues [here](https://github.com/cchalop1/JustDeploy/issues)
+- 💬 Follow me on [Twitter](https://x.com/ChalopinClement)
+- 🎮 Join our [Discord](https://discord.gg/RteyWyKjz4)
 
 ---
 
