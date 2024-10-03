@@ -83,4 +83,4 @@ With this, you'll be able to:
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/cchalop1/JustDeploy/blob/main/LICENSE) file for more details.
+This project is licensed under AGPL-3.0 License. See the [LICENSE](https://github.com/cchalop1/JustDeploy/blob/main/LICENSE) file for more details.
