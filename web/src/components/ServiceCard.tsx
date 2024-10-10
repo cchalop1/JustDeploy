@@ -1,5 +1,5 @@
 import { Service } from "@/services/getServicesByDeployId";
-import { EllipsisVertical } from "lucide-react";
+import { Badge } from "./ui/badge";
 
 type ServiceCardProps = {
   service: Service;
@@ -22,11 +22,10 @@ export default function ServiceCard({ service, onClick }: ServiceCardProps) {
       {isDevContainer && (
         <div className="absolute -top-5 -left-[0.80px] w-1/4 h-5 z-10 border-t border-l border-r bg-white rounded-t-lg"></div>
       )}
-      <div className="flex justify-between ml-4 mr-4 items-center">
+      <div className="flex justify-between items-center ml-4 mr-4 ">
         <img src={iconPath} className="w-8" />
         <div className="flex gap-3">
-          <div>tag</div>
-          {!isDevContainer && <EllipsisVertical />}
+          {!isDevContainer && <Badge>{service.status}</Badge>}
         </div>
       </div>
       <div className="font-bold text-xl mt-2 ml-4 mr-4 mb-2">

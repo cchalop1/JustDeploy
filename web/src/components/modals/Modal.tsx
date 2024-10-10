@@ -1,15 +1,17 @@
 import { XCircle } from "lucide-react";
-import { PropsWithChildren, useEffect, useRef } from "react";
+import { PropsWithChildren, useRef } from "react";
 
 type ModalProps = {
   headerNode?: React.ReactNode;
   onClose: () => void;
+  className?: string;
 };
 
 export default function Modal({
   headerNode,
   onClose,
   children,
+  className,
 }: PropsWithChildren<ModalProps>) {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -31,7 +33,8 @@ export default function Modal({
   return (
     <div
       className={
-        "absolute right-5 top-24 border border-spacing-3 rounded-lg bg-white shadow-lg z-20 p-3"
+        "absolute right-5 top-24 border border-spacing-3 rounded-lg bg-white shadow-lg z-20 p-3 w-96" +
+        className
       }
       ref={modalRef}
     >

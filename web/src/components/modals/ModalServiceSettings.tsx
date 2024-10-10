@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import EnvsManagements from "../forms/EnvsManagements";
 import { useNotification } from "@/hooks/useNotifications";
 import Modal from "./Modal";
+import { Copy, SquareArrowOutUpRight, Trash } from "lucide-react";
 
 type ModalServiceSettingsProps = {
   projectId: string;
@@ -65,22 +66,41 @@ export default function ModalServiceSettings({
           </div>
         }
       >
-        <div className="bg-gray-100 p-3 border-t">
-          <Button variant="destructive" onClick={() => deleteSelectedService()}>
-            Delete
-          </Button>
-          <Button onClick={copyEnv}>Copy Env</Button>
-          <div>
-            <div>
-              <a href={url} target="_blank" className="underline">
-                {url}
-              </a>
+        <div className="p-3 border-t">
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between">
+              <div className="font-bold">Expose URL: </div>
+              <div className="">
+                <a
+                  href={url}
+                  target="_blank"
+                  className="underline flex items-center"
+                >
+                  {url}
+                  <SquareArrowOutUpRight className="h-4" />
+                </a>
+              </div>
             </div>
             <div>
-              <div className="font-bold">Environment variables</div>
+              <div className="flex justify-between items-center mb-2">
+                <div className="font-bold">Environment variables</div>
+                <Button variant="outline" onClick={copyEnv}>
+                  <Copy className="h-4" />
+                  Copy env
+                </Button>
+              </div>
               <EnvsManagements envs={service.envs} setEnvs={() => {}} />
             </div>
           </div>
+
+          <Button
+            className="mt-2 mb-2 w-full"
+            variant="destructive"
+            onClick={() => deleteSelectedService()}
+          >
+            <Trash className="h-4 font-bold" />
+            Delete
+          </Button>
         </div>
       </Modal>
     </motion.div>
