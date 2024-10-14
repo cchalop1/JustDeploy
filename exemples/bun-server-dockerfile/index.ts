@@ -1,5 +1,13 @@
 import pg from "pg";
 
+function renderHtmlResponse(body: string): Response {
+  return new Response(`<div style="text-align: center;">${body}</div>`, {
+    headers: {
+      "content-type": "text/html; charset=UTF-8",
+    },
+  });
+}
+
 Bun.serve({
   port: Bun.env.PORT,
   async fetch(req) {
@@ -15,14 +23,11 @@ Bun.serve({
       const result = await client.query("SELECT NOW()");
       console.log(result);
 
-      return new Response(
-        "🚀 Postgres is connected ! 🎉\nResult: " +
-          JSON.stringify(result.fields)
-      );
+      return renderHtmlResponse("<h1>Postgres connected ! 🎉</h1>");
     } catch (error) {
       console.error(error);
     }
-    return new Response("Postgres is not connected ! 😢");
+    return renderHtmlResponse("<h1>Postgres is not connected ! 😢</h1>");
   },
 });
 

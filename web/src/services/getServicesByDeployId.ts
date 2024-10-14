@@ -15,6 +15,7 @@ export type Service = {
   isDevContainer: boolean;
   currentPath: string;
   exposePort: string;
+  isExposed: boolean;
 };
 
 export async function getServicesByDeployIdApi(

@@ -106,7 +106,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     <div className="bg-grid-image h-screen">
       {serviceSelected && (
         <ModalServiceSettings
-          projectId={id}
+          project={project}
           service={serviceSelected}
           onClose={() => setServiceSelected(null)}
           getProjectById={getProjectById}
@@ -125,7 +125,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
       )}
       {displayDeployModal && (
         <ModalDeployProject
-          projectId={id}
+          project={project}
           onClose={() => setDisplayDeployModal(false)}
           onDeployProject={deployProject}
         />

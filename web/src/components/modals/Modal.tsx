@@ -33,7 +33,7 @@ export default function Modal({
   return (
     <div
       className={
-        "absolute right-5 top-24 border border-spacing-3 rounded-lg bg-white shadow-lg z-20 p-3 w-96" +
+        "absolute right-5 top-24 border border-spacing-3 rounded-lg bg-white shadow-lg z-20 p-3 " +
         className
       }
       ref={modalRef}

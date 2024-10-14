@@ -9,15 +9,16 @@ import { DeployProjectDto } from "@/services/deployProjectApi";
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import Modal from "./Modal";
 import { useNotification } from "@/hooks/useNotifications";
+import { ProjectDto } from "@/services/getProjectById";
 
 type ModalDeployProjectProps = {
-  projectId: string;
+  project: ProjectDto;
   onClose: () => void;
   onDeployProject: (deployProjectDto: DeployProjectDto) => Promise<void>;
 };
 
 export default function ModalDeployProject({
-  projectId,
+  project,
   onClose,
   onDeployProject,
 }: ModalDeployProjectProps) {
@@ -30,7 +31,9 @@ export default function ModalDeployProject({
   useEffect(() => {
     getServersListApi().then((servers) => {
       setServerList(servers);
-      if (servers.length > 0) {
+      if (project.serverId) {
+        setSelectedServer(servers.find((s) => s.id === project.serverId));
+      } else {
         setSelectedServer(servers[0]);
       }
     });
@@ -72,7 +75,7 @@ export default function ModalDeployProject({
               setIsLoading(true);
               await onDeployProject({
                 serverId: selectedServer.id,
-                projectId: projectId,
+                projectId: project.id,
                 isTLSDomain: false,
                 domain: "",
               });

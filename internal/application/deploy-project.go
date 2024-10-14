@@ -20,6 +20,7 @@ func DeployProject(deployService *service.DeployService, deployProjectDto dto.De
 		fmt.Println("Error fetching project by ID:", err)
 		return domain.Deploy{}, err
 	}
+
 	fmt.Println("Fetched project:", project.Name)
 
 	server, err := deployService.DatabaseAdapter.GetServerById(deployProjectDto.ServerId)
@@ -130,6 +131,14 @@ func DeployProject(deployService *service.DeployService, deployProjectDto dto.De
 			return domain.Deploy{}, err
 		}
 		fmt.Println("Service running with config:", config.Image)
+	}
+
+	project.ServerId = &server.Id
+
+	err = deployService.DatabaseAdapter.SaveProject(*project)
+	if err != nil {
+		fmt.Println("Error saving project:", err)
+		return domain.Deploy{}, err
 	}
 
 	fmt.Println("Deployment process completed for project ID:", deployProjectDto.ProjectId)

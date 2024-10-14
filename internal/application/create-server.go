@@ -35,6 +35,15 @@ func CreateServer(deployService *service.DeployService, createNewServer dto.Conn
 		}
 	}
 
+	projects := deployService.DatabaseAdapter.GetProjects()
+
+	for _, project := range projects {
+		if project.ServerId == nil {
+			project.ServerId = &server.Id
+		}
+		deployService.DatabaseAdapter.SaveProject(project)
+	}
+
 	deployService.DatabaseAdapter.SaveServer(server)
 
 	ConnectAndSetupServer(deployService, server)

@@ -13,6 +13,7 @@ export type ProjectDto = {
   id: string;
   name: string;
   path: string;
+  serverId: string;
   services: Service[];
 };
 

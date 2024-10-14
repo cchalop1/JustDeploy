@@ -1,42 +1,27 @@
-import { deleteServiceByIdApi } from "@/services/deleteServiceApi";
-import { Service } from "@/services/getServicesByDeployId";
-import { Button } from "../ui/button";
 import { motion } from "framer-motion";
-import EnvsManagements from "../forms/EnvsManagements";
-import { useNotification } from "@/hooks/useNotifications";
-import Modal from "./Modal";
-import { Copy, SquareArrowOutUpRight, Trash } from "lucide-react";
+
+import Modal from "@/components/modals/Modal";
+import ServiceLocalSettings from "@/components/ServiceLocalSettings";
+import { Service } from "@/services/getServicesByDeployId";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ServiceDeploySettings from "../ServiceDeploySettings";
+import { ProjectDto } from "@/services/getProjectById";
+import { Suspense } from "react";
+import SpinnerIcon from "@/assets/SpinnerIcon";
 
 type ModalServiceSettingsProps = {
-  projectId: string;
+  project: ProjectDto;
   service: Service;
   onClose: () => void;
   getProjectById: () => Promise<void>;
 };
 export default function ModalServiceSettings({
-  projectId,
+  project,
   service,
   onClose,
   getProjectById,
 }: ModalServiceSettingsProps) {
-  const notif = useNotification();
   const isDevContainer = service.isDevContainer;
-  const url = `http://localhost:${service.exposePort}`;
-
-  const deleteSelectedService = async () => {
-    await deleteServiceByIdApi(projectId, service.id);
-    onClose();
-    await getProjectById();
-  };
-
-  function copyEnv() {
-    const env = service.envs.map((e) => `${e.name}=${e.value}`).join("\n");
-    navigator.clipboard.writeText(env);
-    notif.success({
-      title: "Copied",
-      content: "Environment variables copied to clipboard",
-    });
-  }
 
   return (
     <motion.div
@@ -66,42 +51,34 @@ export default function ModalServiceSettings({
           </div>
         }
       >
-        <div className="p-3 border-t">
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-between">
-              <div className="font-bold">Expose URL: </div>
-              <div className="">
-                <a
-                  href={url}
-                  target="_blank"
-                  className="underline flex items-center"
-                >
-                  {url}
-                  <SquareArrowOutUpRight className="h-4" />
-                </a>
+        <Tabs defaultValue="local">
+          <TabsList>
+            <TabsTrigger value="local">Local Settings</TabsTrigger>
+            <TabsTrigger value="deploy">Deploy Settings</TabsTrigger>
+          </TabsList>
+          <div className="p-3 border-t mt-2">
+            <TabsContent value="local">
+              <div className="flex flex-col justify-between gap-2">
+                <ServiceLocalSettings
+                  project={project}
+                  service={service}
+                  getProjectById={getProjectById}
+                  onClose={onClose}
+                />
               </div>
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <div className="font-bold">Environment variables</div>
-                <Button variant="outline" onClick={copyEnv}>
-                  <Copy className="h-4" />
-                  Copy env
-                </Button>
+            </TabsContent>
+            <TabsContent value="deploy">
+              <div className="flex flex-col justify-between gap-2">
+                <ServiceDeploySettings
+                  project={project}
+                  service={service}
+                  getProjectById={getProjectById}
+                  onClose={onClose}
+                />
               </div>
-              <EnvsManagements envs={service.envs} setEnvs={() => {}} />
-            </div>
+            </TabsContent>
           </div>
-
-          <Button
-            className="mt-2 mb-2 w-full"
-            variant="destructive"
-            onClick={() => deleteSelectedService()}
-          >
-            <Trash className="h-4 font-bold" />
-            Delete
-          </Button>
-        </div>
+        </Tabs>
       </Modal>
     </motion.div>
   );
