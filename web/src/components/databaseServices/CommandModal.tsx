@@ -26,6 +26,7 @@ type CommandModalProps = {
   setOpen: (open: boolean) => void;
   create: CreateServiceFunc;
   projectSettings: ProjectSettingsDto;
+  openCustomPathModal: () => void;
 };
 
 export default function CommandModal({
@@ -35,6 +36,7 @@ export default function CommandModal({
   serviceFromDockerCompose,
   create,
   projectSettings,
+  openCustomPathModal,
 }: CommandModalProps) {
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
@@ -53,7 +55,7 @@ export default function CommandModal({
         <CommandGroup heading="Chose a folders in the list">
           {projectSettings.folders.map((folder) => (
             <CommandItem
-              className="flex gap-3"
+              className="flex gap-3 items-center"
               onSelect={() => create({ path: folder.fullPath })}
               key={folder.fullPath}
             >
@@ -61,6 +63,19 @@ export default function CommandModal({
               <span className="h-4">{folder.name}</span>
             </CommandItem>
           ))}
+        </CommandGroup>
+        <CommandGroup heading="Your folder is not in the list">
+          <CommandItem
+            className="flex gap-3 items-center"
+            onSelect={() => {
+              openCustomPathModal();
+            }}
+          >
+            <Folder className="w-5" />
+            <span className="h-4">
+              Other folder (you will be able to select a folder)
+            </span>
+          </CommandItem>
         </CommandGroup>
         {serviceFromDockerCompose && serviceFromDockerCompose.length > 0 && (
           <CommandGroup heading="Service from your docker compose file">

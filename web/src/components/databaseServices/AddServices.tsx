@@ -7,6 +7,16 @@ import { useEffect, useState } from "react";
 import { CreateServiceApi } from "@/services/createServiceApi";
 import CommandModal from "./CommandModal";
 import { ProjectSettingsDto } from "@/services/getProjectSettings";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogContent,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
 
 type AddServiceProps = {
   deployId?: string;
@@ -32,7 +42,12 @@ export default function AddService({
   // const [serviceFromDockerCompose, setServiceFromDockerCompose] =
   //   useState<ResponseServiceFromDockerComposeDto>(null);
 
-  const [open, setOpen] = useState(false);
+  const [openCommandModal, setOpenCommandModal] = useState(false);
+  const [openCustomPath, setOpenCustomPathModal] = useState<boolean>(false);
+
+  const [customPath, setCustomPath] = useState<string>(
+    projectSettings.currentPath
+  );
 
   async function getServices() {
     const res = await getPreConfiguredServiceListApi(projectId);
@@ -45,13 +60,18 @@ export default function AddService({
   //   setServiceFromDockerCompose(res);
   // }
 
+  function openCustomPathModal() {
+    setOpenCommandModal(false);
+    setOpenCustomPathModal(true);
+  }
+
   useEffect(() => {
     getServices();
     // getServicesFromDockerCompose();
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        setOpenCommandModal((open) => !open);
       }
     };
     document.addEventListener("keydown", down);
@@ -61,7 +81,7 @@ export default function AddService({
   return (
     <>
       <div
-        onClick={() => setOpen(true)}
+        onClick={() => setOpenCommandModal(true)}
         className="hover:shadow-md hover:bg-slate-100 cursor-pointer pt-3 pb-6 pl-5 pr-5 flex w-80 h-36 rounded-lg border border-dashed border-gray-600 justify-center items-center"
       >
         <div>
@@ -71,15 +91,42 @@ export default function AddService({
           </kbd>
         </div>
       </div>
+      <AlertDialog open={openCustomPath} onOpenChange={setOpenCustomPathModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              What is the path of your service you want to add ?{" "}
+            </AlertDialogTitle>
+            {/* create me a input where i can specify a custom path to add my new service i want to path the path of the project by default */}
+            <Input
+              value={customPath}
+              onChange={(v) => setCustomPath(v.target.value)}
+            />
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                createService({ path: customPath });
+                fetchServiceList();
+                setOpenCustomPathModal(false);
+              }}
+            >
+              Add
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <CommandModal
-        open={open}
-        setOpen={setOpen}
-        preConfiguredServices={preConfiguredServices}
-        projectSettings={projectSettings}
+        open={openCommandModal}
+        setOpen={setOpenCommandModal}
         serviceFromDockerCompose={[]}
+        projectSettings={projectSettings}
+        preConfiguredServices={preConfiguredServices}
+        openCustomPathModal={openCustomPathModal}
         create={async (createServiceParams) => {
           setLoading(true);
-          setOpen(false);
+          setOpenCommandModal(false);
           await createService({
             path: createServiceParams.path,
             serviceName: createServiceParams.serviceName,
