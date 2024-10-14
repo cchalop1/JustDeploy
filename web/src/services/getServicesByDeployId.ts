@@ -2,6 +2,11 @@ import { callApi } from "./api";
 import { ServerStatusType } from "./getServerListApi";
 import { Env } from "./postFormDetails";
 
+export type ServiceExposeSettings = {
+  isExposed: boolean;
+  subDomain: string;
+};
+
 export type Service = {
   id: string;
   hostName: string;
@@ -15,7 +20,7 @@ export type Service = {
   isDevContainer: boolean;
   currentPath: string;
   exposePort: string;
-  isExposed: boolean;
+  exposeSettings: ServiceExposeSettings;
 };
 
 export async function getServicesByDeployIdApi(

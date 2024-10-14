@@ -6,7 +6,11 @@ import (
 	"cchalop1.com/deploy/internal/api/dto"
 )
 
-// TODO: change to save serviceConfig
+type ServiceExposeSettings struct {
+	IsExposed bool   `json:"isExposed"`
+	SubDomain string `json:"subDomain"`
+}
+
 type Service struct {
 	Id          string    `json:"id"`
 	HostName    string    `json:"hostName"`
@@ -21,6 +25,8 @@ type Service struct {
 	IsDevContainer bool   `json:"isDevContainer"`
 	CurrentPath    string `json:"currentPath"`
 	ExposePort     string `json:"exposePort"`
+
+	ExposeSettings ServiceExposeSettings `json:"exposeSettings"`
 }
 
 func (s *Service) GetDockerName() string {

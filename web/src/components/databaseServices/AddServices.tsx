@@ -36,7 +36,6 @@ export default function AddService({
 
   async function getServices() {
     const res = await getPreConfiguredServiceListApi(projectId);
-    console.log(res);
     setPreConfiguredServices(res);
   }
 

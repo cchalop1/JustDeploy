@@ -54,7 +54,9 @@ export default function ModalServiceSettings({
         <Tabs defaultValue="local">
           <TabsList>
             <TabsTrigger value="local">Local Settings</TabsTrigger>
-            <TabsTrigger value="deploy">Deploy Settings</TabsTrigger>
+            {isDevContainer && (
+              <TabsTrigger value="deploy">Deploy Settings</TabsTrigger>
+            )}
           </TabsList>
           <div className="p-3 border-t mt-2">
             <TabsContent value="local">

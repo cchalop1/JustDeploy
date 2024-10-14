@@ -1,12 +1,15 @@
+import { useEffect, useRef, useState } from "react";
+import { setTimeout } from "timers/promises";
+
 import { useNotification } from "@/hooks/useNotifications";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Service } from "@/services/getServicesByDeployId";
-import { use, useEffect, useState } from "react";
-import { Input } from "./ui/input";
+import { Input } from "@/components/ui/input";
 import { ProjectDto } from "@/services/getProjectById";
 import { getServerByIdApi } from "@/services/getServerById";
 import { ServerDto } from "@/services/getServerListApi";
+import { saveServiceApi } from "@/services/saveServiceApi";
 
 type ServiceDeploySettingsProps = {
   project: ProjectDto;
@@ -22,14 +25,61 @@ export default function ServiceDeploySettings({
   getProjectById,
 }: ServiceDeploySettingsProps) {
   const notif = useNotification();
+  const timeoutRef = useRef<number | null>(null);
   const [server, setServer] = useState<null | ServerDto>(null);
-  // const server = use(getServerByIdApi(project.serverId));
-  const [isServiceExposed, setIsServiceExposed] = useState<boolean>(
-    service.isExposed
+
+  const [isExposed, setIsServiceExposed] = useState<boolean>(
+    service.exposeSettings.isExposed
   );
+  const [subDomain, setSubdomain] = useState<string>(
+    service.exposeSettings.subDomain
+  );
+
+  async function saveService(serviceUpdated: Service) {
+    try {
+      const res = await saveServiceApi(serviceUpdated, project.id);
+      console.log(res);
+    } catch (e) {
+      notif.error({
+        title: "Error",
+        content: e.message,
+      });
+      return;
+    }
+    notif.success({
+      title: "Settings saved",
+      content: "Service settings have been saved !",
+    });
+  }
 
   function onCheckedChange(value: boolean) {
     setIsServiceExposed(value);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = window.setTimeout(() => {
+      saveService({
+        ...service,
+        exposeSettings: { ...service.exposeSettings, isExposed: value },
+      });
+    }, 1000);
+  }
+
+  function onSubdomainChange(value: string) {
+    setSubdomain(value);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = window.setTimeout(() => {
+      saveService({
+        ...service,
+        exposeSettings: { ...service.exposeSettings, subDomain: value },
+      });
+    }, 1000);
   }
 
   useEffect(() => {
@@ -40,17 +90,22 @@ export default function ServiceDeploySettings({
     <>
       <div className="flex items-center space-x-2 w-[25vw]">
         <Switch
-          checked={isServiceExposed}
+          checked={isExposed}
           onCheckedChange={onCheckedChange}
           id="expose-service"
         />
         <Label htmlFor="expose-service">Expose this service</Label>
       </div>
-      {isServiceExposed && (
+      {isExposed && (
         <div className="space-y-2">
           <Label htmlFor="subdomain">Subdomain</Label>
           <div className="flex items-center space-x-2">
-            <Input id="subdomain" placeholder="Enter subdomain" />
+            <Input
+              id="subdomain"
+              placeholder="Enter subdomain"
+              value={subDomain}
+              onChange={(e) => onSubdomainChange(e.target.value)}
+            />
             <span className="text-sm text-muted-foreground">
               {" "}
               .{server?.domain}

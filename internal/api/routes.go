@@ -33,6 +33,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	app.Echo.GET("/api/deploy/:deployId/service-docker-compose", handlers.GetServicesFromDockerComposeHandler(deployService))
 
 	app.Echo.POST("/api/deploy/service", handlers.CreateServiceHandler(deployService))
+	app.Echo.PUT("/api/project/:projectId/service", handlers.UpdateServiceHandler(deployService))
 
 	app.Echo.GET("/api/deploy/:deployId/service", handlers.GetServicesByDeployIdHandler(deployService))
 

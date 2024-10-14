@@ -44,6 +44,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     let variant = "default";
     if (type === "error") {
       variant = "destructive";
+      title = `❌ ${title}`;
     }
     if (type === "warning") {
       title = `⚠️ ${title}`;

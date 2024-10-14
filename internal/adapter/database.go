@@ -261,6 +261,21 @@ func (d *DatabaseAdapter) DeleteServiceById(id string) error {
 	return d.writeDeployConfigInDataBaseFile(databaseModels)
 }
 
+func (d *DatabaseAdapter) UpdateServiceByProjectId(serviceToUpdate domain.Service, projectId string) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	for i, p := range databaseModels.Projects {
+		if p.Id == projectId {
+			for j, s := range p.Services {
+				if s.Id == serviceToUpdate.Id {
+					databaseModels.Projects[i].Services[j] = serviceToUpdate
+					break
+				}
+			}
+		}
+	}
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}
+
 // Logs
 func (d *DatabaseAdapter) CreateDeployLogsFileIfNot(deployId string) error {
 	filePath := internal.JUSTDEPLOY_FOLDER + "/" + deployId + ".log"
