@@ -6,13 +6,12 @@ import (
 
 // TODO: replace the status by a enum
 type Deploy struct {
-	Id              string    `json:"id"`
-	ServerId        string    `json:"serverId"`
-	ProjectId       string    `json:"projectId"`
-	EnableTls       bool      `json:"enableTls"`
-	Email           string    `json:"email"`
-	ExposeServiceId string    `json:"ExposeServiceId"`
-	ServicesDeploy  []Service `json:"servicesDeploy"`
+	Id             string    `json:"id"`
+	ServerId       string    `json:"serverId"`
+	ProjectId      string    `json:"projectId"`
+	EnableTls      bool      `json:"enableTls"`
+	Email          string    `json:"email"`
+	ServicesDeploy []Service `json:"servicesDeploy"`
 }
 
 func (d *Deploy) GetDockerName() string {

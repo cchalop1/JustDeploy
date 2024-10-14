@@ -37,23 +37,13 @@ func DeployProject(deployService *service.DeployService, deployProjectDto dto.De
 	}
 	fmt.Println("Connected to Docker client")
 
-	exposeServiceId := ""
-	for _, service := range project.Services {
-		if service.IsDevContainer {
-			exposeServiceId = service.Id
-			fmt.Println("Service to expose found:", service.HostName)
-			break
-		}
-	}
-
 	deploy := domain.Deploy{
-		Id:              utils.GenerateRandomPassword(5),
-		ServerId:        server.Id,
-		ProjectId:       project.Id,
-		EnableTls:       deployProjectDto.IsTLSDomain,
-		Email:           server.Email,
-		ExposeServiceId: exposeServiceId,
-		ServicesDeploy:  project.Services,
+		Id:             utils.GenerateRandomPassword(5),
+		ServerId:       server.Id,
+		ProjectId:      project.Id,
+		EnableTls:      deployProjectDto.IsTLSDomain,
+		Email:          server.Email,
+		ServicesDeploy: project.Services,
 	}
 
 	err = deployService.DatabaseAdapter.SaveDeploy(deploy)
@@ -109,11 +99,16 @@ func DeployProject(deployService *service.DeployService, deployProjectDto dto.De
 	for _, service := range project.Services {
 		fmt.Println("Configuring service:", service.HostName)
 		config := deployService.DockerAdapter.ConfigContainer(service)
-		if service.Id == exposeServiceId {
+		if service.IsDevContainer && service.ExposeSettings.IsExposed {
 			fmt.Println("Exposing service:", service.HostName)
+			Domain := ""
+			if service.ExposeSettings.SubDomain != "" {
+				Domain += service.ExposeSettings.SubDomain + "."
+			}
+			Domain += server.Domain
 			deployService.DockerAdapter.ExposeContainer(&config, adapter.ExposeContainerParams{
 				IsTls:  true,
-				Domain: server.Domain,
+				Domain: Domain,
 				Port:   service.ExposePort,
 			})
 		}
