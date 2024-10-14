@@ -128,13 +128,26 @@ func getPortsForService(service database.ServicesConfig) string {
 
 func createDevContainerService(deployService *service.DeployService, createServiceDto dto.CreateServiceDto) (domain.Service, error) {
 	exposedPort := "9999"
+	envs := deployService.FilesystemAdapter.LoadEnvsFromFileSystem(*createServiceDto.Path)
+
+	for idx := range envs {
+		if envs[idx].Name == "PORT" {
+			exposedPort = envs[idx].Value
+		}
+	}
+	// remove PORT env form envs
+	for idx, env := range envs {
+		if env.Name == "PORT" {
+			envs = append(envs[:idx], envs[idx+1:]...)
+		}
+	}
+
+	envs = append(envs, dto.Env{Name: "PORT", Value: exposedPort})
+
 	domainService := domain.Service{
-		Id:       utils.GenerateRandomPassword(5),
-		HostName: deployService.FilesystemAdapter.GetFolderName(*createServiceDto.Path),
-		Envs: []dto.Env{
-			// TODO: find a avalaible port
-			{Name: "PORT", Value: exposedPort},
-		},
+		Id:             utils.GenerateRandomPassword(5),
+		HostName:       deployService.FilesystemAdapter.GetFolderName(*createServiceDto.Path),
+		Envs:           envs,
 		VolumsNames:    []string{},
 		Status:         "Runing",
 		Host:           "localhost",
