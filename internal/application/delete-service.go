@@ -37,12 +37,6 @@ func deleteServiceWithoutDeploy(deployService *service.DeployService, project *d
 		return err
 	}
 
-	err = deployService.FilesystemAdapter.RemoveEnvsFromDotEnvFile(project, s.Envs)
-
-	if err != nil {
-		return err
-	}
-
 	return deployService.DatabaseAdapter.DeleteServiceById(s.Id)
 }
 

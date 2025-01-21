@@ -34,6 +34,7 @@ func main() {
 	databaseAdapter := adapter.NewDatabaseAdapter()
 	filesystemAdapter := adapter.NewFilesystemAdapter()
 	dockerAdapter := adapter.NewDockerAdapter()
+	networkAdapter := adapter.NewNetworkAdapter()
 
 	databaseAdapter.Init()
 
@@ -42,17 +43,6 @@ func main() {
 		DockerAdapter:     dockerAdapter,
 		FilesystemAdapter: filesystemAdapter,
 		EventAdapter:      adapter.NewAdapterEvent(),
-	}
-
-	currentPath := deployService.FilesystemAdapter.GetCurrentPath()
-
-	project := deployService.DatabaseAdapter.GetProjectByPath(currentPath)
-
-	projectId, err := application.CreateProjectCurrentFolder(&deployService)
-
-	if err != nil {
-		fmt.Println("Error while creating project:", err)
-		os.Exit(1)
 	}
 
 	getArgsOptions()
@@ -67,16 +57,8 @@ func main() {
 	} else {
 		api.InitValidator(app)
 		api.CreateRoutes(app, &deployService)
-		// web.ReplaceEnvInEnvBuild(port)
 		web.CreateMiddlewareWebFiles(app)
-		if !flags.noBrowser {
-			fmt.Println("Opening browser")
-			if project == nil {
-				adapter.OpenBrowser("http://localhost:" + port + "/project/" + projectId + "?welcome=true")
-			} else {
-				adapter.OpenBrowser("http://localhost:" + port + "/project/" + projectId)
-			}
-		}
+		displayServerURL(networkAdapter, port)
 		app.StartServer(port)
 	}
 }
@@ -93,4 +75,13 @@ func showHelp() {
 	fmt.Println("  -no-browser    Do not open the browser")
 	fmt.Println("  -redeploy <id> Redeploy application by deploy id")
 	os.Exit(0)
+}
+
+func displayServerURL(networkAdapter *adapter.NetworkAdapter, port string) {
+	url, err := networkAdapter.GetServerURL(port)
+	if err != nil {
+		fmt.Println("Error getting server URL:", err)
+		return
+	}
+	fmt.Printf("Server is running at %s\n", url)
 }

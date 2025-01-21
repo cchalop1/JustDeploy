@@ -8,7 +8,6 @@ import ServerConfigForm from "@/components/forms/ServerConfigForm";
 import { CreateDeployForm } from "@/components/forms/CreateDeployForm";
 import DeployPage from "@/pages/DeployPage";
 import ServerPage from "@/pages/ServerPage";
-import { Suspense } from "react";
 import CreateServerLoading from "@/pages/CreateServerLoading";
 import CreateDeployLoading from "@/pages/CreateDeployLoading";
 import Layout from "@/Layout";
@@ -19,14 +18,7 @@ import Background from "./components/ui/background";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<Layout />}>
-      <Route
-        path="/"
-        element={
-          <Suspense>
-            <Home />
-          </Suspense>
-        }
-      />
+      <Route path="/" element={<Home />} />
       <Route path="server/create" element={<ServerConfigForm />} />
       <Route path="server/:id/installation" element={<CreateServerLoading />} />
       <Route path="server/:id" element={<ServerPage />} />
