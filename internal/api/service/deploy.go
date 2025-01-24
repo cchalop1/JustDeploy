@@ -9,4 +9,5 @@ type DeployService struct {
 	DatabaseAdapter   *adapter.DatabaseAdapter
 	FilesystemAdapter *adapter.FilesystemAdapter
 	EventAdapter      *adapter.AdapterEvent
+	NetworkAdapter    *adapter.NetworkAdapter
 }

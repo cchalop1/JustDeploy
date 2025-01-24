@@ -13,14 +13,14 @@ func NewNetworkAdapter() *NetworkAdapter {
 }
 
 func (n *NetworkAdapter) GetServerURL(port string) (string, error) {
-	ip, err := n.getCurrentIP()
+	ip, err := n.GetCurrentIP()
 	if err != nil {
 		return "", err
 	}
 	return fmt.Sprintf("http://%s:%s", ip, port), nil
 }
 
-func (n *NetworkAdapter) getCurrentIP() (string, error) {
+func (n *NetworkAdapter) GetCurrentIP() (string, error) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return "", err

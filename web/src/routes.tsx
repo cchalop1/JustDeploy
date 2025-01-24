@@ -14,11 +14,13 @@ import Layout from "@/Layout";
 import ProjectPageWrapper from "./pages/project/ProjectPageWrapper";
 import { NotificationProvider } from "./contexts/Notifications";
 import Background from "./components/ui/background";
+import GithubRedirect from "./pages/GithubRedirect";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<Layout />}>
       <Route path="/" element={<Home />} />
+      <Route path="/github/redirect" element={<GithubRedirect />} />
       <Route path="server/create" element={<ServerConfigForm />} />
       <Route path="server/:id/installation" element={<CreateServerLoading />} />
       <Route path="server/:id" element={<ServerPage />} />

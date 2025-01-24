@@ -9,6 +9,7 @@ import (
 	"cchalop1.com/deploy/internal/api"
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/application"
+	"cchalop1.com/deploy/internal/domain"
 	"cchalop1.com/deploy/internal/web"
 )
 
@@ -43,9 +44,16 @@ func main() {
 		DockerAdapter:     dockerAdapter,
 		FilesystemAdapter: filesystemAdapter,
 		EventAdapter:      adapter.NewAdapterEvent(),
+		NetworkAdapter:    networkAdapter,
 	}
 
 	getArgsOptions()
+
+	server, err := application.CreateCurrentServer(&deployService, port)
+
+	if err != nil {
+		fmt.Println("Current Server is arealy created :", err)
+	}
 
 	if flags.help {
 		showHelp()
@@ -58,7 +66,7 @@ func main() {
 		api.InitValidator(app)
 		api.CreateRoutes(app, &deployService)
 		web.CreateMiddlewareWebFiles(app)
-		displayServerURL(networkAdapter, port)
+		displayServerURL(networkAdapter, server)
 		app.StartServer(port)
 	}
 }
@@ -77,8 +85,8 @@ func showHelp() {
 	os.Exit(0)
 }
 
-func displayServerURL(networkAdapter *adapter.NetworkAdapter, port string) {
-	url, err := networkAdapter.GetServerURL(port)
+func displayServerURL(networkAdapter *adapter.NetworkAdapter, server domain.Server) {
+	url, err := networkAdapter.GetServerURL(server.Port)
 	if err != nil {
 		fmt.Println("Error getting server URL:", err)
 		return

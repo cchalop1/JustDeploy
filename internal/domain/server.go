@@ -11,6 +11,7 @@ type Server struct {
 	Id          string    `json:"id"`
 	Name        string    `json:"name"`
 	Ip          string    `json:"ip"`
+	Port        string    `json:"port"`
 	Domain      string    `json:"domain"`
 	Password    *string   `json:"password"`
 	SshKey      *string   `json:"sshKey"`

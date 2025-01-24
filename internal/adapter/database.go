@@ -427,3 +427,11 @@ func (d *DatabaseAdapter) GetProjects() []domain.Project {
 	databaseModels := d.readDeployConfigInDataBaseFile()
 	return databaseModels.Projects
 }
+
+func (d *DatabaseAdapter) GetCurrentServer() (domain.Server, error) {
+	servers := d.GetServers()
+	if len(servers) == 0 {
+		return domain.Server{}, errors.New("no servers found")
+	}
+	return servers[0], nil // Assuming the first server is the current server
+}

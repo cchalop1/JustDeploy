@@ -10,6 +10,7 @@ export type ServerDto = {
   id: string;
   ip: string;
   name: string;
+  port: string;
   domain: string;
   createdDate: string;
   status: ServerStatusType;

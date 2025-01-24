@@ -1,8 +1,20 @@
 import BtnConnectGithub from "@/components/BtnConnectGithub";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getServerInfoApi } from "@/services/getServerInfoApi";
 
 export default function Home() {
+  const [serverIp, setServerIp] = useState<string>("");
+
+  useEffect(() => {
+    async function fetchServerInfo() {
+      const serverInfo = await getServerInfoApi();
+      setServerIp(serverInfo.ip);
+    }
+    fetchServerInfo();
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
@@ -21,7 +33,7 @@ export default function Home() {
               <span>{"Ready to deploy"}</span>
             </div>
           </div>
-          <BtnConnectGithub serverIp="172.30.170.130" />
+          <BtnConnectGithub serverIp={serverIp} />
         </CardContent>
       </Card>
     </div>

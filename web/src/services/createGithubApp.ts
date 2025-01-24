@@ -6,8 +6,8 @@ export function buildGithubAppManifest(serverIp: string) {
     hook_attributes: {
       url: serverUrl + "/github/events",
     },
-    redirect_url: serverUrl + "/redirect",
-    callback_urls: [serverUrl + "/callback"],
+    redirect_url: serverUrl + "/github/redirect",
+    callback_urls: [serverUrl + "/github/callback"],
     public: true,
     default_permissions: {
       contents: "read",
