@@ -3,7 +3,6 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
 } from "react-router-dom";
-import Home from "@/pages/Home";
 import ServerConfigForm from "@/components/forms/ServerConfigForm";
 import { CreateDeployForm } from "@/components/forms/CreateDeployForm";
 import DeployPage from "@/pages/DeployPage";
@@ -19,8 +18,7 @@ import GithubRedirect from "./pages/GithubRedirect";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<Layout />}>
-      <Route path="/" element={<Home />} />
-      <Route path="/github/redirect" element={<GithubRedirect />} />
+      <Route path="/github/auth/redirect" element={<GithubRedirect />} />
       <Route path="server/create" element={<ServerConfigForm />} />
       <Route path="server/:id/installation" element={<CreateServerLoading />} />
       <Route path="server/:id" element={<ServerPage />} />
@@ -29,7 +27,7 @@ const router = createBrowserRouter(
       <Route path="deploy/create" element={<CreateDeployForm />} />
       <Route path="deploy/:id" element={<DeployPage />} />
       <Route
-        path="project/:id"
+        path="/"
         element={
           <NotificationProvider>
             <Background>

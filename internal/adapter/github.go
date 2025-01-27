@@ -1,0 +1,3 @@
+package adapter
+
+// Empty adapter

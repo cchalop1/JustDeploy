@@ -1,7 +1,6 @@
-import { FileSlidersIcon, Folder, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   CommandDialog,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -10,8 +9,6 @@ import {
 } from "../ui/command";
 import NewServiceItem from "./NewServiceItem";
 import { ServiceDto } from "@/services/getServicesApi";
-import { ResponseServiceFromDockerComposeDto } from "@/services/getServicesFromDockerCompose";
-import { ProjectSettingsDto } from "@/services/getProjectSettings";
 
 export type CreateServiceFunc = (parms: {
   serviceName?: string;
@@ -21,78 +18,21 @@ export type CreateServiceFunc = (parms: {
 
 type CommandModalProps = {
   open: boolean;
-  preConfiguredServices: ServiceDto[];
-  serviceFromDockerCompose: ResponseServiceFromDockerComposeDto;
   setOpen: (open: boolean) => void;
+  preConfiguredServices: ServiceDto[];
   create: CreateServiceFunc;
-  projectSettings: ProjectSettingsDto;
-  openCustomPathModal: () => void;
 };
 
 export default function CommandModal({
   open,
   setOpen,
-  preConfiguredServices,
-  serviceFromDockerCompose,
   create,
-  projectSettings,
-  openCustomPathModal,
+  preConfiguredServices,
 }: CommandModalProps) {
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Type to search and lauch a service in the list..." />
+      <CommandInput placeholder="Search a github repos or a services to deploy on your server ..." />
       <CommandList onSelect={() => setOpen(false)}>
-        <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup heading="Current Folder">
-          <CommandItem
-            onSelect={() => create({ path: projectSettings.currentPath })}
-            className="flex gap-3"
-          >
-            <Folder className="w-5" />
-            <span className="h-4">{projectSettings.currentFolderName}</span>
-          </CommandItem>
-        </CommandGroup>
-        <CommandGroup heading="Chose a folders in the list">
-          {projectSettings.folders.map((folder) => (
-            <CommandItem
-              className="flex gap-3 items-center"
-              onSelect={() => create({ path: folder.fullPath })}
-              key={folder.fullPath}
-            >
-              <Folder className="w-5" />
-              <span className="h-4">{folder.name}</span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-        <CommandGroup heading="Your folder is not in the list">
-          <CommandItem
-            className="flex gap-3 items-center"
-            onSelect={() => {
-              openCustomPathModal();
-            }}
-          >
-            <Folder className="w-5" />
-            <span className="h-4">
-              Other folder (you will be able to select a folder)
-            </span>
-          </CommandItem>
-        </CommandGroup>
-        {serviceFromDockerCompose && serviceFromDockerCompose.length > 0 && (
-          <CommandGroup heading="Service from your docker compose file">
-            {serviceFromDockerCompose.map((s) => (
-              <CommandItem
-                className="flex gap-3"
-                onSelect={() =>
-                  create({ serviceName: s, fromDockerCompose: true })
-                }
-                key={s}
-              >
-                <FileSlidersIcon className="w-5"></FileSlidersIcon>
-                <span className="h-4">{s}</span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        )}
         <CommandSeparator />
         <CommandGroup heading="Other databases">
           {preConfiguredServices.map((s) => (

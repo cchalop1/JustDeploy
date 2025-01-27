@@ -9,7 +9,8 @@ export default function GithubRedirect() {
     const params = new URLSearchParams(location.search);
     const code = params.get("code");
     if (code) {
-      //   navigate("/");
+      // TODO: save the code to the server
+      navigate("/");
     }
   }, [location, navigate]);
 

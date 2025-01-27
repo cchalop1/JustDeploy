@@ -33,7 +33,6 @@ export default function Background({ children }: { children: ReactNode }) {
           </svg>
         </div>
       </div>
-
       {children}
     </>
   );

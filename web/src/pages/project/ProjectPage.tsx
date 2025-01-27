@@ -25,11 +25,7 @@ import ModalGlobalSettings from "@/components/modals/ModalGlobalSettings";
 import ModalDeployProject from "@/components/modals/ModalDeployProject";
 import ModalCreateServer from "@/components/modals/ModalCreateServer";
 
-type ProjectPageProps = {
-  id: string;
-};
-
-export default function ProjectPage({ id }: ProjectPageProps) {
+export default function ProjectPage() {
   const notif = useNotification();
 
   const [project, setProject] = useState<ProjectDto | null>(null);
@@ -50,8 +46,8 @@ export default function ProjectPage({ id }: ProjectPageProps) {
   const services = project?.services.filter((s) => !s.isDevContainer) || [];
 
   async function getProjectById() {
-    const project = await getProjectByIdApi(id);
-    setProject(project);
+    // const project = await getProjectByIdApi(id);
+    // setProject(project);
   }
 
   const create: CreateServiceFunc = async ({
@@ -59,37 +55,36 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     path,
     serviceName,
   }) => {
-    if (!project) return;
-    setServiceIsCreating(true);
-    await createServiceApi({
-      serviceName,
-      fromDockerCompose,
-      projectId: project.id,
-      path,
-    });
-    await getProjectById();
-    await getProjectSettings();
-    notif.success({
-      title: "Service is started",
-      content: `${serviceName} is started you can now connect to if the env is generate and store in .env file in your project folder`,
-    });
-    setServiceIsCreating(false);
+    // if (!project) return;
+    // setServiceIsCreating(true);
+    // await createServiceApi({
+    //   serviceName,
+    //   fromDockerCompose,
+    //   projectId: project.id,
+    //   path,
+    // });
+    // await getProjectById();
+    // await getProjectSettings();
+    // notif.success({
+    //   title: "Service is started",
+    //   content: `${serviceName} is started you can now connect to if the env is generate and store in .env file in your project folder`,
+    // });
+    // setServiceIsCreating(false);
   };
 
   async function getProjectSettings() {
-    const projectSettingsResponse = await getProjectSettingsByIdApi(id);
-
-    setProjectSettings(projectSettingsResponse);
+    // const projectSettingsResponse = await getProjectSettingsByIdApi(id);
+    // setProjectSettings(projectSettingsResponse);
   }
 
   async function deployProject(deployProjectDto: DeployProjectDto) {
-    const response = await deployProjectApi(deployProjectDto);
+    // const response = await deployProjectApi(deployProjectDto);
   }
 
   useEffect(() => {
     getProjectById();
     getProjectSettings();
-  }, [id]);
+  }, []);
 
   useEffect(() => {
     window.addEventListener("keydown", (ev: globalThis.KeyboardEvent) => {
@@ -106,7 +101,7 @@ export default function ProjectPage({ id }: ProjectPageProps) {
     <div className="bg-grid-image h-screen">
       {serviceSelected && (
         <ModalServiceSettings
-          project={project}
+          // project={project}
           service={serviceSelected}
           onClose={() => setServiceSelected(null)}
           getProjectById={getProjectById}
@@ -123,13 +118,13 @@ export default function ProjectPage({ id }: ProjectPageProps) {
           }}
         />
       )}
-      {displayDeployModal && (
+      {/* {displayDeployModal && (
         <ModalDeployProject
           project={project}
           onClose={() => setDisplayDeployModal(false)}
           onDeployProject={deployProject}
         />
-      )}
+      )} */}
       <ProjectPageHeader
         onClickDeploy={() => setDisplayDeployModal(true)}
         onClickSettings={() =>
@@ -147,7 +142,6 @@ export default function ProjectPage({ id }: ProjectPageProps) {
             />
           ))}
         </div>
-        {!project && <SpinnerIcon color="text-black" />}
         <div className="flex gap-3 mt-3 ">
           {services.map((service) => (
             <ServiceCard
@@ -157,21 +151,18 @@ export default function ProjectPage({ id }: ProjectPageProps) {
             />
           ))}
           {serviceIsLoading && <ServiceCardLoading />}
-          {projectSettings && (
-            <AddService
-              projectId={project?.id}
-              projectSettings={projectSettings}
-              createService={async (serviceParams) => {
-                await create({
-                  serviceName: serviceParams.serviceName,
-                  fromDockerCompose: serviceParams.fromDockerCompose,
-                  path: serviceParams.path,
-                });
-              }}
-              fetchServiceList={getProjectById}
-              setLoading={() => {}}
-            />
-          )}
+          <AddService
+            projectId={project?.id}
+            createService={async (serviceParams) => {
+              await create({
+                serviceName: serviceParams.serviceName,
+                fromDockerCompose: serviceParams.fromDockerCompose,
+                path: serviceParams.path,
+              });
+            }}
+            fetchServiceList={getProjectById}
+            setLoading={() => {}}
+          />
         </div>
       </div>
       <div className="fixed bottom-6 right-4 pl-10 pr-10">

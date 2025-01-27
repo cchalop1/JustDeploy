@@ -5,18 +5,13 @@ import ServiceLocalSettings from "@/components/ServiceLocalSettings";
 import { Service } from "@/services/getServicesByDeployId";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ServiceDeploySettings from "../ServiceDeploySettings";
-import { ProjectDto } from "@/services/getProjectById";
-import { Suspense } from "react";
-import SpinnerIcon from "@/assets/SpinnerIcon";
 
 type ModalServiceSettingsProps = {
-  project: ProjectDto;
   service: Service;
   onClose: () => void;
   getProjectById: () => Promise<void>;
 };
 export default function ModalServiceSettings({
-  project,
   service,
   onClose,
   getProjectById,
@@ -59,7 +54,7 @@ export default function ModalServiceSettings({
             )}
           </TabsList>
           <div className="p-3 border-t mt-2">
-            <TabsContent value="local">
+            {/* <TabsContent value="local">
               <div className="flex flex-col justify-between gap-2">
                 <ServiceLocalSettings
                   project={project}
@@ -68,11 +63,11 @@ export default function ModalServiceSettings({
                   onClose={onClose}
                 />
               </div>
-            </TabsContent>
+            </TabsContent> */}
             <TabsContent value="deploy">
               <div className="flex flex-col justify-between gap-2">
                 <ServiceDeploySettings
-                  project={project}
+                  // project={project}
                   service={service}
                   getProjectById={getProjectById}
                   onClose={onClose}

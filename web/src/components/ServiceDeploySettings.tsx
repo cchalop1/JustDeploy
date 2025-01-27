@@ -12,14 +12,14 @@ import { ServerDto } from "@/services/getServerListApi";
 import { saveServiceApi } from "@/services/saveServiceApi";
 
 type ServiceDeploySettingsProps = {
-  project: ProjectDto;
+  // project: ProjectDto;
   service: Service;
   onClose: () => void;
   getProjectById: () => Promise<void>;
 };
 
 export default function ServiceDeploySettings({
-  project,
+  // project,
   service,
   onClose,
   getProjectById,
@@ -83,8 +83,8 @@ export default function ServiceDeploySettings({
   }
 
   useEffect(() => {
-    getServerByIdApi(project.serverId).then(setServer);
-  }, [project.serverId]);
+    // getServerByIdApi(project.serverId).then(setServer);
+  }, []);
 
   return (
     <>

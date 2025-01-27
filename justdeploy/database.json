@@ -11,9 +11,24 @@
       "createdDate": "2025-01-24T20:39:01.579905+07:00",
       "status": "Installing",
       "email": ""
+    },
+    {
+      "id": "FOBdC",
+      "name": "Server 2",
+      "ip": "192.168.1.188",
+      "port": "8080",
+      "domain": "",
+      "password": null,
+      "sshKey": null,
+      "createdDate": "2025-01-27T16:05:16.881301+07:00",
+      "status": "Installing",
+      "email": ""
     }
   ],
   "deploys": [],
   "services": [],
-  "projects": []
+  "projects": [],
+  "settings": {
+    "GithubToken": ""
+  }
 }

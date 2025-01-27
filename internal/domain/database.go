@@ -4,5 +4,6 @@ type DatabaseModelsType struct {
 	Servers  []Server  `json:"servers"`
 	Deploys  []Deploy  `json:"deploys"`
 	Services []Service `json:"services"`
-	Projects []Project `json:"projects"` // Add this line
+	Projects []Project `json:"projects"`
+	Settings Settings  `json:"settings"`
 }
