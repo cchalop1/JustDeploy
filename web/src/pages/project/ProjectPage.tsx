@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import SpinnerIcon from "@/assets/SpinnerIcon";
 import AddService from "@/components/databaseServices/AddServices";
 import { CreateServiceFunc } from "@/components/databaseServices/CommandModal";
 import ModalWelcome from "@/components/modals/ModalWelcome";
@@ -7,22 +6,13 @@ import ModalServiceSettings from "@/components/modals/ModalServiceSettings";
 import ProjectPageHeader from "@/components/project/ProjectPageHeader";
 import ServiceCard from "@/components/ServiceCard";
 import Version from "@/components/Version";
-import { createServiceApi } from "@/services/createServiceApi";
-import { getProjectByIdApi, ProjectDto } from "@/services/getProjectById";
+import { ProjectDto } from "@/services/getProjectById";
 import { Service } from "@/services/getServicesByDeployId";
 import { useNotification } from "@/hooks/useNotifications";
-import {
-  getProjectSettingsByIdApi,
-  ProjectSettingsDto,
-} from "@/services/getProjectSettings";
 import { useIsWelcome } from "@/hooks/useIsWelcome";
-import {
-  DeployProjectDto,
-  deployProjectApi,
-} from "@/services/deployProjectApi";
+import { DeployProjectDto } from "@/services/deployProjectApi";
 import { ServiceCardLoading } from "@/components/ServiceCardLoading";
 import ModalGlobalSettings from "@/components/modals/ModalGlobalSettings";
-import ModalDeployProject from "@/components/modals/ModalDeployProject";
 import ModalCreateServer from "@/components/modals/ModalCreateServer";
 
 export default function ProjectPage() {
@@ -30,9 +20,6 @@ export default function ProjectPage() {
 
   const [project, setProject] = useState<ProjectDto | null>(null);
   const [serviceSelected, setServiceSelected] = useState<Service | null>(null);
-  const [projectSettings, setProjectSettings] =
-    useState<ProjectSettingsDto | null>(null);
-
   // Modals states
   const displayWelcomeModal = useIsWelcome();
   const [isGlobalSettingsModalOpen, setIsGlobalSettingsModalOpen] =
