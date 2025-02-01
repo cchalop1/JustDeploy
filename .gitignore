@@ -27,3 +27,5 @@ bin/
 .justdeploy/
 
 .env
+
+justdeploy/
