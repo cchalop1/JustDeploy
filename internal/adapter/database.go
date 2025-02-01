@@ -435,3 +435,22 @@ func (d *DatabaseAdapter) GetCurrentServer() (domain.Server, error) {
 	}
 	return servers[0], nil // Assuming the first server is the current server
 }
+
+// Setting
+
+func (d *DatabaseAdapter) GetSettings() domain.Settings {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	return databaseModels.Settings
+}
+
+func (d *DatabaseAdapter) SaveSettings(settings domain.Settings) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	databaseModels.Settings = settings
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}
+
+func (d *DatabaseAdapter) SaveInstallationToken(installationId string, token string) error {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	databaseModels.Settings.GithubToken = token
+	return d.writeDeployConfigInDataBaseFile(databaseModels)
+}

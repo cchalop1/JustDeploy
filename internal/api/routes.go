@@ -55,4 +55,11 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	app.Echo.POST("/api/deploy/project", handlers.DeployProjectHandler(deployService))
 
+	app.Echo.GET("/api/github/is-connected", handlers.GetGithubIsConnectedHandler(deployService))
+
+	app.Echo.POST("/api/github/connect/:code", handlers.PostConnectGithubAppHandler(deployService))
+
+	app.Echo.GET("/api/github/repos", handlers.GetGithubRepos(deployService))
+
+	app.Echo.POST("/api/github/save-access-token/:installationId", handlers.PostSaveAccessTokenHandler(deployService))
 }

@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 
 import { CreateServiceApi } from "@/services/createServiceApi";
 import CommandModal from "./CommandModal";
+import { githubIsConnectedApi } from "@/services/githubIsConnected";
+import { getServerInfoApi } from "@/services/getServerInfoApi";
+import { GithubRepo, getGithubRepos } from "@/services/getGithubRepos";
 
 type AddServiceProps = {
   deployId?: string;
@@ -24,16 +27,40 @@ export default function AddService({
   const [preConfiguredServices, setPreConfiguredServices] = useState<
     Array<ServiceDto>
   >([]);
+  const [isGithubConnected, setIsGithubConnected] = useState(false);
+  const [githubRepos, setGithubRepos] = useState<Array<GithubRepo>>([]);
   const text =
     "Click here to connect a github repos or create a new service. You can also press";
   const [openCommandModal, setOpenCommandModal] = useState(false);
+
+  const [serverIp, setServerIp] = useState<string>("");
+
+  console.log(serverIp);
+
+  async function fetchServerInfo() {
+    const serverInfo = await getServerInfoApi();
+    setServerIp(serverInfo.ip);
+  }
 
   async function getServices() {
     const res = await getPreConfiguredServiceListApi(projectId);
     setPreConfiguredServices(res);
   }
+
+  async function fetchIsGithubConnected() {
+    const { isConnected } = await githubIsConnectedApi();
+    setIsGithubConnected(isConnected);
+    if (isConnected) {
+      const repos = await getGithubRepos();
+      setGithubRepos(repos);
+    }
+  }
+
   useEffect(() => {
     getServices();
+    fetchIsGithubConnected();
+
+    fetchServerInfo();
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
@@ -71,6 +98,9 @@ export default function AddService({
           setLoading(false);
           await getServices();
         }}
+        isGithubConnected={isGithubConnected}
+        githubRepos={githubRepos}
+        serverIp={serverIp}
       />
     </>
   );

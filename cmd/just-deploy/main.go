@@ -36,6 +36,7 @@ func main() {
 	filesystemAdapter := adapter.NewFilesystemAdapter()
 	dockerAdapter := adapter.NewDockerAdapter()
 	networkAdapter := adapter.NewNetworkAdapter()
+	githubAdapter := adapter.NewGithubAdapter()
 
 	databaseAdapter.Init()
 
@@ -45,6 +46,7 @@ func main() {
 		FilesystemAdapter: filesystemAdapter,
 		EventAdapter:      adapter.NewAdapterEvent(),
 		NetworkAdapter:    networkAdapter,
+		GithubAdapter:     githubAdapter,
 	}
 
 	getArgsOptions()

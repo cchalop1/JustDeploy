@@ -10,4 +10,5 @@ type DeployService struct {
 	FilesystemAdapter *adapter.FilesystemAdapter
 	EventAdapter      *adapter.AdapterEvent
 	NetworkAdapter    *adapter.NetworkAdapter
+	GithubAdapter     *adapter.GithubAdapter
 }
