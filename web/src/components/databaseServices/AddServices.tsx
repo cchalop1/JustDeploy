@@ -30,7 +30,7 @@ export default function AddService({
   const [isGithubConnected, setIsGithubConnected] = useState(false);
   const [githubRepos, setGithubRepos] = useState<Array<GithubRepo>>([]);
   const text =
-    "Click here to connect a github repos or create a new service. You can also press";
+    "Connect a github repos or create a new service. You can also press";
   const [openCommandModal, setOpenCommandModal] = useState(false);
 
   const [serverIp, setServerIp] = useState<string>("");
@@ -75,8 +75,9 @@ export default function AddService({
     <>
       <div
         onClick={() => setOpenCommandModal(true)}
-        className="hover:shadow-md hover:bg-slate-100 cursor-pointer pt-3 pb-6 pl-5 pr-5 flex w-80 h-36 rounded-lg border border-dashed border-gray-600 justify-center items-center"
+        className="hover:shadow-md text-gray-600 hover:text-black bg-white cursor-pointer pt-5 pb-6 pl-5 pr-5 w-80 h-36 rounded-lg border border-dashed border-gray-500 hover:border-black"
       >
+        <div className="font-bold text-xl mb-1">Click here</div>
         <div>
           {text}{" "}
           <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">

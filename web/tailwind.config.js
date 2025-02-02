@@ -18,7 +18,7 @@ module.exports = {
     },
     extend: {
       backgroundImage: {
-        'grid-image': "url('/background-grid.jpg')",
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
       },
       colors: {
         "button": "#070F2A",
