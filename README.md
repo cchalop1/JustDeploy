@@ -42,7 +42,7 @@ Before getting started, ensure your development machine has the following instal
 To install JustDeploy on your local machine, run the following command:
 
 ```bash
-curl -fsSL https://get.justdeploy.app | bash
+curl -fsSL https://raw.githubusercontent.com/cchalop1/JustDeploy/refs/heads/main/install.sh | bash
 ```
 
 ---
