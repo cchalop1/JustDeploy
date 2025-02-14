@@ -9,12 +9,13 @@ export type ServiceExposeSettings = {
 
 export type Service = {
   id: string;
+  type: string;
   hostName: string;
-  status: ServerStatusType;
+  name: string;
   envs: Array<Env>;
   volumsNames: Array<string>;
+  status: string;
   host: string;
-  deployId: string;
   imageName: string;
   imageUrl: string;
   isDevContainer: boolean;

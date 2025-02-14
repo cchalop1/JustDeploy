@@ -37,6 +37,7 @@ func main() {
 	dockerAdapter := adapter.NewDockerAdapter()
 	networkAdapter := adapter.NewNetworkAdapter()
 	githubAdapter := adapter.NewGithubAdapter()
+	gitAdapter := adapter.NewGitAdapter()
 
 	databaseAdapter.Init()
 
@@ -47,6 +48,7 @@ func main() {
 		EventAdapter:      adapter.NewAdapterEvent(),
 		NetworkAdapter:    networkAdapter,
 		GithubAdapter:     githubAdapter,
+		GitAdapter:        gitAdapter,
 	}
 
 	getArgsOptions()

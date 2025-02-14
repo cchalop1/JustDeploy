@@ -12,18 +12,13 @@ import { ServiceDto } from "@/services/getServicesApi";
 import { redirectToGithubAppRegistration } from "@/services/createGithubApp";
 import { GithubRepo } from "@/services/getGithubRepos";
 
-export type CreateServiceFunc = (parms: {
-  serviceName?: string;
-  path?: string;
-  fromDockerCompose?: boolean;
-}) => void;
-
 type CommandModalProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  preConfiguredServices: ServiceDto[];
-  create: CreateServiceFunc;
+  preConfiguredServices: Array<ServiceDto>;
   isGithubConnected: boolean;
+  createRepoToDeploy: (repoUrl: string) => Promise<void>;
+  createDatabaseToDeploy: (databaseName: string) => Promise<void>;
   githubRepos: Array<GithubRepo>;
   serverIp: string;
 };
@@ -31,11 +26,12 @@ type CommandModalProps = {
 export default function CommandModal({
   open,
   setOpen,
-  create,
   preConfiguredServices,
   isGithubConnected,
   serverIp,
   githubRepos,
+  createDatabaseToDeploy,
+  createRepoToDeploy,
 }: CommandModalProps) {
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
@@ -55,9 +51,7 @@ export default function CommandModal({
             githubRepos.map((repo) => (
               <CommandItem
                 key={repo.id}
-                onSelect={() =>
-                  create({ serviceName: repo.name, path: repo.full_name })
-                }
+                onSelect={() => createRepoToDeploy(repo.full_name)}
                 className="flex gap-3"
               >
                 <GithubIcon className="mr-2 h-5 w-5" />
@@ -71,10 +65,9 @@ export default function CommandModal({
             <NewServiceItem
               key={s.name}
               service={s}
-              onSelect={(serviceName) => create({ serviceName })}
+              onSelect={(serviceName) => createDatabaseToDeploy(serviceName)}
             />
           ))}
-
           <CommandItem
             onSelect={() => {
               window.open("https://github.com/cchalop1/JustDeploy/issues/new");

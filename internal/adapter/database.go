@@ -205,16 +205,9 @@ func (d *DatabaseAdapter) SaveService(service domain.Service) error {
 	return d.writeDeployConfigInDataBaseFile(databaseModels)
 }
 
-func (d *DatabaseAdapter) GetServicesByDeployId(deployId string) []domain.Service {
-	// databaseModels := d.readDeployConfigInDataBaseFile()
-	// serviceList := []domain.Service{}
-	// for _, s := range databaseModels.Services {
-	// 	if *s.DeployId == deployId {
-	// 		serviceList = append(serviceList, s)
-	// 	}
-	// }
-	// return serviceList
-	return []domain.Service{}
+func (d *DatabaseAdapter) GetServices() []domain.Service {
+	databaseModels := d.readDeployConfigInDataBaseFile()
+	return databaseModels.Services
 }
 
 func (d *DatabaseAdapter) GetLocalService() []domain.Service {

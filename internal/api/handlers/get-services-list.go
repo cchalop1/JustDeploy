@@ -11,7 +11,7 @@ import (
 func GetServicesListHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		productId := c.Param("productId")
-		services := application.GetServiceList(deployService, productId)
+		services := application.GetConfiguredServiceList(deployService, productId)
 		return c.JSON(http.StatusOK, services)
 	}
 }

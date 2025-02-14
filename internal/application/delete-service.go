@@ -6,22 +6,20 @@ import (
 	"cchalop1.com/deploy/internal/domain"
 )
 
-func DeleteService(deployService *service.DeployService, projectId string, serviceId string) error {
-	var service *domain.Service
-
-	p, err := deployService.DatabaseAdapter.GetProjectById(projectId)
+func DeleteService(deployService *service.DeployService, serviceId string) error {
+	s, err := deployService.DatabaseAdapter.GetServiceById(serviceId)
 
 	if err != nil {
 		return err
 	}
 
-	for _, s := range p.Services {
-		if s.Id == serviceId {
-			service = &s
-		}
+	if s.Status != "stoped" || s.Status != "ready_to_deploy" {
+		// TODO: return error message
 	}
 
-	return deleteServiceWithoutDeploy(deployService, p, service)
+	return deployService.DatabaseAdapter.DeleteServiceById(s.Id)
+
+	// return deleteServiceWithoutDeploy(deployService, p, service)
 }
 
 func deleteServiceWithoutDeploy(deployService *service.DeployService, project *domain.Project, s *domain.Service) error {

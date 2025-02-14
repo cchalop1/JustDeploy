@@ -1,7 +1,8 @@
 package application
 
 import (
-	"cchalop1.com/deploy/internal/api/dto"
+	"fmt"
+
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/domain"
 )
@@ -133,7 +134,11 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 	// deployService.DatabaseAdapter.UpdateDeploy(*deploy)
 }
 
-func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDeployDto) (domain.Deploy, error) {
+func DeployApplication(deployService *service.DeployService) error {
+	services := deployService.DatabaseAdapter.GetServices()
+	fmt.Println(services)
+	return nil
+
 	// server, err := deployService.DatabaseAdapter.GetServerById(newDeploy.ServerId)
 	// if err != nil {
 	// 	return domain.Deploy{}, err
@@ -203,5 +208,4 @@ func DeployApplication(deployService *service.DeployService, newDeploy dto.NewDe
 	// go runApplication(deployService, &deploy, server.Domain)
 
 	// return deploy, err
-	return domain.Deploy{}, nil
 }

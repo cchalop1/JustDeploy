@@ -11,4 +11,5 @@ type DeployService struct {
 	EventAdapter      *adapter.AdapterEvent
 	NetworkAdapter    *adapter.NetworkAdapter
 	GithubAdapter     *adapter.GithubAdapter
+	GitAdapter        *adapter.GitAdapter
 }

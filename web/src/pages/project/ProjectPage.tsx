@@ -6,7 +6,6 @@ import ModalServiceSettings from "@/components/modals/ModalServiceSettings";
 import ProjectPageHeader from "@/components/project/ProjectPageHeader";
 import ServiceCard from "@/components/ServiceCard";
 import Version from "@/components/Version";
-import { ProjectDto } from "@/services/getProjectById";
 import { Service } from "@/services/getServicesByDeployId";
 import { useNotification } from "@/hooks/useNotifications";
 import { useIsWelcome } from "@/hooks/useIsWelcome";
@@ -14,14 +13,17 @@ import { DeployProjectDto } from "@/services/deployProjectApi";
 import { ServiceCardLoading } from "@/components/ServiceCardLoading";
 import ModalGlobalSettings from "@/components/modals/ModalGlobalSettings";
 import ModalCreateServer from "@/components/modals/ModalCreateServer";
+import { getServicesApi } from "@/services/getServicesApi";
 
 export default function ProjectPage() {
   const notif = useNotification();
-
-  const [project, setProject] = useState<ProjectDto | null>(null);
-  const [serviceSelected, setServiceSelected] = useState<Service | null>(null);
-  // Modals states
   const displayWelcomeModal = useIsWelcome();
+
+  const [serviceSelected, setServiceSelected] = useState<Service | null>(null);
+
+  const [services, setServices] = useState<Service[]>([]);
+
+  // Modals states
   const [isGlobalSettingsModalOpen, setIsGlobalSettingsModalOpen] =
     useState(false);
   const [serviceIsLoading, setServiceIsCreating] = useState(false);
@@ -29,8 +31,9 @@ export default function ProjectPage() {
   const [isCreateServiceModalOpen, setIsCreateServiceModalOpen] =
     useState(false);
 
-  const apps = project?.services.filter((s) => s.isDevContainer) || [];
-  const services = project?.services.filter((s) => !s.isDevContainer) || [];
+  const toDeploy = services.find(
+    (service) => service.status === "ready_to_deploy"
+  );
 
   async function getProjectById() {
     // const project = await getProjectByIdApi(id);
@@ -68,9 +71,15 @@ export default function ProjectPage() {
     // const response = await deployProjectApi(deployProjectDto);
   }
 
+  async function fetchServices() {
+    const services = await getServicesApi();
+    setServices(services);
+  }
+
   useEffect(() => {
     getProjectById();
     getProjectSettings();
+    fetchServices();
   }, []);
 
   useEffect(() => {
@@ -88,10 +97,9 @@ export default function ProjectPage() {
     <div className="bg-grid-image h-screen">
       {serviceSelected && (
         <ModalServiceSettings
-          // project={project}
           service={serviceSelected}
           onClose={() => setServiceSelected(null)}
-          getProjectById={getProjectById}
+          fetchServices={fetchServices}
         />
       )}
       {isCreateServiceModalOpen && (
@@ -117,19 +125,11 @@ export default function ProjectPage() {
         onClickSettings={() =>
           setIsGlobalSettingsModalOpen(!isGlobalSettingsModalOpen)
         }
+        toDeploy={!!toDeploy}
       />
       {displayWelcomeModal && <ModalWelcome />}
       <div className="flex flex-col justify-center items-center h-3/5">
-        <div className="flex gap-3">
-          {apps.map((app) => (
-            <ServiceCard
-              key={app.id}
-              service={app}
-              onClick={() => setServiceSelected(app)}
-            />
-          ))}
-        </div>
-        <div className="flex gap-3 mt-3 ">
+        <div className="flex flex-col gap-3 mt-3 ">
           {services.map((service) => (
             <ServiceCard
               key={service.id}
@@ -139,16 +139,8 @@ export default function ProjectPage() {
           ))}
           {serviceIsLoading && <ServiceCardLoading />}
           <AddService
-            projectId={project?.id}
-            createService={async (serviceParams) => {
-              await create({
-                serviceName: serviceParams.serviceName,
-                fromDockerCompose: serviceParams.fromDockerCompose,
-                path: serviceParams.path,
-              });
-            }}
-            fetchServiceList={getProjectById}
-            setLoading={() => {}}
+            fetchServices={fetchServices}
+            setLoading={setServiceIsCreating}
           />
         </div>
       </div>

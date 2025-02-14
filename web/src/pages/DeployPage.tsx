@@ -18,10 +18,6 @@ import {
   getServicesByDeployIdApi,
   Service,
 } from "@/services/getServicesByDeployId";
-import {
-  createServiceApi,
-  CreateServiceApi,
-} from "@/services/createServiceApi";
 
 export default function DeployPage() {
   const { id } = useParams();
@@ -59,7 +55,7 @@ export default function DeployPage() {
   }
 
   async function createService(createServiceParams: CreateServiceApi) {
-    await createServiceApi(createServiceParams);
+    // await createServiceApi(createServiceParams);
   }
 
   if (deploy === null || server === null) {

@@ -1,22 +1,39 @@
 import { motion } from "framer-motion";
 
 import Modal from "@/components/modals/Modal";
-import ServiceLocalSettings from "@/components/ServiceLocalSettings";
 import { Service } from "@/services/getServicesByDeployId";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ServiceDeploySettings from "../ServiceDeploySettings";
+import { CardIcon } from "../CardIcon";
+import { Button } from "../ui/button";
+import Status from "../ServerStatus";
+import { deleteServiceByIdApi } from "@/services/deleteServiceApi";
+import { useNotification } from "@/hooks/useNotifications";
 
 type ModalServiceSettingsProps = {
   service: Service;
   onClose: () => void;
-  getProjectById: () => Promise<void>;
+  fetchServices: () => Promise<void>;
 };
 export default function ModalServiceSettings({
   service,
   onClose,
-  getProjectById,
+  fetchServices,
 }: ModalServiceSettingsProps) {
   const isDevContainer = service.isDevContainer;
+  const type = service.type;
+  const notif = useNotification();
+
+  async function deleteServiceById() {
+    const res = await deleteServiceByIdApi(service.id);
+    if (res) {
+      onClose();
+      notif.success({
+        title: "Service is deleted",
+        content: `${service.name} is deleted`,
+      });
+      await fetchServices();
+    }
+  }
 
   return (
     <motion.div
@@ -37,45 +54,24 @@ export default function ModalServiceSettings({
         onClose={onClose}
         headerNode={
           <div className="flex items-center gap-4">
-            {isDevContainer ? (
-              <img src="/icons/folder.png" className="w-8" />
-            ) : (
-              <img src="/icons/service.png" className="w-8" />
-            )}
-            <div className="font-bold">{service.hostName}</div>
+            <CardIcon service={service} />
+            <div className="font-bold">{service.name}</div>
           </div>
         }
       >
-        <Tabs defaultValue="local">
-          <TabsList>
-            <TabsTrigger value="local">Local Settings</TabsTrigger>
-            {isDevContainer && (
-              <TabsTrigger value="deploy">Deploy Settings</TabsTrigger>
-            )}
-          </TabsList>
-          <div className="p-3 border-t mt-2">
-            {/* <TabsContent value="local">
-              <div className="flex flex-col justify-between gap-2">
-                <ServiceLocalSettings
-                  project={project}
-                  service={service}
-                  getProjectById={getProjectById}
-                  onClose={onClose}
-                />
-              </div>
-            </TabsContent> */}
-            <TabsContent value="deploy">
-              <div className="flex flex-col justify-between gap-2">
-                <ServiceDeploySettings
-                  // project={project}
-                  service={service}
-                  getProjectById={getProjectById}
-                  onClose={onClose}
-                />
-              </div>
-            </TabsContent>
+        <div className="p-3 border-t mt-2">
+          <div className="flex flex-col justify-between gap-2">
+            <div>
+              <Status status={"Installing"}></Status>
+            </div>
+            <ServiceDeploySettings service={service} onClose={onClose} />
           </div>
-        </Tabs>
+        </div>
+        <div className="flex justify-end mt-4">
+          <Button variant="destructive" onClick={deleteServiceById}>
+            Delete
+          </Button>
+        </div>
       </Modal>
     </motion.div>
   );

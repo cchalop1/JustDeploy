@@ -5,6 +5,6 @@ import (
 	"cchalop1.com/deploy/internal/domain"
 )
 
-func GetServicesByDeployId(deployService *service.DeployService, deployId string) []domain.Service {
-	return deployService.DatabaseAdapter.GetServicesByDeployId(deployId)
+func GetServices(deployService *service.DeployService) []domain.Service {
+	return deployService.DatabaseAdapter.GetServices()
 }

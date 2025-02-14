@@ -5,8 +5,12 @@ import (
 	"cchalop1.com/deploy/internal/api/service"
 )
 
-func GetServiceList(deployService *service.DeployService, productId string) []database.ServicesConfig {
+func GetConfiguredServiceList(deployService *service.DeployService, productId string) []database.ServicesConfig {
 	services := database.GetListOfDatabasesServices()
+
+	if productId == "" {
+		return services
+	}
 
 	project, err := deployService.DatabaseAdapter.GetProjectById(productId)
 

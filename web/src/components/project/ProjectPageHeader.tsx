@@ -3,11 +3,13 @@ import { PlayCircle, Settings } from "lucide-react";
 type ProjectPageHeaderProps = {
   onClickDeploy: () => void;
   onClickSettings: () => void;
+  toDeploy: boolean;
 };
 
 export default function ProjectPageHeader({
   onClickDeploy,
   onClickSettings,
+  toDeploy,
 }: ProjectPageHeaderProps) {
   return (
     <div className="flex justify-between pt-6 pb-6 pl-10 pr-10">
@@ -22,7 +24,10 @@ export default function ProjectPageHeader({
           <Settings />
         </button>
         <button
-          className="font-mono bg-button text-white p-1 pl-4 pr-4 rounded-xl border border-green-200"
+          disabled={!toDeploy}
+          className={`font-mono bg-button text-white p-1 pl-4 pr-4 rounded-xl border border-green-200 ${
+            !toDeploy ? "opacity-50 cursor-not-allowed" : "border-animate"
+          }`}
           onClick={onClickDeploy}
         >
           Deploy

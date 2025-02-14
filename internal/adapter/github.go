@@ -99,7 +99,7 @@ func (g *GithubAdapter) GetInstallationToken(appID int, privateKey string, insta
 }
 
 func (g *GithubAdapter) GetRepos(token string) ([]GithubRepo, error) {
-	url := "https://api.github.com/installation/repositories?per_page=10"
+	url := "https://api.github.com/installation/repositories?per_page=100"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -110,6 +110,7 @@ func (g *GithubAdapter) GetRepos(token string) ([]GithubRepo, error) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
+		// TODO: regenerate a token when is expired
 		return nil, err
 	}
 	defer res.Body.Close()

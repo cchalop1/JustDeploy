@@ -13,6 +13,7 @@ type ServiceExposeSettings struct {
 
 type Service struct {
 	Id          string    `json:"id"`
+	Type        string    `json:"type"`
 	HostName    string    `json:"hostName"`
 	Name        string    `json:"name"`
 	Envs        []dto.Env `json:"envs"`

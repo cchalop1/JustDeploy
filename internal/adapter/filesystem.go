@@ -13,6 +13,7 @@ import (
 	"cchalop1.com/deploy/internal/adapter/database"
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
+	"cchalop1.com/deploy/internal/utils"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/go-connections/nat"
 	"gopkg.in/yaml.v3"
@@ -420,4 +421,8 @@ func (fs *FilesystemAdapter) getFoldersRecursive(path string, currentDepth, maxD
 	}
 
 	return result, nil
+}
+
+func (f *FilesystemAdapter) GetTempDir() string {
+	return os.TempDir() + "/deploy-" + utils.GenerateRandomPassword(5)
 }

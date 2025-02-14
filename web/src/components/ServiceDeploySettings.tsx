@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { setTimeout } from "timers/promises";
 
 import { useNotification } from "@/hooks/useNotifications";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Service } from "@/services/getServicesByDeployId";
 import { Input } from "@/components/ui/input";
-import { ProjectDto } from "@/services/getProjectById";
-import { getServerByIdApi } from "@/services/getServerById";
 import { ServerDto } from "@/services/getServerListApi";
 import { saveServiceApi } from "@/services/saveServiceApi";
 
@@ -15,14 +12,12 @@ type ServiceDeploySettingsProps = {
   // project: ProjectDto;
   service: Service;
   onClose: () => void;
-  getProjectById: () => Promise<void>;
 };
 
 export default function ServiceDeploySettings({
   // project,
   service,
   onClose,
-  getProjectById,
 }: ServiceDeploySettingsProps) {
   const notif = useNotification();
   const timeoutRef = useRef<number | null>(null);
