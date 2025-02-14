@@ -146,7 +146,7 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 
 	log.Println("Updating server status")
 	server.Status = "Runing"
-	deployService.DatabaseAdapter.UpdateServer(server)
+	deployService.DatabaseAdapter.SaveServer(server)
 
 	// eventWrapper.NextStep()
 	// deployService.EventAdapter.SendNewServerEvent(eventWrapper)

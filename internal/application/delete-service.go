@@ -29,11 +29,11 @@ func deleteServiceWithoutDeploy(deployService *service.DeployService, project *d
 
 	removeEnvsFromProject(project, s.Envs)
 
-	err := deployService.DatabaseAdapter.SaveProject(*project)
+	// err := deployService.DatabaseAdapter.SaveProject(*project)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
 	return deployService.DatabaseAdapter.DeleteServiceById(s.Id)
 }

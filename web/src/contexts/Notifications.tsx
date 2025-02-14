@@ -78,5 +78,3 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     </NotificationContext.Provider>
   );
 };
-
-// Hook pour utiliser le contexte

@@ -19,7 +19,6 @@ func isValidSubdomain(subdomain string) bool {
 
 func UpdateServiceHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		projectId := c.Param("projectId")
 		serviceToUpdate := domain.Service{}
 
 		err := c.Bind(&serviceToUpdate)
@@ -32,7 +31,7 @@ func UpdateServiceHandler(deployService *service.DeployService) echo.HandlerFunc
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		service, err := application.UpdateService(deployService, serviceToUpdate, projectId)
+		service, err := application.UpdateService(deployService, serviceToUpdate)
 
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, dto.ResponseApi{Message: err.Error()})

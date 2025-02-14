@@ -5,8 +5,8 @@ import (
 	"cchalop1.com/deploy/internal/domain"
 )
 
-func UpdateService(deployService *service.DeployService, serviceToUpdate domain.Service, projectId string) (domain.Service, error) {
-	err := deployService.DatabaseAdapter.UpdateServiceByProjectId(serviceToUpdate, projectId)
+func UpdateService(deployService *service.DeployService, serviceToUpdate domain.Service) (domain.Service, error) {
+	err := deployService.DatabaseAdapter.SaveService(serviceToUpdate)
 
 	return serviceToUpdate, err
 }

@@ -8,13 +8,10 @@ import (
 )
 
 func AddDomainToServer(deployService *service.DeployService, newDomain dto.NewDomain, serverId string) error {
-	server, err := deployService.DatabaseAdapter.GetServerById(serverId)
-	if err != nil {
-		return err
-	}
+	server := deployService.DatabaseAdapter.GetServer()
 
 	server.Domain = newDomain.Domain
 	fmt.Println(server)
-	err = deployService.DatabaseAdapter.SaveServer(server)
+	err := deployService.DatabaseAdapter.SaveServer(server)
 	return err
 }

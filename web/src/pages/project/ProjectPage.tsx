@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import AddService from "@/components/databaseServices/AddServices";
-import { CreateServiceFunc } from "@/components/databaseServices/CommandModal";
 import ModalWelcome from "@/components/modals/ModalWelcome";
 import ModalServiceSettings from "@/components/modals/ModalServiceSettings";
 import ProjectPageHeader from "@/components/project/ProjectPageHeader";
@@ -9,11 +8,11 @@ import Version from "@/components/Version";
 import { Service } from "@/services/getServicesByDeployId";
 import { useNotification } from "@/hooks/useNotifications";
 import { useIsWelcome } from "@/hooks/useIsWelcome";
-import { DeployProjectDto } from "@/services/deployProjectApi";
 import { ServiceCardLoading } from "@/components/ServiceCardLoading";
 import ModalGlobalSettings from "@/components/modals/ModalGlobalSettings";
 import ModalCreateServer from "@/components/modals/ModalCreateServer";
 import { getServicesApi } from "@/services/getServicesApi";
+import { deployApi } from "@/services/deployApi";
 
 export default function ProjectPage() {
   const notif = useNotification();
@@ -27,7 +26,6 @@ export default function ProjectPage() {
   const [isGlobalSettingsModalOpen, setIsGlobalSettingsModalOpen] =
     useState(false);
   const [serviceIsLoading, setServiceIsCreating] = useState(false);
-  const [displayDeployModal, setDisplayDeployModal] = useState(false);
   const [isCreateServiceModalOpen, setIsCreateServiceModalOpen] =
     useState(false);
 
@@ -35,40 +33,31 @@ export default function ProjectPage() {
     (service) => service.status === "ready_to_deploy"
   );
 
-  async function getProjectById() {
-    // const project = await getProjectByIdApi(id);
-    // setProject(project);
-  }
-
-  const create: CreateServiceFunc = async ({
-    fromDockerCompose,
-    path,
-    serviceName,
-  }) => {
-    // if (!project) return;
-    // setServiceIsCreating(true);
-    // await createServiceApi({
-    //   serviceName,
-    //   fromDockerCompose,
-    //   projectId: project.id,
-    //   path,
-    // });
-    // await getProjectById();
-    // await getProjectSettings();
-    // notif.success({
-    //   title: "Service is started",
-    //   content: `${serviceName} is started you can now connect to if the env is generate and store in .env file in your project folder`,
-    // });
-    // setServiceIsCreating(false);
-  };
-
   async function getProjectSettings() {
     // const projectSettingsResponse = await getProjectSettingsByIdApi(id);
     // setProjectSettings(projectSettingsResponse);
   }
 
-  async function deployProject(deployProjectDto: DeployProjectDto) {
-    // const response = await deployProjectApi(deployProjectDto);
+  async function deploy() {
+    notif.info({
+      title: "Deploying project",
+      content: "This may take a few minutes... Loading...",
+    });
+    try {
+      const res = await deployApi();
+      if (res.message === "Deployed") {
+        notif.success({
+          title: "Project deployed",
+          content: "Your project has been deployed successfully",
+        });
+        fetchServices();
+      }
+    } catch (error) {
+      notif.error({
+        title: "Error deploying project",
+        content: error.message,
+      });
+    }
   }
 
   async function fetchServices() {
@@ -77,7 +66,6 @@ export default function ProjectPage() {
   }
 
   useEffect(() => {
-    getProjectById();
     getProjectSettings();
     fetchServices();
   }, []);
@@ -121,7 +109,7 @@ export default function ProjectPage() {
         />
       )} */}
       <ProjectPageHeader
-        onClickDeploy={() => setDisplayDeployModal(true)}
+        onClickDeploy={() => deploy()}
         onClickSettings={() =>
           setIsGlobalSettingsModalOpen(!isGlobalSettingsModalOpen)
         }

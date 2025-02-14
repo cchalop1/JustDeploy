@@ -10,10 +10,7 @@ import (
 
 func GetServerInfoHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		serverInfo, err := application.GetServerInfo(deployService)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err.Error())
-		}
+		serverInfo := application.GetServerInfo(deployService)
 		return c.JSON(http.StatusOK, serverInfo)
 	}
 }

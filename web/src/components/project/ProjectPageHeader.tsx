@@ -1,4 +1,4 @@
-import { PlayCircle, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 
 type ProjectPageHeaderProps = {
   onClickDeploy: () => void;

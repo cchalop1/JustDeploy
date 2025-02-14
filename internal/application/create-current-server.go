@@ -1,8 +1,6 @@
 package application
 
 import (
-	"errors"
-	"strconv"
 	"time"
 
 	"cchalop1.com/deploy/internal/api/service"
@@ -11,9 +9,6 @@ import (
 )
 
 func CreateCurrentServer(deployService *service.DeployService, port string) (domain.Server, error) {
-	serverCount := deployService.DatabaseAdapter.CountServer() + 1
-	Name := "Server " + strconv.Itoa(serverCount)
-
 	currentIp, err := deployService.NetworkAdapter.GetCurrentIP()
 
 	if err != nil {
@@ -22,19 +17,11 @@ func CreateCurrentServer(deployService *service.DeployService, port string) (dom
 
 	server := domain.Server{
 		Id:          utils.GenerateRandomPassword(5),
-		Name:        Name,
+		Name:        "Local Server",
 		Ip:          currentIp,
 		Port:        port,
 		CreatedDate: time.Now(),
 		Status:      "Installing",
-	}
-
-	serverList := deployService.DatabaseAdapter.GetServers()
-
-	for _, s := range serverList {
-		if s.Ip == server.Ip {
-			return server, errors.New("server already exist")
-		}
 	}
 
 	deployService.DatabaseAdapter.SaveServer(server)

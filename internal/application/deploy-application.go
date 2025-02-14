@@ -1,8 +1,12 @@
 package application
 
 import (
+	"errors"
 	"fmt"
+	"path/filepath"
 
+	"cchalop1.com/deploy/internal/adapter"
+	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/domain"
 )
@@ -134,78 +138,61 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 	// deployService.DatabaseAdapter.UpdateDeploy(*deploy)
 }
 
+func deployOneService(service domain.Service) error {
+	pathToDir, err := filepath.Abs(service.CurrentPath)
+
+	if err != nil {
+		return err
+	}
+
+	pathToDir = adapter.NewFilesystemAdapter().CleanPath(pathToDir)
+
+	isFolder := adapter.NewFilesystemAdapter().IsFolder(pathToDir)
+	DockerFileName := "Dockerfile"
+
+	if !isFolder {
+		fmt.Println("Is not a folder")
+		DockerFileName = adapter.NewFilesystemAdapter().BaseDir(pathToDir)
+		pathToDir = adapter.NewFilesystemAdapter().GetDir(pathToDir)
+	}
+
+	portEnv := make([]dto.Env, 1)
+
+	portEnv[0] = dto.Env{
+		Name:  "PORT",
+		Value: "80",
+	}
+
+	fmt.Println("Path to dir: ", pathToDir)
+	fmt.Println("Docker file name: ", DockerFileName)
+
+	service.Envs = append(portEnv, service.Envs...)
+
+	return nil
+}
+
 func DeployApplication(deployService *service.DeployService) error {
 	services := deployService.DatabaseAdapter.GetServices()
-	fmt.Println(services)
-	return nil
 
-	// server, err := deployService.DatabaseAdapter.GetServerById(newDeploy.ServerId)
-	// if err != nil {
-	// 	return domain.Deploy{}, err
-	// }
+	server := deployService.DatabaseAdapter.GetServer()
 
-	// if server.Domain == "" {
-	// 	return domain.Deploy{}, errors.New("server does not have domain")
-	// }
+	if server.Domain == "" {
+		return errors.New("Server does not have domain")
+	}
 
-	// pathToDir, err := filepath.Abs(newDeploy.PathToSource)
+	err := deployService.DockerAdapter.ConnectClient(server)
 
-	// if err != nil {
-	// 	return domain.Deploy{}, err
-	// }
+	if err != nil {
+		return err
+	}
 
-	// pathToDir = adapter.NewFilesystemAdapter().CleanPath(pathToDir)
-
-	// err = deployService.DockerAdapter.ConnectClient(server)
-
-	// if err != nil {
-	// 	return domain.Deploy{}, err
-	// }
-
-	// isFolder := adapter.NewFilesystemAdapter().IsFolder(pathToDir)
-	// DockerFileName := "Dockerfile"
-
-	// if !isFolder {
-	// 	fmt.Println("Is not a folder")
-	// 	DockerFileName = adapter.NewFilesystemAdapter().BaseDir(pathToDir)
-	// 	pathToDir = adapter.NewFilesystemAdapter().GetDir(pathToDir)
-	// }
-
-	// portEnv := make([]dto.Env, 1)
-
-	// portEnv[0] = dto.Env{
-	// 	Name:  "PORT",
-	// 	Value: "80",
-	// }
-
-	// newDeploy.Envs = append(portEnv, newDeploy.Envs...)
-
-	// Name := adapter.NewFilesystemAdapter().GetFolderName(pathToDir)
-
-	// SubDomain := ""
-
-	// deploys := deployService.DatabaseAdapter.GetDeployByServerId(server.Id)
-
-	// if len(deploys) > 0 {
-	// 	SubDomain = Name
-	// }
-
-	// deploy := domain.Deploy{
-	// 	Id:             utils.GenerateRandomPassword(5),
-	// 	Name:           Name,
-	// 	ServerId:       newDeploy.ServerId,
-	// 	PathToSource:   pathToDir,
-	// 	Status:         "Installing",
-	// 	EnableTls:      newDeploy.EnableTls,
-	// 	Email:          newDeploy.Email,
-	// 	Envs:           newDeploy.Envs,
-	// 	SubDomain:      SubDomain,
-	// 	DockerFileName: DockerFileName,
-	// }
-
-	// err = deployService.DatabaseAdapter.SaveDeploy(deploy)
+	for _, service := range services {
+		err = deployOneService(service)
+		return err
+	}
 
 	// go runApplication(deployService, &deploy, server.Domain)
 
 	// return deploy, err
+	return nil
 }

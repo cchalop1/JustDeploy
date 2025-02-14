@@ -1,9 +1,7 @@
 package domain
 
 type DatabaseModelsType struct {
-	Servers  []Server  `json:"servers"`
-	Deploys  []Deploy  `json:"deploys"`
+	Server   Server    `json:"server"`
 	Services []Service `json:"services"`
-	Projects []Project `json:"projects"`
 	Settings Settings  `json:"settings"`
 }
