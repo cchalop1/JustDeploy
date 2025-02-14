@@ -6,14 +6,13 @@ import {
 import ServerConfigForm from "@/components/forms/ServerConfigForm";
 import { CreateDeployForm } from "@/components/forms/CreateDeployForm";
 import DeployPage from "@/pages/DeployPage";
-import ServerPage from "@/pages/ServerPage";
 import CreateServerLoading from "@/pages/CreateServerLoading";
 import CreateDeployLoading from "@/pages/CreateDeployLoading";
 import Layout from "@/Layout";
-import ProjectPageWrapper from "./pages/project/ProjectPageWrapper";
 import { NotificationProvider } from "./contexts/Notifications";
 import Background from "./components/ui/background";
 import GithubRedirect from "./pages/GithubRedirect";
+import Home from "./pages/Home";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -21,7 +20,6 @@ const router = createBrowserRouter(
       <Route path="/github/auth/redirect" element={<GithubRedirect />} />
       <Route path="server/create" element={<ServerConfigForm />} />
       <Route path="server/:id/installation" element={<CreateServerLoading />} />
-      <Route path="server/:id" element={<ServerPage />} />
 
       <Route path="deploy/:id/installation" element={<CreateDeployLoading />} />
       <Route path="deploy/create" element={<CreateDeployForm />} />
@@ -31,7 +29,7 @@ const router = createBrowserRouter(
         element={
           <NotificationProvider>
             <Background>
-              <ProjectPageWrapper />
+              <Home />
             </Background>
           </NotificationProvider>
         }

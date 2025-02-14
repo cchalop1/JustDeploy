@@ -14,7 +14,7 @@ import ModalCreateServer from "@/components/modals/ModalCreateServer";
 import { getServicesApi } from "@/services/getServicesApi";
 import { deployApi } from "@/services/deployApi";
 
-export default function ProjectPage() {
+export default function Home() {
   const notif = useNotification();
   const displayWelcomeModal = useIsWelcome();
 
@@ -101,13 +101,6 @@ export default function ProjectPage() {
           }}
         />
       )}
-      {/* {displayDeployModal && (
-        <ModalDeployProject
-          project={project}
-          onClose={() => setDisplayDeployModal(false)}
-          onDeployProject={deployProject}
-        />
-      )} */}
       <ProjectPageHeader
         onClickDeploy={() => deploy()}
         onClickSettings={() =>
