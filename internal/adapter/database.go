@@ -100,7 +100,20 @@ func (d *DatabaseAdapter) GetServer() domain.Server {
 // Services
 func (d *DatabaseAdapter) SaveService(service domain.Service) error {
 	databaseModels := d.readDeployConfigInDataBaseFile()
-	databaseModels.Services = append(databaseModels.Services, service)
+	serviceExists := false
+
+	for i, s := range databaseModels.Services {
+		if s.Id == service.Id {
+			databaseModels.Services[i] = service
+			serviceExists = true
+			break
+		}
+	}
+
+	if !serviceExists {
+		databaseModels.Services = append(databaseModels.Services, service)
+	}
+
 	return d.writeDeployConfigInDataBaseFile(databaseModels)
 }
 

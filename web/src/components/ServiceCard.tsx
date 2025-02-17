@@ -17,15 +17,25 @@ export default function ServiceCard({ service, onClick }: ServiceCardProps) {
       <div className="flex justify-between items-center m-4 ">
         <CardIcon service={service} />
         <div className="flex gap-3">
-          <Badge>{service.status}</Badge>
+          <Badge
+            variant={
+              service.status === "Stopped"
+                ? "destructive"
+                : service.status === "Running"
+                ? "outline"
+                : "secondary"
+            }
+          >
+            {service.status}
+          </Badge>
         </div>
       </div>
       <div className="ml-4 mr-4 flex items-center">
         <div className="font-bold">{service.imageName}</div>
       </div>
-      <div className="underline font-bold text-xl mt-2 ml-4 mr-4 mb-2">
-        {service.hostName}
-      </div>
+      <a href={service.url} target="_blank">
+        <div className="underline mt-2 ml-4 mr-4 mb-2">{service.url}</div>
+      </a>
     </div>
   );
 }

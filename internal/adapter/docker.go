@@ -327,13 +327,13 @@ func (d *DockerAdapter) ExposeContainer(containersConfig *container.Config, expo
 	containersConfig.Labels = Labels
 }
 
-func (d *DockerAdapter) RunImage(service domain.Service, baseDomain string) error {
+func (d *DockerAdapter) RunImage(service domain.Service, domain string) error {
 	config := d.ConfigContainer(service)
 	d.Stop(service.GetDockerName())
 	d.Remove(service.GetDockerName())
 	d.ExposeContainer(&config, ExposeContainerParams{
 		IsTls:  false,
-		Domain: service.Name + ".localhost",
+		Domain: domain,
 		Port:   "3000",
 	})
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, &network.NetworkingConfig{

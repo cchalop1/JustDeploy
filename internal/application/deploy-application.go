@@ -1,6 +1,7 @@
 package application
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -130,7 +131,7 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 	// deployService.DatabaseAdapter.UpdateDeploy(*deploy)
 }
 
-func deployOneService(deployService *service.DeployService, serviceToDeploy domain.Service) error {
+func deployOneService(deployService *service.DeployService, serviceToDeploy domain.Service, baseDomain string) error {
 	pathToDir, err := filepath.Abs(serviceToDeploy.CurrentPath)
 
 	if err != nil {
@@ -170,19 +171,17 @@ func deployOneService(deployService *service.DeployService, serviceToDeploy doma
 		// TODO: nixpacks build
 	}
 
-	domain := "localhost"
+	serviceDomain := serviceToDeploy.Name + "." + baseDomain
 
-	err = deployService.DockerAdapter.RunImage(serviceToDeploy, domain)
+	err = deployService.DockerAdapter.RunImage(serviceToDeploy, serviceDomain)
 
 	if err != nil {
 		return fmt.Errorf("error running Docker image: %w", err)
 	}
 
-	// if deploy.EnableTls {
-	// 	deploy.Url = "https://" + appUrl
-	// } else {
-	// 	deploy.Url = "http://" + appUrl
-	// }
+	serviceToDeploy.Status = "Running"
+	serviceToDeploy.Url = "http://" + serviceDomain
+	deployService.DatabaseAdapter.SaveService(serviceToDeploy)
 
 	return nil
 }
@@ -210,12 +209,12 @@ func DeployApplication(deployService *service.DeployService) error {
 		return fmt.Errorf("error running Traefik router: %w", err)
 	}
 
-	// if server.Domain == "" {
-	// 	return errors.New("Server does not have domain")
-	// }
+	if server.Domain == "" {
+		return errors.New("Server does not have domain")
+	}
 
 	for _, service := range services {
-		err = deployOneService(deployService, service)
+		err = deployOneService(deployService, service, server.Domain)
 		if err != nil {
 			return fmt.Errorf("error deploying service: %w", err)
 		}

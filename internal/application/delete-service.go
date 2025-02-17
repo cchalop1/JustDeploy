@@ -13,9 +13,16 @@ func DeleteService(deployService *service.DeployService, serviceId string) error
 		return err
 	}
 
-	if s.Status != "stoped" || s.Status != "ready_to_deploy" {
-		// TODO: return error message
-	}
+	// if s.Status != "stoped" || s.Status != "ready_to_deploy" {
+	// 	// TODO: return error message
+	// }
+
+	server := deployService.DatabaseAdapter.GetServer()
+
+	deployService.DockerAdapter.ConnectClient(server)
+
+	deployService.DockerAdapter.Stop(s.GetDockerName())
+	deployService.DockerAdapter.Remove(s.GetDockerName())
 
 	return deployService.DatabaseAdapter.DeleteServiceById(s.Id)
 
@@ -25,7 +32,7 @@ func DeleteService(deployService *service.DeployService, serviceId string) error
 func deleteServiceWithoutDeploy(deployService *service.DeployService, project *domain.Project, s *domain.Service) error {
 	server := deployService.DockerAdapter.GetLocalHostServer()
 	deployService.DockerAdapter.ConnectClient(server)
-	deployService.DockerAdapter.Delete(s.HostName)
+	deployService.DockerAdapter.Delete(s.Url)
 
 	removeEnvsFromProject(project, s.Envs)
 

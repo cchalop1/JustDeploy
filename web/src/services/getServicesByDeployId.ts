@@ -10,7 +10,7 @@ export type ServiceExposeSettings = {
 export type Service = {
   id: string;
   type: string;
-  hostName: string;
+  url: string;
   name: string;
   envs: Array<Env>;
   volumsNames: Array<string>;
