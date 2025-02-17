@@ -7,17 +7,14 @@ import { Service } from "@/services/getServicesByDeployId";
 import { Input } from "@/components/ui/input";
 import { ServerDto } from "@/services/getServerListApi";
 import { saveServiceApi } from "@/services/saveServiceApi";
+import { getServerInfoApi } from "@/services/getServerInfoApi";
 
 type ServiceDeploySettingsProps = {
-  // project: ProjectDto;
   service: Service;
-  onClose: () => void;
 };
 
 export default function ServiceDeploySettings({
-  // project,
   service,
-  onClose,
 }: ServiceDeploySettingsProps) {
   const notif = useNotification();
   const timeoutRef = useRef<number | null>(null);
@@ -78,7 +75,7 @@ export default function ServiceDeploySettings({
   }
 
   useEffect(() => {
-    // getServerByIdApi(project.serverId).then(setServer);
+    getServerInfoApi().then(setServer);
   }, []);
 
   return (

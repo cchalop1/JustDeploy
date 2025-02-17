@@ -4,9 +4,6 @@ type AddDomainToServerDto = {
   domain: string;
 };
 
-export async function addDomainToServerApi(
-  serverId: string,
-  body: AddDomainToServerDto
-) {
-  return await callApi<ResponseApi>(`/server/${serverId}/domain`, "POST", body);
+export async function addDomainToServerApi(body: AddDomainToServerDto) {
+  return await callApi<ResponseApi>(`/server/domain`, "POST", body);
 }

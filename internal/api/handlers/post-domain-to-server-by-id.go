@@ -17,9 +17,7 @@ func PostAddDomainToServerById(deployService *service.DeployService) echo.Handle
 			return c.String(http.StatusBadRequest, "bad request")
 		}
 
-		serverId := c.Param("id")
-
-		err = application.AddDomainToServer(deployService, newDeployDto, serverId)
+		err = application.AddDomainToServer(deployService, newDeployDto)
 
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, dto.ResponseApi{Message: err.Error()})

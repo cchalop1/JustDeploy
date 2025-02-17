@@ -12,13 +12,6 @@ import (
 )
 
 func runApplication(deployService *service.DeployService, deploy *domain.Deploy, domain string) {
-	// appUrl := ""
-
-	// // if deploy.SubDomain != "" {
-	// // 	appUrl += deploy.SubDomain + "."
-	// // }
-
-	// appUrl += domain
 
 	// // eventsList := []adapter.EventServer{
 	// // 	{

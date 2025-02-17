@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Modal from "./Modal";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { getServerInfoApi } from "@/services/getServerInfoApi";
 import { githubIsConnectedApi } from "@/services/githubIsConnected";
+import { addDomainToServerApi } from "@/services/addDomainToServerApi";
 import { Github } from "lucide-react";
+import { useNotification } from "@/hooks/useNotifications";
 
 type ModalGlobalSettingsProps = {
   onClose: () => void;
@@ -20,12 +22,15 @@ export default function ModalGlobalSettings({
   const [domain, setDomain] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [isGithubConnected, setIsGithubConnected] = useState<boolean>(false);
+  const notif = useNotification();
+  const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     async function fetchServerInfo() {
       const serverInfo = await getServerInfoApi();
       setServerIp(serverInfo.ip);
       setServerName(serverInfo.name);
+      setDomain(serverInfo.domain);
     }
 
     async function fetchGithubConnectionStatus() {
@@ -36,6 +41,29 @@ export default function ModalGlobalSettings({
     fetchServerInfo();
     fetchGithubConnectionStatus();
   }, []);
+
+  function onDomainChange(value: string) {
+    setDomain(value);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = window.setTimeout(async () => {
+      try {
+        await addDomainToServerApi({ domain: value });
+        notif.success({
+          title: "Domain saved",
+          content: "Domain has been successfully saved!",
+        });
+      } catch (e) {
+        notif.error({
+          title: "Error",
+          content: e.message,
+        });
+      }
+    }, 1000);
+  }
 
   return (
     <Modal
@@ -57,23 +85,16 @@ export default function ModalGlobalSettings({
             <Label>Domain</Label>
             <Input
               value={domain}
-              onChange={(e) => setDomain(e.target.value)}
+              onChange={(e) => onDomainChange(e.target.value)}
               placeholder="Enter domain"
             />
-            <Button
-              variant="outline"
-              className="mt-2"
-              onClick={() => alert(`Testing domain: ${domain}`)}
-            >
-              Test Domain
-            </Button>
           </div>
           <div className="mb-4">
             <Label>Email</Label>
             <Input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter email address"
+              placeholder="Enter email"
             />
           </div>
           <div className="text-2xl font-bold mb-4">Connections</div>

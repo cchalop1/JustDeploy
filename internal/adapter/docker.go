@@ -37,20 +37,20 @@ const ROUTER_NAME = "treafik"
 func (d *DockerAdapter) ConnectClient(server domain.Server) error {
 	var err error
 
-	if server.Ip != "localhost" {
-		serverCerts := server.GetCertsPath()
+	// if server.Ip != "localhost" {
+	// 	serverCerts := server.GetCertsPath()
 
-		d.client, err = client.NewClientWithOpts(
-			client.WithHost("tcp://"+server.Ip+":2376"),
-			client.WithTLSClientConfig(
-				serverCerts.CaCertPath,
-				serverCerts.CertPath,
-				serverCerts.KeyPath,
-			),
-		)
-	} else {
-		d.client, err = client.NewClientWithOpts(client.FromEnv)
-	}
+	// 	d.client, err = client.NewClientWithOpts(
+	// 		client.WithHost("tcp://"+server.Ip+":2376"),
+	// 		client.WithTLSClientConfig(
+	// 			serverCerts.CaCertPath,
+	// 			serverCerts.CertPath,
+	// 			serverCerts.KeyPath,
+	// 		),
+	// 	)
+	// } else {
+	d.client, err = client.NewClientWithOpts(client.FromEnv)
+	// }
 
 	if err != nil {
 		fmt.Println("Error creating Docker client:", err)

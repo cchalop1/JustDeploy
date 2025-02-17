@@ -121,7 +121,7 @@ func (d *DatabaseAdapter) GetServiceById(id string) (*domain.Service, error) {
 
 func (d *DatabaseAdapter) DeleteServiceById(id string) error {
 	databaseModels := d.readDeployConfigInDataBaseFile()
-	var newServices []domain.Service
+	var newServices = []domain.Service{}
 	for _, s := range databaseModels.Services {
 		if s.Id != id {
 			newServices = append(newServices, s)
