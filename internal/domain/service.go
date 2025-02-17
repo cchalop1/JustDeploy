@@ -31,5 +31,5 @@ type Service struct {
 }
 
 func (s *Service) GetDockerName() string {
-	return strings.ToLower(s.HostName + "-" + s.Id)
+	return strings.ToLower(s.Name + "-" + s.Id)
 }

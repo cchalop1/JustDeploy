@@ -1,7 +1,6 @@
 package application
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 
@@ -131,8 +130,8 @@ func runApplication(deployService *service.DeployService, deploy *domain.Deploy,
 	// deployService.DatabaseAdapter.UpdateDeploy(*deploy)
 }
 
-func deployOneService(service domain.Service) error {
-	pathToDir, err := filepath.Abs(service.CurrentPath)
+func deployOneService(deployService *service.DeployService, serviceToDeploy domain.Service) error {
+	pathToDir, err := filepath.Abs(serviceToDeploy.CurrentPath)
 
 	if err != nil {
 		return err
@@ -159,7 +158,31 @@ func deployOneService(service domain.Service) error {
 	fmt.Println("Path to dir: ", pathToDir)
 	fmt.Println("Docker file name: ", DockerFileName)
 
-	service.Envs = append(portEnv, service.Envs...)
+	serviceToDeploy.Envs = append(portEnv, serviceToDeploy.Envs...)
+
+	isDockerfile := deployService.FilesystemAdapter.FindDockerFile(serviceToDeploy.CurrentPath)
+	if isDockerfile {
+		err := deployService.DockerAdapter.BuildImage(serviceToDeploy)
+		if err != nil {
+			return fmt.Errorf("error building Docker image: %w", err)
+		}
+	} else {
+		// TODO: nixpacks build
+	}
+
+	domain := "localhost"
+
+	err = deployService.DockerAdapter.RunImage(serviceToDeploy, domain)
+
+	if err != nil {
+		return fmt.Errorf("error running Docker image: %w", err)
+	}
+
+	// if deploy.EnableTls {
+	// 	deploy.Url = "https://" + appUrl
+	// } else {
+	// 	deploy.Url = "http://" + appUrl
+	// }
 
 	return nil
 }
@@ -169,23 +192,34 @@ func DeployApplication(deployService *service.DeployService) error {
 
 	server := deployService.DatabaseAdapter.GetServer()
 
-	if server.Domain == "" {
-		return errors.New("Server does not have domain")
-	}
-
 	err := deployService.DockerAdapter.ConnectClient(server)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("error connecting Docker client: %w", err)
 	}
+
+	err = deployService.DockerAdapter.PullTreafikImage()
+
+	if err != nil {
+		return fmt.Errorf("error pulling Traefik image: %w", err)
+	}
+
+	err = deployService.DockerAdapter.RunRouter("clement.chalopin@gmail.com")
+
+	if err != nil {
+		return fmt.Errorf("error running Traefik router: %w", err)
+	}
+
+	// if server.Domain == "" {
+	// 	return errors.New("Server does not have domain")
+	// }
 
 	for _, service := range services {
-		err = deployOneService(service)
-		return err
+		err = deployOneService(deployService, service)
+		if err != nil {
+			return fmt.Errorf("error deploying service: %w", err)
+		}
 	}
 
-	// go runApplication(deployService, &deploy, server.Domain)
-
-	// return deploy, err
 	return nil
 }

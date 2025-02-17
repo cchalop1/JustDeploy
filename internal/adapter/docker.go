@@ -32,7 +32,7 @@ func NewDockerAdapter() *DockerAdapter {
 }
 
 const TRAEFIK_IMAGE = "traefik"
-const ROUTER_NAME = "treafik"
+const ROUTER_NAME = "traefik"
 
 func (d *DockerAdapter) ConnectClient(server domain.Server) error {
 	var err error
@@ -79,6 +79,8 @@ func (d *DockerAdapter) BuildImage(service domain.Service) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("Tar created")
+	fmt.Println("Building image", service.GetDockerName())
 
 	buildOptions := types.ImageBuildOptions{
 		Dockerfile: "Dockerfile",
@@ -88,6 +90,7 @@ func (d *DockerAdapter) BuildImage(service domain.Service) error {
 
 	buildResponse, err := d.client.ImageBuild(context.Background(), tar, buildOptions)
 	if err != nil {
+		fmt.Println("Error building image:", err)
 		return err
 	}
 	defer buildResponse.Body.Close()
@@ -193,8 +196,12 @@ func (d *DockerAdapter) checkRouterIsRuning() (bool, error) {
 
 func (d *DockerAdapter) PullTreafikImage() error {
 	treafikIsPulled, err := d.checkIsRouterImageIsPull()
-	if treafikIsPulled || err != nil {
+	if err != nil {
 		return err
+	}
+
+	if treafikIsPulled {
+		return nil
 	}
 
 	d.PullImage(TRAEFIK_IMAGE)
@@ -221,11 +228,8 @@ func (d *DockerAdapter) PullImage(image string) error {
 }
 
 func (d *DockerAdapter) RunRouter(email string) error {
-	routerIsRuning, err := d.checkRouterIsRuning()
-	if routerIsRuning || err != nil {
-		return nil
-	}
-
+	d.Stop(ROUTER_NAME)
+	d.Remove(ROUTER_NAME)
 	d.client.NetworkCreate(context.Background(), "databases_default", types.NetworkCreate{})
 
 	config := container.Config{
@@ -253,7 +257,7 @@ func (d *DockerAdapter) RunRouter(email string) error {
 
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{
 		Binds: []string{
-			"/root/letsencrypt:/letsencrypt",
+			// "/root/letsencrypt:/letsencrypt",
 			"/var/run/docker.sock:/var/run/docker.sock:ro",
 		},
 		NetworkMode:  "default",
@@ -323,14 +327,20 @@ func (d *DockerAdapter) ExposeContainer(containersConfig *container.Config, expo
 	containersConfig.Labels = Labels
 }
 
-func (d *DockerAdapter) RunImage(config container.Config, networkName string) error {
-	d.Stop(config.Hostname)
-	d.Remove(config.Hostname)
+func (d *DockerAdapter) RunImage(service domain.Service, baseDomain string) error {
+	config := d.ConfigContainer(service)
+	d.Stop(service.GetDockerName())
+	d.Remove(service.GetDockerName())
+	d.ExposeContainer(&config, ExposeContainerParams{
+		IsTls:  false,
+		Domain: service.Name + ".localhost",
+		Port:   "3000",
+	})
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
 			"databases_default": {},
 		},
-	}, &v1.Platform{}, config.Hostname)
+	}, &v1.Platform{}, service.GetDockerName())
 
 	if err != nil {
 		return err
@@ -339,7 +349,7 @@ func (d *DockerAdapter) RunImage(config container.Config, networkName string) er
 	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
 	fmt.Printf("Container %s is started", con.ID)
 
-	fmt.Println("Run image", config.Hostname)
+	fmt.Println("Run image", service.GetDockerName())
 	return nil
 }
 
