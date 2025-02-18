@@ -180,7 +180,7 @@ func deployOneService(deployService *service.DeployService, serviceToDeploy doma
 	}
 
 	serviceToDeploy.Status = "Running"
-	serviceToDeploy.Url = "http://" + serviceDomain
+	serviceToDeploy.SetUrl(baseDomain)
 	deployService.DatabaseAdapter.SaveService(serviceToDeploy)
 
 	return nil
@@ -210,7 +210,7 @@ func DeployApplication(deployService *service.DeployService) error {
 	}
 
 	if server.Domain == "" {
-		return errors.New("Server does not have domain")
+		return errors.New("server does not have domain")
 	}
 
 	for _, service := range services {

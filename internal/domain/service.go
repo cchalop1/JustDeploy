@@ -9,6 +9,7 @@ import (
 type ServiceExposeSettings struct {
 	IsExposed bool   `json:"isExposed"`
 	SubDomain string `json:"subDomain"`
+	Tls       bool   `json:"tls"`
 }
 
 type Service struct {
@@ -32,4 +33,22 @@ type Service struct {
 
 func (s *Service) GetDockerName() string {
 	return strings.ToLower(s.Name + "-" + s.Id)
+}
+
+func (s *Service) SetUrl(serverDomain string) {
+	if !s.ExposeSettings.IsExposed {
+		return
+	}
+
+	protocol := "http"
+	if s.ExposeSettings.Tls {
+		protocol = "https"
+	}
+
+	subDomain := s.ExposeSettings.SubDomain
+	if subDomain != "" {
+		subDomain += "."
+	}
+
+	s.Url = protocol + "://" + subDomain + serverDomain
 }

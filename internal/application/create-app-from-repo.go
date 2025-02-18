@@ -36,6 +36,10 @@ func CreateServiceFromGithubRepo(deployService *service.DeployService, repoUrl s
 		CurrentPath: repoPath,
 		Type:        "github_repo",
 		ImageName:   Name,
+		ExposeSettings: domain.ServiceExposeSettings{
+			IsExposed: true,
+			SubDomain: Name,
+		},
 	}
 
 	deployService.DatabaseAdapter.SaveService(service)
