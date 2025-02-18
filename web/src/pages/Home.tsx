@@ -102,7 +102,7 @@ export default function Home() {
         />
       )}
       <ProjectPageHeader
-        onClickDeploy={() => deploy()}
+        onClickDeploy={deploy}
         onClickSettings={() =>
           setIsGlobalSettingsModalOpen(!isGlobalSettingsModalOpen)
         }

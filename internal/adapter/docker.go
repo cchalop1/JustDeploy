@@ -126,15 +126,11 @@ func (d *DockerAdapter) BuildImage(service domain.Service) error {
 
 }
 
-func (d *DockerAdapter) BuildNixpacksImage(server domain.Server, service domain.Service) error {
+func (d *DockerAdapter) BuildNixpacksImage(service domain.Service) error {
 	// Construct the nixpacks command
 
 	nixpacksCmd := exec.Command("nixpacks", "build",
-		// TODO: chose the ip or the domain depends of what is in the server
-		"--docker-host", server.Ip+":2376",
 		"--name", service.GetDockerName(),
-		"--docker-tls-verify", "1",
-		"--docker-cert-path", server.GetSshKeyPath(),
 		service.CurrentPath)
 
 	// Set up pipes for stdout and stderr
@@ -292,7 +288,7 @@ func envToSlice(envVars []dto.Env) []string {
 func (d *DockerAdapter) ConfigContainer(service domain.Service) container.Config {
 	Image := service.ImageName
 
-	if service.IsDevContainer {
+	if service.IsRepo {
 		Image = service.GetDockerName()
 	}
 
@@ -343,6 +339,7 @@ func (d *DockerAdapter) RunImage(service domain.Service, domain string) error {
 	}, &v1.Platform{}, service.GetDockerName())
 
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 

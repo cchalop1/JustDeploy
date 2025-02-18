@@ -1,7 +1,7 @@
 import { Settings } from "lucide-react";
 
 type ProjectPageHeaderProps = {
-  onClickDeploy: () => void;
+  onClickDeploy: () => Promise<void>;
   onClickSettings: () => void;
   toDeploy: boolean;
 };
@@ -28,7 +28,9 @@ export default function ProjectPageHeader({
           className={`font-mono hover:opacity-80 font-bold bg-button text-white p-1 pl-4 pr-4 rounded-xl border border-green-200 ${
             !toDeploy ? "opacity-50 cursor-not-allowed" : "border-animate"
           }`}
-          onClick={onClickDeploy}
+          onClick={async () => {
+            await onClickDeploy();
+          }}
         >
           Deploy
         </button>

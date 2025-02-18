@@ -29,7 +29,7 @@ export default function ServiceDeploySettings({
 
   async function saveService(serviceUpdated: Service) {
     try {
-      const res = await saveServiceApi(serviceUpdated, project.id);
+      const res = await saveServiceApi(serviceUpdated);
       console.log(res);
     } catch (e) {
       notif.error({

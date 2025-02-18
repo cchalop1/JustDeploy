@@ -47,7 +47,7 @@ func deleteServiceWithoutDeploy(deployService *service.DeployService, project *d
 
 func removeEnvsFromProject(project *domain.Project, envsToRemove []dto.Env) {
 	for i, _ := range project.Services {
-		if project.Services[i].IsDevContainer {
+		if project.Services[i].IsRepo {
 			filteredEnvs := []dto.Env{}
 			for _, env := range project.Services[i].Envs {
 				if !envIsContained(env, envsToRemove) {

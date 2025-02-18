@@ -9,7 +9,12 @@ import (
 )
 
 func CreateCurrentServer(deployService *service.DeployService, port string) (domain.Server, error) {
+	oldServer := deployService.DatabaseAdapter.GetServer()
 	currentIp, err := deployService.NetworkAdapter.GetCurrentIP()
+
+	if oldServer.Ip == currentIp {
+		return oldServer, nil
+	}
 
 	if err != nil {
 		return domain.Server{}, err

@@ -36,6 +36,7 @@ func CreateServiceFromGithubRepo(deployService *service.DeployService, repoUrl s
 		CurrentPath: repoPath,
 		Type:        "github_repo",
 		ImageName:   Name,
+		IsRepo:      true,
 		ExposeSettings: domain.ServiceExposeSettings{
 			IsExposed: true,
 			SubDomain: Name,

@@ -19,8 +19,6 @@ export default function ModalServiceSettings({
   onClose,
   fetchServices,
 }: ModalServiceSettingsProps) {
-  const isDevContainer = service.isDevContainer;
-  const type = service.type;
   const notif = useNotification();
 
   async function deleteServiceById() {
@@ -64,7 +62,7 @@ export default function ModalServiceSettings({
             <div>
               <Status status={"Installing"}></Status>
             </div>
-            <ServiceDeploySettings service={service} onClose={onClose} />
+            <ServiceDeploySettings service={service} />
           </div>
         </div>
         <div className="flex justify-end mt-4">

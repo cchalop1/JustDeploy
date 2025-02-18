@@ -273,7 +273,7 @@ func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) ([]da
 func (fs *FilesystemAdapter) GenerateDotEnvFile(project *domain.Project) error {
 	// Full path to the .env file
 	for _, service := range project.Services {
-		if service.IsDevContainer {
+		if service.IsRepo {
 
 			envFilePath := service.CurrentPath + "/.env"
 
@@ -312,7 +312,7 @@ func (fs *FilesystemAdapter) GenerateDotEnvFile(project *domain.Project) error {
 
 func (fs *FilesystemAdapter) RemoveEnvsFromDotEnvFile(project *domain.Project, envToRemove []dto.Env) error {
 	for _, service := range project.Services {
-		if service.IsDevContainer {
+		if service.IsRepo {
 
 			envFilePath := service.CurrentPath + "/.env"
 

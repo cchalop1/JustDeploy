@@ -18,7 +18,6 @@ export type Service = {
   host: string;
   imageName: string;
   imageUrl: string;
-  isDevContainer: boolean;
   currentPath: string;
   exposePort: string;
   exposeSettings: ServiceExposeSettings;

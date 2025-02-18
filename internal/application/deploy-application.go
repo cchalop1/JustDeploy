@@ -168,7 +168,10 @@ func deployOneService(deployService *service.DeployService, serviceToDeploy doma
 			return fmt.Errorf("error building Docker image: %w", err)
 		}
 	} else {
-		// TODO: nixpacks build
+		err = deployService.DockerAdapter.BuildNixpacksImage(serviceToDeploy)
+		if err != nil {
+			return fmt.Errorf("error building Nixpacks image: %w", err)
+		}
 	}
 
 	serviceDomain := serviceToDeploy.Name + "." + baseDomain
