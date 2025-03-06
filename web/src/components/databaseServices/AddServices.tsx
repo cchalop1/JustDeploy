@@ -9,6 +9,7 @@ import { githubIsConnectedApi } from "@/services/githubIsConnected";
 import { getServerInfoApi } from "@/services/getServerInfoApi";
 import { GithubRepo, getGithubRepos } from "@/services/getGithubRepos";
 import { createRepoApi } from "@/services/createRepoApi";
+import { createDatabaseApi } from "@/services/createDatabaseApi";
 
 type AddServiceProps = {
   setLoading: (loading: boolean) => void;
@@ -67,15 +68,21 @@ export default function AddService({
   }
 
   async function createDatabaseToDeploy(databaseName: string) {
-    setLoading(true);
-    setOpenCommandModal(false);
-    console.log(databaseName);
-    // await createService({
-    //   path: createServiceParams.path,
-    //   serviceName: createServiceParams.serviceName,
-    // });
-    setLoading(false);
-    await getServices();
+    try {
+      setLoading(true);
+      setOpenCommandModal(false);
+
+      await createDatabaseApi({
+        databaseName,
+      });
+
+      await fetchServices();
+    } catch (error) {
+      console.error("Failed to create database:", error);
+      // You might want to add error handling/notification here
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {

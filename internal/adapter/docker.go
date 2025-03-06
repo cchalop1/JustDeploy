@@ -190,6 +190,30 @@ func (d *DockerAdapter) checkRouterIsRuning() (bool, error) {
 	return false, nil
 }
 
+// CheckRouterIsRunning checks if the Traefik router is running
+func (d *DockerAdapter) CheckRouterIsRunning() (bool, error) {
+	return d.checkRouterIsRuning()
+}
+
+// IsServiceRunning checks if a service with the given name is running
+func (d *DockerAdapter) IsServiceRunning(serviceName string) (bool, error) {
+	containerList, err := d.client.ContainerList(context.Background(), types.ContainerListOptions{})
+
+	if err != nil {
+		return false, err
+	}
+
+	for _, container := range containerList {
+		for _, name := range container.Names {
+			// Remove leading slash from container name
+			if name == "/"+serviceName || name[1:] == serviceName {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
+}
+
 func (d *DockerAdapter) PullTreafikImage() error {
 	treafikIsPulled, err := d.checkIsRouterImageIsPull()
 	if err != nil {

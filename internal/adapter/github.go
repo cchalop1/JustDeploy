@@ -110,10 +110,14 @@ func (g *GithubAdapter) GetRepos(token string) ([]GithubRepo, error) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		// TODO: regenerate a token when is expired
 		return nil, err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode == http.StatusUnauthorized {
+		// Token is likely expired, but we can't renew it here without additional info
+		return nil, errors.New("github token expired")
+	}
 
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("failed to fetch repositories, status code: %d", res.StatusCode)
@@ -124,9 +128,17 @@ func (g *GithubAdapter) GetRepos(token string) ([]GithubRepo, error) {
 		return nil, err
 	}
 
-	// Sort repositories by updated_at in descending order
+	// Sort repositories by updated_at in descending order (most recently updated first)
 	sort.Slice(response.Repositories, func(i, j int) bool {
-		return response.Repositories[i].UpdatedAt > response.Repositories[j].UpdatedAt
+		timeI, errI := time.Parse(time.RFC3339, response.Repositories[i].UpdatedAt)
+		timeJ, errJ := time.Parse(time.RFC3339, response.Repositories[j].UpdatedAt)
+
+		// If we can't parse the time for some reason, fall back to string comparison
+		if errI != nil || errJ != nil {
+			return response.Repositories[i].UpdatedAt > response.Repositories[j].UpdatedAt
+		}
+
+		return timeI.After(timeJ)
 	})
 
 	return response.Repositories, nil
@@ -172,7 +184,7 @@ type Installation struct {
 	ID int `json:"id"`
 }
 
-func (g *GithubAdapter) getInstallationID(appID int, privateKey string) (int, error) {
+func (g *GithubAdapter) GetInstallationID(appID int, privateKey string) (int, error) {
 	jwtToken, err := generateJWT(appID, privateKey)
 	if err != nil {
 		return 0, err
@@ -207,4 +219,69 @@ func (g *GithubAdapter) getInstallationID(appID int, privateKey string) (int, er
 
 	fmt.Println(installations)
 	return installations[0].ID, nil
+}
+
+// RenewGithubToken generates a new GitHub installation token
+func (g *GithubAdapter) RenewGithubToken(appID int, privateKey string, installationID string) (string, error) {
+	return g.GetInstallationToken(appID, privateKey, installationID)
+}
+
+// IsTokenValid checks if the provided GitHub token is still valid
+func (g *GithubAdapter) IsTokenValid(token string) bool {
+	if token == "" {
+		return false
+	}
+
+	// Make a simple request to GitHub API to check token validity
+	req, err := http.NewRequest("GET", "https://api.github.com/installation/repositories?per_page=1", nil)
+	if err != nil {
+		return false
+	}
+	req.Header.Set("Authorization", "token "+token)
+	req.Header.Set("Accept", "application/vnd.github+json")
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return false
+	}
+	defer res.Body.Close()
+
+	return res.StatusCode == http.StatusOK
+}
+
+// GetReposWithTokenRenewal gets repositories with automatic token renewal
+// This is a convenience method that can be used directly instead of handling token renewal separately
+// Returns only the 15 most recently updated repositories
+func (g *GithubAdapter) GetReposWithTokenRenewal(token string, appID int, privateKey string, installationID string, saveToken func(string, string) error) ([]GithubRepo, error) {
+	// First try with the existing token
+	repos, err := g.GetRepos(token)
+
+	// If token is expired, renew it and try again
+	if err != nil && err.Error() == "github token expired" {
+		newToken, err := g.RenewGithubToken(appID, privateKey, installationID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to renew token: %w", err)
+		}
+
+		// Save the new token
+		if saveToken != nil {
+			if err := saveToken(installationID, newToken); err != nil {
+				return nil, fmt.Errorf("failed to save new token: %w", err)
+			}
+		}
+
+		// Try again with the new token
+		repos, err = g.GetRepos(newToken)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Limit to the last 15 updated repositories
+	if len(repos) > 15 {
+		repos = repos[:15]
+	}
+
+	return repos, err
 }

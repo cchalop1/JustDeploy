@@ -1,6 +1,5 @@
 import { Service } from "@/services/getServicesByDeployId";
 import { Badge } from "./ui/badge";
-import { GithubIcon } from "lucide-react";
 import { CardIcon } from "./CardIcon";
 
 type ServiceCardProps = {
@@ -9,13 +8,23 @@ type ServiceCardProps = {
 };
 
 export default function ServiceCard({ service, onClick }: ServiceCardProps) {
+  const isPreconfiguredService = service.type === "database";
+
   return (
     <div
-      className={`relative w-80 h-36 bg-white border rounded shadow-lg hover:shadow-xl cursor-pointer`}
+      className={`relative w-80 h-36 bg-white border rounded shadow-lg hover:shadow-xl cursor-pointer p-4 flex flex-col`}
       onClick={onClick}
     >
-      <div className="flex justify-between items-center m-4 ">
-        <CardIcon service={service} />
+      <div className="flex justify-between items-center">
+        {isPreconfiguredService && service.imageUrl ? (
+          <img
+            src={service.imageUrl}
+            alt={service.name}
+            className="h-8 w-8 object-contain"
+          />
+        ) : (
+          <CardIcon service={service} />
+        )}
         <div className="flex gap-3">
           <Badge
             variant={
@@ -30,12 +39,33 @@ export default function ServiceCard({ service, onClick }: ServiceCardProps) {
           </Badge>
         </div>
       </div>
-      <div className="ml-4 mr-4 flex items-center">
+
+      <div className="mt-2 flex items-center">
         <div className="font-bold">{service.imageName}</div>
       </div>
-      <a href={service.url} target="_blank">
-        <div className="underline mt-2 ml-4 mr-4 mb-2">{service.url}</div>
-      </a>
+
+      <div className="mt-1 flex items-center">
+        <Badge variant="outline" className="text-xs">
+          {service.type === "database"
+            ? "Database"
+            : service.type === "github_repo"
+            ? "GitHub Repo"
+            : service.type}
+        </Badge>
+      </div>
+
+      {service.url && (
+        <a
+          href={service.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-auto"
+        >
+          <div className="underline text-sm text-blue-600 hover:text-blue-800">
+            {service.url}
+          </div>
+        </a>
+      )}
     </div>
   );
 }
