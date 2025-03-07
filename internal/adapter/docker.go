@@ -9,6 +9,7 @@ import (
 	"log"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 
 	"cchalop1.com/deploy/internal/adapter/database"
@@ -442,8 +443,32 @@ func (d *DockerAdapter) RunService(service database.ServicesConfig, exposedPort 
 	fmt.Println("Run image", service.Name)
 }
 
-func (d *DockerAdapter) RunServiceWithDeploy(service database.ServicesConfig, containerHostName string) {
-	con, err := d.client.ContainerCreate(context.Background(), &service.Config, &container.HostConfig{},
+func (d *DockerAdapter) RunServiceWithDeploy(service domain.Service, containerHostName string) {
+	config := container.Config{
+		Image:    service.ImageName,
+		Hostname: containerHostName,
+		Env:      envToSlice(service.Envs),
+		Labels: map[string]string{
+			"traefik.enable": "true",
+		},
+	}
+
+	hostConfig := &container.HostConfig{
+		NetworkMode: "databases_default",
+	}
+
+	if service.ExposePort != "" {
+		hostConfig.PortBindings = nat.PortMap{
+			nat.Port(service.ExposePort + "/tcp"): []nat.PortBinding{
+				{
+					HostIP:   "0.0.0.0",
+					HostPort: service.ExposePort,
+				},
+			},
+		}
+	}
+
+	con, err := d.client.ContainerCreate(context.Background(), &config, hostConfig,
 		&network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
 				"databases_default": {},
@@ -473,4 +498,18 @@ func (d *DockerAdapter) GetLocalHostServer() domain.Server {
 		CreatedDate: time.Now(),
 		Status:      "active",
 	}
+}
+
+func (d *DockerAdapter) GetDockerHubUrl(image string) string {
+	// Remove tag if present
+	imageParts := strings.Split(image, ":")
+	imageName := imageParts[0]
+
+	// Handle official images (no slash)
+	if !strings.Contains(imageName, "/") {
+		return "https://hub.docker.com/_/" + imageName
+	}
+
+	// Handle organization/user images
+	return "https://hub.docker.com/r/" + imageName
 }

@@ -10,12 +10,9 @@ import (
 	"strings"
 
 	"cchalop1.com/deploy/internal"
-	"cchalop1.com/deploy/internal/adapter/database"
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
 	"cchalop1.com/deploy/internal/utils"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/go-connections/nat"
 	"gopkg.in/yaml.v3"
 )
 
@@ -188,17 +185,24 @@ func (fs *FilesystemAdapter) GetDir(path string) string {
 
 // Get docker compose config from the file
 
-type serviceConfig struct {
+type buildConfig struct {
+	Context    string `yaml:"context"`
+	Dockerfile string `yaml:"dockerfile"`
+}
+
+type ComposeServiceConfig struct {
 	Image       string            `yaml:"image"`
 	Ports       []string          `yaml:"ports"`
 	Environment map[string]string `yaml:"environment"`
 	Volumes     []string          `yaml:"volumes"`
 	Name        string            `yaml:"container_name"`
 	Cmd         []string          `yaml:"command"`
+	Build       interface{}       `yaml:"build"` // can be string or buildConfig
+	DependsOn   []string          `yaml:"depends_on"`
 }
 
 type composeConfig struct {
-	Services map[string]serviceConfig `yaml:"services"`
+	Services map[string]ComposeServiceConfig `yaml:"services"`
 }
 
 func parsComposeFile(pathToComposeFile string) (*composeConfig, error) {
@@ -215,44 +219,11 @@ func parsComposeFile(pathToComposeFile string) (*composeConfig, error) {
 	return &cfg, nil
 }
 
-func filterComposeServiceToArray(services map[string]serviceConfig) []database.ServicesConfig {
-	servicesArray := []database.ServicesConfig{}
-
-	for key, value := range services {
-		envs := []dto.Env{}
-
-		for key := range value.Environment {
-			envs = append(envs, dto.Env{Name: key, Value: "", IsSecret: true})
-		}
-
-		ports := nat.PortSet{}
-
-		for _, port := range value.Ports {
-			ports[nat.Port(port)] = struct{}{}
-		}
-
-		// volumes := []string{}
-
-		// for _, volume := range value.Volumes {
-		// 	volumes = append(volumes, strings.Split(volume, ":")[1])
-		// }
-
-		servicesArray = append(servicesArray, database.ServicesConfig{
-			Name: key,
-			Icon: "compose",
-			Env:  envs,
-			Config: container.Config{
-				Image:        value.Image,
-				Cmd:          value.Cmd,
-				ExposedPorts: ports,
-			},
-		})
-	}
-
-	return servicesArray
+func (s *ComposeServiceConfig) HasBuild() bool {
+	return s.Build != nil
 }
 
-func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) ([]database.ServicesConfig, error) {
+func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) (map[string]ComposeServiceConfig, error) {
 	// TODO: try all the compose file name like (docker-compose.yml, docker-compose.yaml, compose.yml, compose.yaml)
 	cfg, err := parsComposeFile(pathToSource + "/docker-compose.yml")
 
@@ -264,9 +235,7 @@ func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) ([]da
 		return nil, errors.New("no services found in the docker-compose.yml")
 	}
 
-	services := filterComposeServiceToArray(cfg.Services)
-
-	return services, nil
+	return cfg.Services, nil
 }
 
 // .env file management

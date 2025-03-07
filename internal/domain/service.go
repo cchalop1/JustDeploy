@@ -24,9 +24,10 @@ type Service struct {
 	ImageName   string    `json:"imageName"`
 	ImageUrl    string    `json:"imageUrl"`
 	// TODO: rethink this
-	IsRepo      bool   `json:"isRepo"`
-	CurrentPath string `json:"currentPath"`
-	ExposePort  string `json:"exposePort"`
+	IsRepo       bool   `json:"isRepo"`
+	CurrentPath  string `json:"currentPath"`
+	ExposePort   string `json:"exposePort"`
+	DockerHubUrl string `json:"dockerHubUrl"`
 
 	ExposeSettings ServiceExposeSettings `json:"exposeSettings"`
 }
