@@ -7,26 +7,25 @@ import (
 )
 
 type ServiceExposeSettings struct {
-	IsExposed bool   `json:"isExposed"`
-	SubDomain string `json:"subDomain"`
-	Tls       bool   `json:"tls"`
+	IsExposed  bool   `json:"isExposed"`
+	SubDomain  string `json:"subDomain"`
+	Tls        bool   `json:"tls"`
+	ExposePort string `json:"exposePort"`
 }
 
 type Service struct {
-	Id          string    `json:"id"`
-	Type        string    `json:"type"`
-	Url         string    `json:"url"`
-	Name        string    `json:"name"`
-	Envs        []dto.Env `json:"envs"`
-	VolumsNames []string  `json:"volumsNames"`
-	Status      string    `json:"status"`
-	Host        string    `json:"host"`
-	ImageName   string    `json:"imageName"`
-	ImageUrl    string    `json:"imageUrl"`
-	// TODO: rethink this
-	IsRepo       bool   `json:"isRepo"`
+	Id   string    `json:"id"`
+	Type string    `json:"type"`
+	Url  string    `json:"url"`
+	Name string    `json:"name"`
+	Envs []dto.Env `json:"envs"`
+	// VolumsNames []string  `json:"volumsNames"`
+	Status string `json:"status"`
+	// Host      string `json:"host"`
+	ImageName string `json:"imageName"`
+	ImageUrl  string `json:"imageUrl"`
+
 	CurrentPath  string `json:"currentPath"`
-	ExposePort   string `json:"exposePort"`
 	DockerHubUrl string `json:"dockerHubUrl"`
 
 	ExposeSettings ServiceExposeSettings `json:"exposeSettings"`

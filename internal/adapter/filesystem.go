@@ -191,14 +191,14 @@ type buildConfig struct {
 }
 
 type ComposeServiceConfig struct {
-	Image       string            `yaml:"image"`
-	Ports       []string          `yaml:"ports"`
-	Environment map[string]string `yaml:"environment"`
-	Volumes     []string          `yaml:"volumes"`
-	Name        string            `yaml:"container_name"`
-	Cmd         []string          `yaml:"command"`
-	Build       interface{}       `yaml:"build"` // can be string or buildConfig
-	DependsOn   []string          `yaml:"depends_on"`
+	Image       string      `yaml:"image"`
+	Ports       []string    `yaml:"ports"`
+	Environment interface{} `yaml:"environment"`
+	Volumes     []string    `yaml:"volumes"`
+	Name        string      `yaml:"container_name"`
+	Cmd         []string    `yaml:"command"`
+	Build       interface{} `yaml:"build"`
+	DependsOn   []string    `yaml:"depends_on"`
 }
 
 type composeConfig struct {
@@ -223,6 +223,77 @@ func (s *ComposeServiceConfig) HasBuild() bool {
 	return s.Build != nil
 }
 
+// GetEnvironmentVariables converts the Environment field to a slice of dto.Env
+func (s *ComposeServiceConfig) GetEnvironmentVariables() []dto.Env {
+	var envVars []dto.Env
+
+	switch env := s.Environment.(type) {
+	case map[string]interface{}:
+		// Handle map format: environment: { VAR1: value1, VAR2: value2 }
+		for key, value := range env {
+			strValue := ""
+			if value != nil {
+				strValue = fmt.Sprintf("%v", value)
+			}
+			envVars = append(envVars, dto.Env{
+				Name:  key,
+				Value: strValue,
+			})
+		}
+	case map[interface{}]interface{}:
+		// Handle map format with interface keys: environment: { VAR1: value1, VAR2: value2 }
+		for key, value := range env {
+			strKey := fmt.Sprintf("%v", key)
+			strValue := ""
+			if value != nil {
+				strValue = fmt.Sprintf("%v", value)
+			}
+			envVars = append(envVars, dto.Env{
+				Name:  strKey,
+				Value: strValue,
+			})
+		}
+	case []interface{}:
+		// Handle array format: environment: [ VAR1=value1, VAR2=value2 ] or [ VAR1, VAR2 ]
+		for _, item := range env {
+			if strItem, ok := item.(string); ok {
+				// Check if it's in the format VAR=value
+				parts := strings.SplitN(strItem, "=", 2)
+				if len(parts) == 2 {
+					envVars = append(envVars, dto.Env{
+						Name:  parts[0],
+						Value: parts[1],
+					})
+				} else {
+					// It's just a variable name without a value
+					envVars = append(envVars, dto.Env{
+						Name:  parts[0],
+						Value: "",
+					})
+				}
+			}
+		}
+	case []string:
+		// Handle string array format: environment: [ VAR1=value1, VAR2=value2 ] or [ VAR1, VAR2 ]
+		for _, item := range env {
+			parts := strings.SplitN(item, "=", 2)
+			if len(parts) == 2 {
+				envVars = append(envVars, dto.Env{
+					Name:  parts[0],
+					Value: parts[1],
+				})
+			} else {
+				envVars = append(envVars, dto.Env{
+					Name:  parts[0],
+					Value: "",
+				})
+			}
+		}
+	}
+
+	return envVars
+}
+
 func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) (map[string]ComposeServiceConfig, error) {
 	// TODO: try all the compose file name like (docker-compose.yml, docker-compose.yaml, compose.yml, compose.yaml)
 	cfg, err := parsComposeFile(pathToSource + "/docker-compose.yml")
@@ -236,114 +307,6 @@ func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) (map[
 	}
 
 	return cfg.Services, nil
-}
-
-// .env file management
-func (fs *FilesystemAdapter) GenerateDotEnvFile(project *domain.Project) error {
-	// Full path to the .env file
-	for _, service := range project.Services {
-		if service.IsRepo {
-
-			envFilePath := service.CurrentPath + "/.env"
-
-			// Check if .env file exists
-			_, err := os.Stat(envFilePath)
-			if err != nil {
-				if errors.Is(err, os.ErrNotExist) {
-					// File does not exist, create it
-					fmt.Println(".env file does not exist, creating a new one")
-				} else {
-					// Other error when trying to check file
-					return err
-				}
-			}
-
-			// Open the file in append mode if it exists, otherwise create it
-			file, err := os.OpenFile(envFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
-
-			// Write environment variables to the file
-			for _, env := range service.Envs {
-				_, err := file.WriteString(env.Name + "=" + env.Value + "\n")
-				if err != nil {
-					return err
-				}
-			}
-
-		}
-	}
-
-	return nil
-}
-
-func (fs *FilesystemAdapter) RemoveEnvsFromDotEnvFile(project *domain.Project, envToRemove []dto.Env) error {
-	for _, service := range project.Services {
-		if service.IsRepo {
-
-			envFilePath := service.CurrentPath + "/.env"
-
-			// Check if .env file exists
-			_, err := os.Stat(envFilePath)
-			if err != nil {
-				if errors.Is(err, os.ErrNotExist) {
-					// File does not exist, nothing to remove
-					return nil
-				}
-				// Other error when trying to check file
-				return err
-			}
-
-			// Read the entire file
-			content, err := os.ReadFile(envFilePath)
-			if err != nil {
-				return err
-			}
-
-			// Create a map of environment variables to remove for quick lookup
-			envsToRemove := make(map[string]bool)
-			for _, env := range envToRemove {
-				envsToRemove[env.Name] = true
-			}
-
-			// Process the file line by line
-			var newLines []string
-			lines := strings.Split(string(content), "\n")
-			for _, line := range lines {
-				trimmedLine := strings.TrimSpace(line)
-				if trimmedLine == "" || strings.HasPrefix(trimmedLine, "#") {
-					// Keep empty lines and comments
-					newLines = append(newLines, line)
-					continue
-				}
-
-				parts := strings.SplitN(trimmedLine, "=", 2)
-				if len(parts) < 2 {
-					// Keep lines that don't look like environment variable declarations
-					newLines = append(newLines, line)
-					continue
-				}
-
-				key := strings.TrimSpace(parts[0])
-				if !envsToRemove[key] {
-					// Keep lines for environment variables that are not in the removal list
-					newLines = append(newLines, line)
-				}
-			}
-
-			// Write the updated content back to the file
-			newContent := strings.Join(newLines, "\n")
-			err = os.WriteFile(envFilePath, []byte(newContent), 0644)
-			if err != nil {
-				return err
-			}
-
-		}
-	}
-
-	return nil
 }
 
 // Get list of folders

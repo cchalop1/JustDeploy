@@ -313,7 +313,7 @@ func envToSlice(envVars []dto.Env) []string {
 func (d *DockerAdapter) ConfigContainer(service domain.Service) container.Config {
 	Image := service.ImageName
 
-	if service.IsRepo {
+	if service.Type == "github_repo" {
 		Image = service.GetDockerName()
 	}
 
@@ -332,6 +332,7 @@ type ExposeContainerParams struct {
 }
 
 func (d *DockerAdapter) ExposeContainer(containersConfig *container.Config, exposeContainerParams ExposeContainerParams) {
+
 	Labels := map[string]string{
 		"traefik.enable": "true",
 		"traefik.http.routers." + containersConfig.Image + ".rule":                      "Host(`" + exposeContainerParams.Domain + "`)",
@@ -352,11 +353,13 @@ func (d *DockerAdapter) RunImage(service domain.Service, domain string) error {
 	config := d.ConfigContainer(service)
 	d.Stop(service.GetDockerName())
 	d.Remove(service.GetDockerName())
-	d.ExposeContainer(&config, ExposeContainerParams{
-		IsTls:  false,
-		Domain: domain,
-		Port:   "3000",
-	})
+	if domain != "" {
+		d.ExposeContainer(&config, ExposeContainerParams{
+			IsTls:  false,
+			Domain: domain,
+			Port:   service.ExposeSettings.ExposePort,
+		})
+	}
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, &network.NetworkingConfig{
 		EndpointsConfig: map[string]*network.EndpointSettings{
 			"databases_default": {},
@@ -368,10 +371,33 @@ func (d *DockerAdapter) RunImage(service domain.Service, domain string) error {
 		return err
 	}
 
-	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
-	fmt.Printf("Container %s is started", con.ID)
+	err = d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to start container: %v", err)
+	}
 
+	fmt.Printf("Container %s is started\n", con.ID)
 	fmt.Println("Run image", service.GetDockerName())
+
+	// Vérifier si le conteneur est bien en cours d'exécution
+	// Attendre un court instant pour laisser le temps au conteneur de démarrer
+	time.Sleep(2 * time.Second)
+
+	containerInfo, err := d.client.ContainerInspect(context.Background(), con.ID)
+	if err != nil {
+		return fmt.Errorf("failed to inspect container: %v", err)
+	}
+
+	if !containerInfo.State.Running {
+		// Si le conteneur n'est pas en cours d'exécution, récupérer les logs pour comprendre pourquoi
+		logs, logErr := d.GetLogsOfContainer(service.GetDockerName())
+		if logErr == nil && len(logs) > 0 {
+			return fmt.Errorf("container failed to start. Logs: %s", strings.Join(logs, "\n"))
+		}
+		return fmt.Errorf("container failed to start. Exit code: %d, Error: %s",
+			containerInfo.State.ExitCode, containerInfo.State.Error)
+	}
+
 	return nil
 }
 
@@ -443,48 +469,50 @@ func (d *DockerAdapter) RunService(service database.ServicesConfig, exposedPort 
 	fmt.Println("Run image", service.Name)
 }
 
-func (d *DockerAdapter) RunServiceWithDeploy(service domain.Service, containerHostName string) {
-	config := container.Config{
-		Image:    service.ImageName,
-		Hostname: containerHostName,
-		Env:      envToSlice(service.Envs),
-		Labels: map[string]string{
-			"traefik.enable": "true",
-		},
-	}
+// func (d *DockerAdapter) RunServiceWithDeploy(service domain.Service, containerHostName string) {
+// 	config := container.Config{
+// 		Image:    service.ImageName,
+// 		Hostname: containerHostName,
+// 		Env:      envToSlice(service.Envs),
+// 		Labels: map[string]string{
+// 			"traefik.enable": "true",
+// 		},
+// 	}
 
-	hostConfig := &container.HostConfig{
-		NetworkMode: "databases_default",
-	}
+// 	hostConfig := &container.HostConfig{
+// 		NetworkMode: "databases_default",
+// 	}
 
-	if service.ExposePort != "" {
-		hostConfig.PortBindings = nat.PortMap{
-			nat.Port(service.ExposePort + "/tcp"): []nat.PortBinding{
-				{
-					HostIP:   "0.0.0.0",
-					HostPort: service.ExposePort,
-				},
-			},
-		}
-	}
+// 	if service.ExposeSettings.ExposePort != "" {
+// 		hostConfig.PortBindings = nat.PortMap{
+// 			nat.Port(service.ExposeSettings.ExposePort + "/tcp"): []nat.PortBinding{
+// 				{
+// 					HostIP:   "0.0.0.0",
+// 					HostPort: service.ExposeSettings.ExposePort,
+// 				},
+// 			},
+// 		}
+// 	}
 
-	con, err := d.client.ContainerCreate(context.Background(), &config, hostConfig,
-		&network.NetworkingConfig{
-			EndpointsConfig: map[string]*network.EndpointSettings{
-				"databases_default": {},
-			},
-		}, &v1.Platform{}, containerHostName)
+// 	d.
 
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+// 	con, err := d.client.ContainerCreate(context.Background(), &config, hostConfig,
+// 		&network.NetworkingConfig{
+// 			EndpointsConfig: map[string]*network.EndpointSettings{
+// 				"databases_default": {},
+// 			},
+// 		}, &v1.Platform{}, containerHostName)
 
-	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
-	fmt.Printf("Container %s is started", con.ID)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		return
+// 	}
 
-	fmt.Println("Run image", service.Name)
-}
+// 	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
+// 	fmt.Printf("Container %s is started", con.ID)
+
+// 	fmt.Println("Run image", service.Name)
+// }
 
 func (d *DockerAdapter) GetLocalHostServer() domain.Server {
 	return domain.Server{

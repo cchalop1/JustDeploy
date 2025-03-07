@@ -32,6 +32,7 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 
 	portEnv := make([]dto.Env, 1)
 
+	// TODO: find the write port
 	portEnv[0] = dto.Env{
 		Name:  "PORT",
 		Value: "80",
@@ -84,7 +85,11 @@ func deployDatabaseService(deployService *service.DeployService, dbService domai
 	fmt.Printf("Deploying database service: %s\n", dbService.GetDockerName())
 
 	// Deploy the database service
-	deployService.DockerAdapter.RunServiceWithDeploy(dbService, dbService.GetDockerName())
+	err = deployService.DockerAdapter.RunImage(dbService, "")
+
+	if err != nil {
+		dbService.Status = "Error"
+	}
 
 	dbService.Status = "Running"
 
@@ -159,15 +164,6 @@ func DeployApplication(deployService *service.DeployService) error {
 			fmt.Printf("Service %s is already running\n", service.Name)
 		}
 	}
-
-	// Deploy all database services from the database configuration
-	// databaseServices := database.GetListOfDatabasesServices()
-	// for _, dbService := range databaseServices {
-	// 	err = deployDatabaseService(deployService, dbService.Name)
-	// 	if err != nil {
-	// 		return fmt.Errorf("error deploying database service: %w", err)
-	// 	}
-	// }
 
 	return nil
 }

@@ -39,10 +39,10 @@ func CreateServiceFromGithubRepo(deployService *service.DeployService, repoUrl s
 		CurrentPath: repoPath,
 		Type:        "github_repo",
 		ImageName:   Name,
-		IsRepo:      true,
 		ExposeSettings: domain.ServiceExposeSettings{
-			IsExposed: true,
-			SubDomain: Name,
+			IsExposed:  true,
+			SubDomain:  Name,
+			ExposePort: "80",
 		},
 	}
 
@@ -50,6 +50,7 @@ func CreateServiceFromGithubRepo(deployService *service.DeployService, repoUrl s
 	if deployService.FilesystemAdapter.FindDockerComposeFile(repoPath) {
 		// Get services from docker-compose
 		services, err := deployService.FilesystemAdapter.GetComposeConfigOfDeploy(repoPath)
+		fmt.Println(services)
 		if err != nil {
 			return domain.Service{}, fmt.Errorf("error reading docker-compose: %w", err)
 		}
@@ -59,7 +60,6 @@ func CreateServiceFromGithubRepo(deployService *service.DeployService, repoUrl s
 			if value.HasBuild() {
 				continue
 			}
-
 			// Create a new service for each additional service (e.g., database)
 			additionalService := domain.Service{
 				Id:           utils.GenerateRandomPassword(5),
@@ -68,20 +68,15 @@ func CreateServiceFromGithubRepo(deployService *service.DeployService, repoUrl s
 				Status:       "ready_to_deploy",
 				ImageName:    value.Image,
 				DockerHubUrl: utils.GetDockerHubUrl(value.Image),
-				IsRepo:       false,
 				ExposeSettings: domain.ServiceExposeSettings{
-					IsExposed: false,
+					IsExposed:  false,
+					ExposePort: value.Ports[0],
 				},
 			}
 
 			// Convert environment variables
-			for envName, envValue := range value.Environment {
-				additionalService.Envs = append(additionalService.Envs, dto.Env{
-					Name:     envName,
-					Value:    envValue,
-					IsSecret: true,
-				})
-			}
+			envVars := value.GetEnvironmentVariables()
+			additionalService.Envs = append(additionalService.Envs, envVars...)
 
 			// Save the additional service
 			deployService.DatabaseAdapter.SaveService(additionalService)
