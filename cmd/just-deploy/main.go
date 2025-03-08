@@ -25,7 +25,7 @@ func main() {
 	isNewVersion := application.CheckIsNewVersion()
 
 	if isNewVersion {
-		fmt.Println("There is a new version available. Please download it by typing: curl -fsSL https://get.justdeploy.app | bash")
+		fmt.Println("There is a new version available. Please download it by typing: curl -fsSL https://raw.githubusercontent.com/cchalop1/JustDeploy/refs/heads/main/install.sh | bash")
 	}
 
 	port := adapter.FindOpenLocalPort(8080)
@@ -101,6 +101,21 @@ func displayServerURL(networkAdapter *adapter.NetworkAdapter, server domain.Serv
 	if isNewServer {
 		url = url + "?welcome=true"
 	}
+
+	yellow := "\033[33m"
+	reset := "\033[0m"
+
+	fmt.Println(yellow + `
+           _           _   _____             _             
+          | |         | | |  __ \           | |            
+          | |_   _ ___| |_| |  | | ___ _ __ | | ___  _   _ 
+      _   | | | | / __| __| |  | |/ _ \ '_ \| |/ _ \| | | |
+     | |__| | |_| \__ \ |_| |__| |  __/ |_) | | (_) | |_| |
+      \____/ \__,_|___/\__|_____/ \___| .__/|_|\___/ \__, |
+                                      | |             __/ |
+                                      |_|            |___/ 
+ 	🛵 JustDeploy - Simplify Development & Deployment 🚀
+	` + reset)
 
 	fmt.Printf("Server is running at %s\n", url)
 }

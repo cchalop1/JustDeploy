@@ -11,6 +11,7 @@ type Application struct {
 
 func NewApplication(port string) *Application {
 	e := echo.New()
+	e.HideBanner = true
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:" + port, "http://localhost:5173"},
