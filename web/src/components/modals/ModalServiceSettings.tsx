@@ -8,6 +8,8 @@ import { Button } from "../ui/button";
 import Status from "../ServerStatus";
 import { deleteServiceByIdApi } from "@/services/deleteServiceApi";
 import { useNotification } from "@/hooks/useNotifications";
+import EnvsManagements from "../forms/EnvsManagements";
+import { Badge } from "../ui/badge";
 
 type ModalServiceSettingsProps = {
   service: Service;
@@ -60,7 +62,7 @@ export default function ModalServiceSettings({
         <div className="p-3 border-t mt-2">
           <div className="flex flex-col justify-between gap-2">
             <div>
-              <Status status={"Installing"}></Status>
+              <Badge variant="outline">{service.status}</Badge>
             </div>
             <ServiceDeploySettings service={service} />
           </div>

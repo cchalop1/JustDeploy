@@ -115,7 +115,10 @@ export default function Home() {
             <ServiceCard
               key={service.id}
               service={service}
-              onClick={() => setServiceSelected(service)}
+              onClick={() => {
+                setServiceSelected(null);
+                setServiceSelected(service);
+              }}
             />
           ))}
           {serviceIsLoading && <ServiceCardLoading />}

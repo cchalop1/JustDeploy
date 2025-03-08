@@ -4,7 +4,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { DeployDto } from "@/services/getDeployListApi";
 import { getDeployByIdApi } from "@/services/getDeployById";
 import DeployButtons from "@/components/DeployButtons";
-import Status from "@/components/ServerStatus";
 import LinkIcon from "@/assets/linkIcon";
 import FolderIcon from "@/assets/FolderIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -73,7 +72,6 @@ export default function DeployPage() {
           fetchDeployById={fetchDeployById}
         />
       </div>
-      <Status status={deploy.status} />
       <div className="flex items-center mt-2 gap-2">
         <LinkIcon />
         <a href={deploy.url} target="_blank" className="underline">

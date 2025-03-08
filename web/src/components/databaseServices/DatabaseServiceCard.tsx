@@ -1,6 +1,5 @@
 import { Service } from "@/services/getServicesByDeployId";
 import { Card } from "../ui/card";
-import Status from "../ServerStatus";
 import { Button } from "../ui/button";
 import { useState } from "react";
 
@@ -30,7 +29,6 @@ export default function DatabaseServiceCard({
         <div className="flex items-center gap-5">
           <img className="w-10" src={service.imageUrl}></img>
           <p className="font-bold">{service.url}</p>
-          <Status status={service.status} />
         </div>
       </div>
       <div className="flex gap-3 items-center">

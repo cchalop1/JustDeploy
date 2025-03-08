@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { ServerDto } from "@/services/getServerListApi";
 import { saveServiceApi } from "@/services/saveServiceApi";
 import { getServerInfoApi } from "@/services/getServerInfoApi";
+import EnvsManagements from "./forms/EnvsManagements";
+import { Env } from "@/services/postFormDetails";
 
 type ServiceDeploySettingsProps = {
   service: Service;
@@ -26,15 +28,18 @@ export default function ServiceDeploySettings({
   const [subDomain, setSubdomain] = useState<string>(
     service.exposeSettings.subDomain
   );
+  const [envs, setLocalEnvs] = useState<Env[]>(service.envs || []);
 
   async function saveService(serviceUpdated: Service) {
     try {
       const res = await saveServiceApi(serviceUpdated);
       console.log(res);
+      // TODO: it can be redeploy
+      // TODO: error when i update envs
     } catch (e) {
       notif.error({
         title: "Error",
-        content: e.message,
+        content: (e as Error).message,
       });
       return;
     }
@@ -74,6 +79,21 @@ export default function ServiceDeploySettings({
     }, 1000);
   }
 
+  function handleEnvsChange(updatedEnvs: Env[]) {
+    setLocalEnvs(updatedEnvs);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = window.setTimeout(() => {
+      saveService({
+        ...service,
+        envs: updatedEnvs,
+      });
+    }, 1000);
+  }
+
   useEffect(() => {
     getServerInfoApi().then(setServer);
   }, []);
@@ -106,6 +126,13 @@ export default function ServiceDeploySettings({
           <Label htmlFor="subdomain" className="text-gray-500">
             Leave the domain empty if you want only the base domain
           </Label>
+
+          <div className="font-bold mt-2 mb-2">Environement variables :</div>
+          <EnvsManagements
+            setEnvs={handleEnvsChange}
+            envs={envs}
+            canEdit={true}
+          />
         </div>
       )}
     </>
