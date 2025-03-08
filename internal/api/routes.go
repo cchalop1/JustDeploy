@@ -27,7 +27,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	app.Echo.GET("/api/services", handlers.GetServicesHandler(deployService))
 	app.Echo.GET("/api/deploy/:deployId/service-docker-compose", handlers.GetServicesFromDockerComposeHandler(deployService))
 
-	app.Echo.PUT("/api/project/:projectId/service", handlers.UpdateServiceHandler(deployService))
+	app.Echo.PUT("/api/service", handlers.UpdateServiceHandler(deployService))
 
 	app.Echo.POST("/api/server/domain", handlers.PostAddDomainToServerById(deployService))
 

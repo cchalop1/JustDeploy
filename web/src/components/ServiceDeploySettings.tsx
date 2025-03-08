@@ -13,10 +13,12 @@ import { Env } from "@/services/postFormDetails";
 
 type ServiceDeploySettingsProps = {
   service: Service;
+  fetchServices: () => Promise<void>;
 };
 
 export default function ServiceDeploySettings({
   service,
+  fetchServices,
 }: ServiceDeploySettingsProps) {
   const notif = useNotification();
   const timeoutRef = useRef<number | null>(null);
@@ -32,11 +34,14 @@ export default function ServiceDeploySettings({
 
   async function saveService(serviceUpdated: Service) {
     try {
+      serviceUpdated = {
+        ...serviceUpdated,
+        status: "ready_to_deploy",
+      };
       const res = await saveServiceApi(serviceUpdated);
-      console.log(res);
-      // TODO: it can be redeploy
-      // TODO: error when i update envs
+      await fetchServices();
     } catch (e) {
+      console.log(e);
       notif.error({
         title: "Error",
         content: (e as Error).message,

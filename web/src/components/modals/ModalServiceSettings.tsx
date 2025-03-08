@@ -5,10 +5,8 @@ import { Service } from "@/services/getServicesByDeployId";
 import ServiceDeploySettings from "../ServiceDeploySettings";
 import { CardIcon } from "../CardIcon";
 import { Button } from "../ui/button";
-import Status from "../ServerStatus";
 import { deleteServiceByIdApi } from "@/services/deleteServiceApi";
 import { useNotification } from "@/hooks/useNotifications";
-import EnvsManagements from "../forms/EnvsManagements";
 import { Badge } from "../ui/badge";
 
 type ModalServiceSettingsProps = {
@@ -64,7 +62,10 @@ export default function ModalServiceSettings({
             <div>
               <Badge variant="outline">{service.status}</Badge>
             </div>
-            <ServiceDeploySettings service={service} />
+            <ServiceDeploySettings
+              service={service}
+              fetchService={fetchServices}
+            />
           </div>
         </div>
         <div className="flex justify-end mt-4">
