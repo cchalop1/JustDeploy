@@ -48,3 +48,19 @@ rm $zip_file
 rm -rf ./bin
 
 echo "✨ Installation complete. You can now run $binary_file"
+
+# Create a log directory
+mkdir -p /var/log/justdeploy
+
+# Run the binary in the background and redirect output to log file
+echo "🚀 Starting JustDeploy in the background..."
+nohup /usr/local/bin/$binary_file > /var/log/justdeploy/justdeploy.log 2>&1 &
+
+# Store the process ID
+PID=$!
+echo "✅ JustDeploy started with PID: $PID"
+echo "📝 Logs are available at: /var/log/justdeploy/justdeploy.log"
+echo "💡 You can view logs in real-time with: tail -f /var/log/justdeploy/justdeploy.log"
+
+tail -f /var/log/justdeploy/justdeploy.log
+
