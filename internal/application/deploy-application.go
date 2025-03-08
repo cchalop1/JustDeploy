@@ -12,6 +12,8 @@ import (
 )
 
 func deployGithubService(deployService *service.DeployService, serviceToDeploy domain.Service, baseDomain string) error {
+	deployService.DockerAdapter.Stop(serviceToDeploy.GetDockerName())
+	// deployService.DockerAdapter.Remove(serviceToDeploy.GetDockerName())
 	fmt.Println("service to deploy : ", serviceToDeploy, baseDomain)
 	pathToDir, err := filepath.Abs(serviceToDeploy.CurrentPath)
 
@@ -72,20 +74,12 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 }
 
 func deployDatabaseService(deployService *service.DeployService, dbService domain.Service) error {
-	isRunning, err := deployService.DockerAdapter.IsServiceRunning(dbService.GetDockerName())
-	if err != nil {
-		return fmt.Errorf("error checking if database service %s is running: %w", dbService.GetDockerName(), err)
-	}
-
-	if isRunning {
-		fmt.Printf("Database service %s is already running\n", dbService.GetDockerName())
-		return nil
-	}
+	deployService.DockerAdapter.Stop(dbService.GetDockerName())
 
 	fmt.Printf("Deploying database service: %s\n", dbService.GetDockerName())
 
 	// Deploy the database service
-	err = deployService.DockerAdapter.RunImage(dbService, "")
+	err := deployService.DockerAdapter.RunImage(dbService, "")
 
 	if err != nil {
 		dbService.Status = "Error"
@@ -149,20 +143,20 @@ func DeployApplication(deployService *service.DeployService) error {
 
 	// Deploy application services that are not already running
 	for _, service := range services {
-		isRunning, err := deployService.DockerAdapter.IsServiceRunning(service.GetDockerName())
-		if err != nil {
-			return fmt.Errorf("error checking if service %s is running: %w", service.Name, err)
-		}
+		// isRunning, err := deployService.DockerAdapter.IsServiceRunning(service.GetDockerName())
+		// if err != nil {
+		// 	return fmt.Errorf("error checking if service %s is running: %w", service.Name, err)
+		// }
 
-		if !isRunning {
-			fmt.Printf("Deploying service: %s\n", service.Name)
-			err = deployOneService(deployService, service, server.Domain)
-			if err != nil {
-				return fmt.Errorf("error deploying service: %w", err)
-			}
-		} else {
-			fmt.Printf("Service %s is already running\n", service.Name)
+		// if !isRunning {
+		fmt.Printf("Deploying service: %s\n", service.Name)
+		err = deployOneService(deployService, service, server.Domain)
+		if err != nil {
+			return fmt.Errorf("error deploying service: %w", err)
 		}
+		// } else {
+		// 	fmt.Printf("Service %s is already running\n", service.Name)
+		// }
 	}
 
 	return nil
