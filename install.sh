@@ -12,6 +12,19 @@ release_url="https://api.github.com/repos/cchalop1/JustDeploy/releases/latest"
 zip_file="justdeploy.zip"
 binary_file="justdeploy"
 
+# Function to install prerequisites
+install_prerequisites() {
+  echo "🔍 Checking for required packages..."
+  if ! command -v unzip &> /dev/null; then
+    echo "📦 Installing unzip..."
+    sudo apt-get update
+    sudo apt-get install -y unzip
+    echo "✅ unzip installed successfully."
+  else
+    echo "✅ unzip is already installed."
+  fi
+}
+
 # Function to check if Docker is installed and install it if not
 install_docker() {
   echo "🔍 Checking if Docker is installed..."
@@ -82,6 +95,9 @@ install_docker_compose() {
   fi
 }
 
+# Install prerequisites first
+install_prerequisites
+
 # Get the current platform and architecture
 platform=$(uname -s | tr '[:upper:]' '[:lower:]')
 arch=$(uname -m)
@@ -115,9 +131,11 @@ response=$(curl -s $release_url)
 download_url=$(echo $response | grep -o "https://github.com/cchalop1/JustDeploy/releases/download/[^ ]*/$zip_file" | head -n 1)
 
 # Download the binary
+echo "📥 Downloading JustDeploy binary..."
 curl -L -o $zip_file $download_url
 
 # Unzip binary file
+echo "📦 Extracting binary..."
 unzip $zip_file
 
 # Make the binary executable
@@ -126,65 +144,67 @@ chmod +x ./bin/$binary_file_arch
 # Move the binary to a system directory (e.g., /usr/local/bin)
 sudo mv ./bin/$binary_file_arch /usr/local/bin/$binary_file
 
+# Clean up downloaded files
 rm $zip_file
-
 rm -rf ./bin
 
-echo "✨ Installation complete. You can now run $binary_file"
+echo "✨ JustDeploy binary installation complete."
 
-# # Create systemd service file
-# echo "🔧 Creating systemd service for JustDeploy..."
-# cat > /tmp/justdeploy.service << EOF
-# [Unit]
-# Description=JustDeploy Service
-# After=network.target
+# Create systemd service file
+echo "🔧 Creating systemd service for JustDeploy..."
+cat > /tmp/justdeploy.service << EOF
+[Unit]
+Description=JustDeploy Service
+After=network.target
 
-# [Service]
-# Type=simple
-# ExecStart=/usr/local/bin/$binary_file
-# Restart=on-failure
-# RestartSec=10
-# StandardOutput=journal
-# StandardError=journal
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/$binary_file
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
 
-# [Install]
-# WantedBy=multi-user.target
-# EOF
+[Install]
+WantedBy=multi-user.target
+EOF
 
-# # Move service file to systemd directory
-# sudo mv /tmp/justdeploy.service /etc/systemd/system/
+# Move service file to systemd directory
+sudo mv /tmp/justdeploy.service /etc/systemd/system/
 
-# # Reload systemd to recognize the new service
-# sudo systemctl daemon-reload
+# Reload systemd to recognize the new service
+sudo systemctl daemon-reload
 
-# # Enable and start the service
-# sudo systemctl enable justdeploy.service
-# sudo systemctl start justdeploy.service
+# Enable and start the service
+sudo systemctl enable justdeploy.service
+sudo systemctl start justdeploy.service
 
-# echo "✅ JustDeploy service has been installed and started"
-# echo "💡 You can check the status with: sudo systemctl status justdeploy.service"
-# echo "📝 View logs with: sudo journalctl -u justdeploy.service -f"
+echo "✅ JustDeploy service has been installed and started"
 
-# # Show the current status
-# sudo systemctl status justdeploy.service
+# Display startup logs to show server IP
+echo "📋 Displaying JustDeploy startup logs (showing server IP):"
+echo "----------------------------------------------------------------"
+sleep 3  # Give the service a moment to start
+sudo journalctl -u justdeploy.service -n 20 --no-pager
+echo "----------------------------------------------------------------"
+echo "💡 You can continue to monitor logs with: sudo journalctl -u justdeploy.service -f"
 
-# # Print summary
-# echo ""
-# echo "🎉 Installation Summary:"
-# echo "------------------------"
-# echo "✅ JustDeploy installed at: /usr/local/bin/$binary_file"
-# echo "✅ Systemd service created: justdeploy.service"
-# if [ "$platform" != "darwin" ]; then
-#   if command -v docker &> /dev/null; then
-#     echo "✅ Docker is installed"
-#   fi
-#   if command -v docker-compose &> /dev/null; then
-#     echo "✅ Docker Compose is installed"
-#   fi
-# fi
-# echo ""
-# echo "🚀 JustDeploy is now running as a system service!"
-# echo "💡 Access the web interface using the URL shown in the service logs"
-# echo "📝 View logs with: sudo journalctl -u justdeploy.service -f"
-# echo ""
-
+# Print summary
+echo ""
+echo "🎉 Installation Summary:"
+echo "------------------------"
+echo "✅ JustDeploy installed at: /usr/local/bin/$binary_file"
+echo "✅ Systemd service created: justdeploy.service"
+if [ "$platform" != "darwin" ]; then
+  if command -v docker &> /dev/null; then
+    echo "✅ Docker is installed"
+  fi
+  if command -v docker-compose &> /dev/null; then
+    echo "✅ Docker Compose is installed"
+  fi
+fi
+echo "✅ Unzip installed (prerequisite)"
+echo ""
+echo "🚀 JustDeploy is now running as a system service!"
+echo "💡 Access the web interface using the URL shown in the service logs above"
+echo ""
