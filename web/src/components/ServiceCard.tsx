@@ -8,15 +8,13 @@ type ServiceCardProps = {
 };
 
 export default function ServiceCard({ service, onClick }: ServiceCardProps) {
-  const isPreconfiguredService = service.type === "database";
-
   return (
     <div
       className={`relative w-80 h-36 bg-white border rounded shadow-lg hover:shadow-xl cursor-pointer p-4 flex flex-col`}
       onClick={onClick}
     >
       <div className="flex justify-between items-center">
-        {isPreconfiguredService && service.imageUrl ? (
+        {service.imageUrl ? (
           <img
             src={service.imageUrl}
             alt={service.name}

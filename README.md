@@ -11,14 +11,14 @@
 
 <br>
 
-JustDeploy is a command-line tool designed to simplify the lives of developers. Install it on your machine to easily manage databases, environments, and projects, all while deploying to any VPS of your choice. Forget about vendor lock-in—deploy wherever you want.
+JustDeploy is a PaaS tool designed to simplify the lives of developers. Install it on your server to easily deploy your projects and databases. It's based on Docker, so JustDeploy fetches your GitHub repository and deploys your application using your Docker and Docker Compose configurations. All while deploying to any VPS of your choice. Forget about vendor lock-in—deploy wherever you want.
 
 <br>
 
 ## Features
 
-- 🚀 **Start a database locally in one click**
-- 🔧 **Manage environments seamlessly**
+- 🚀 **Deploy full-stack apps in one click**
+- ⚙️ **Manage environments seamlessly**
 - 🗂️ **Project Management**
 - 🌐 **Deploy on any VPS**
 - 🔓 **No vendor lock-in—deploy wherever you want**
@@ -39,7 +39,9 @@ Before getting started, ensure your development machine has the following instal
 
 ## Installation
 
-To install JustDeploy on your local machine, run the following command:
+To install JustDeploy on your server, run the following command:
+
+Your server needs to be running Debian.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/cchalop1/JustDeploy/refs/heads/main/install.sh | bash
@@ -49,24 +51,21 @@ curl -fsSL https://raw.githubusercontent.com/cchalop1/JustDeploy/refs/heads/main
 
 ## Usage
 
-After installation, JustDeploy runs locally on your development machine (not on the VPS). Simply run the following command to launch the CLI tool and start managing your projects, databases, and deployments:
-
-```bash
-justdeploy
-```
+After installation, JustDeploy runs on your server and you can access it by clicking on the URL displayed at the end of the installation process. You can then access the web interface from your local computer.
 
 With this, you'll be able to:
 
-- Set up new databases in just one click.
-- Manage and configure environments for your applications.
-- Deploy your project to any VPS of your choice without being locked into a particular provider.
+- Connect your GitHub account
+- Set up new databases in just one click
+- Manage and configure environments for your applications
+- Deploy your project to any VPS of your choice without being locked into a particular provider
+- Enjoy zero-config deployment as JustDeploy extracts information from your GitHub repo to deploy your full-stack application
 
 ---
 
 ## Why Choose JustDeploy?
 
 - **Full Control**: Deploy where you want without extra costs or limitations.
-- **Local First**: Manage everything from your local environment.
 - **Developer-Friendly**: Intuitive and designed to simplify everyday tasks for developers.
 
 ---
@@ -83,4 +82,4 @@ With this, you'll be able to:
 
 ## License
 
-This project is licensed under AGPL-3.0 License. See the [LICENSE](https://github.com/cchalop1/JustDeploy/blob/main/LICENSE) file for more details.
+This project is licensed under the AGPL-3.0 License. See the [LICENSE](https://github.com/cchalop1/JustDeploy/blob/main/LICENSE) file for more details.
