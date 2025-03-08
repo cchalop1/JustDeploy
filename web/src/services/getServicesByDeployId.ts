@@ -1,5 +1,4 @@
 import { callApi } from "./api";
-import { ServerStatusType } from "./getServerListApi";
 import { Env } from "./postFormDetails";
 
 export type ServiceExposeSettings = {

@@ -10,13 +10,17 @@ export default function ModalWelcome() {
           onInit={(typewriter) => {
             typewriter
               .typeString(
-                "Hi, This is where you can create and manage your projects."
+                "Hello, welcome to justdeploy. This is where you'll be able to deploy your project."
               )
               .pauseFor(2500)
-              .typeString(" Click on the + button to create a new project.")
-              .pauseFor(4000)
               .typeString(
-                " We have eraly load your local folder you can now add a other service or a other folder."
+                " Before getting started, you can link a domain name to this server to access your application from the outside."
+              )
+              .pauseFor(2500)
+              .typeString(" Click on settings to specify this domain name.")
+              .pauseFor(2500)
+              .typeString(
+                " Then you can click on the button in the middle of the screen to connect to GitHub and choose a repository to deploy."
               )
               .start();
           }}

@@ -54,6 +54,7 @@ func main() {
 	getArgsOptions()
 
 	server, err := application.CreateCurrentServer(&deployService, port)
+	isNewServer := err == nil
 
 	if err != nil {
 		fmt.Println("Current Server is arealy created :", err)
@@ -70,7 +71,7 @@ func main() {
 		api.InitValidator(app)
 		api.CreateRoutes(app, &deployService)
 		web.CreateMiddlewareWebFiles(app)
-		displayServerURL(networkAdapter, server)
+		displayServerURL(networkAdapter, server, isNewServer)
 		app.StartServer(port)
 	}
 }
@@ -89,11 +90,17 @@ func showHelp() {
 	os.Exit(0)
 }
 
-func displayServerURL(networkAdapter *adapter.NetworkAdapter, server domain.Server) {
+func displayServerURL(networkAdapter *adapter.NetworkAdapter, server domain.Server, isNewServer bool) {
 	url, err := networkAdapter.GetServerURL(server.Port)
 	if err != nil {
 		fmt.Println("Error getting server URL:", err)
 		return
 	}
+
+	// Add welcome parameter if this is a new server
+	if isNewServer {
+		url = url + "?welcome=true"
+	}
+
 	fmt.Printf("Server is running at %s\n", url)
 }
