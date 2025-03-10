@@ -1,0 +1,154 @@
+basePath: /api/v1
+definitions:
+  cchalop1_com_deploy_internal_api_dto.Env:
+    properties:
+      isSecret:
+        type: boolean
+      name:
+        type: string
+      value:
+        type: string
+    type: object
+  cchalop1_com_deploy_internal_api_dto.ResponseApi:
+    properties:
+      message:
+        type: string
+    type: object
+  internal_api_handlers.CreateRepoRequest:
+    properties:
+      repoUrl:
+        type: string
+    type: object
+  internal_api_handlers.ServiceExposeSettings:
+    properties:
+      exposePort:
+        type: string
+      isExposed:
+        type: boolean
+      subDomain:
+        type: string
+      tls:
+        type: boolean
+    type: object
+  internal_api_handlers.ServiceResponse:
+    properties:
+      currentPath:
+        type: string
+      dockerHubUrl:
+        type: string
+      envs:
+        items:
+          $ref: '#/definitions/cchalop1_com_deploy_internal_api_dto.Env'
+        type: array
+      exposeSettings:
+        $ref: '#/definitions/internal_api_handlers.ServiceExposeSettings'
+      id:
+        type: string
+      imageName:
+        type: string
+      imageUrl:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+      url:
+        type: string
+    type: object
+externalDocs:
+  description: GitHub Repository
+  url: https://github.com/cchalop1/JustDeploy
+host: localhost:8080
+info:
+  contact:
+    email: support@justdeploy.dev
+    name: Clément Chalopin
+    url: https://github.com/cchalop1/JustDeploy
+  description: JustDeploy is a PaaS tool designed to simplify the lives of developers.
+    It allows you to easily deploy your projects and databases using Docker. JustDeploy
+    fetches your GitHub repository and deploys your application using your Docker
+    and Docker Compose configurations, all while deploying to any VPS of your choice
+    without vendor lock-in.
+  license:
+    name: AGPL-3.0 License
+    url: https://github.com/cchalop1/JustDeploy/blob/main/LICENSE
+  termsOfService: http://swagger.io/terms/
+  title: JustDeploy API
+  version: "1.0"
+paths:
+  /api/v1/deploy:
+    post:
+      consumes:
+      - application/json
+      description: Deploys the current application using the deploy service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deployed
+          schema:
+            $ref: '#/definitions/cchalop1_com_deploy_internal_api_dto.ResponseApi'
+        "500":
+          description: Internal server error with error message
+          schema:
+            $ref: '#/definitions/cchalop1_com_deploy_internal_api_dto.ResponseApi'
+      summary: Deploy application
+      tags:
+      - deployment
+  /api/v1/repo:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new service by cloning and configuring a GitHub repository
+      parameters:
+      - description: Repository URL information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.CreateRepoRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Service created successfully
+          schema:
+            $ref: '#/definitions/internal_api_handlers.ServiceResponse'
+        "400":
+          description: Bad request - Invalid input
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new service from a GitHub repository
+      tags:
+      - repository
+  /api/v1/services:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all services managed by the application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of services
+          schema:
+            items:
+              $ref: '#/definitions/internal_api_handlers.ServiceResponse'
+            type: array
+      summary: Get all services
+      tags:
+      - services
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
