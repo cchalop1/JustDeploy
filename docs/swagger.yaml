@@ -9,6 +9,11 @@ definitions:
       value:
         type: string
     type: object
+  cchalop1_com_deploy_internal_api_dto.GithubIsConnected:
+    properties:
+      isConnected:
+        type: boolean
+    type: object
   cchalop1_com_deploy_internal_api_dto.ResponseApi:
     properties:
       message:
@@ -97,6 +102,94 @@ paths:
       summary: Deploy application
       tags:
       - deployment
+  /api/v1/github/connect/{code}:
+    post:
+      consumes:
+      - application/json
+      description: Connects the application to GitHub using an authorization code
+      parameters:
+      - description: GitHub authorization code
+        in: path
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Connection result
+          schema: {}
+        "400":
+          description: Code is required
+          schema:
+            type: string
+        "500":
+          description: Error message
+          schema:
+            type: string
+      summary: Connect GitHub application
+      tags:
+      - github
+  /api/v1/github/is-connected:
+    get:
+      consumes:
+      - application/json
+      description: Checks if the application is connected to GitHub
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Connection status
+          schema:
+            $ref: '#/definitions/cchalop1_com_deploy_internal_api_dto.GithubIsConnected'
+      summary: Check GitHub connection status
+      tags:
+      - github
+  /api/v1/github/repos:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all GitHub repositories accessible to the application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of GitHub repositories
+          schema:
+            items: {}
+            type: array
+      summary: Get GitHub repositories
+      tags:
+      - github
+  /api/v1/github/save-token/{installationId}:
+    post:
+      consumes:
+      - application/json
+      description: Saves a GitHub access token using the provided installation ID
+      parameters:
+      - description: GitHub installation ID
+        in: path
+        name: installationId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Access token saved successfully
+          schema:
+            type: string
+        "400":
+          description: Installation ID is required
+          schema:
+            type: string
+        "500":
+          description: Error message
+          schema:
+            type: string
+      summary: Save GitHub access token
+      tags:
+      - github
   /api/v1/repo:
     post:
       consumes:

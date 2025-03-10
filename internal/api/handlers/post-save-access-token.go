@@ -8,6 +8,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// @Summary Save GitHub access token
+// @Description Saves a GitHub access token using the provided installation ID
+// @Tags github
+// @Accept json
+// @Produce json
+// @Param installationId path string true "GitHub installation ID"
+// @Success 200 {string} string "Access token saved successfully"
+// @Failure 400 {string} string "Installation ID is required"
+// @Failure 500 {string} string "Error message"
+// @Router /api/v1/github/save-token/{installationId} [post]
 func PostSaveAccessTokenHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		installationId := c.Param("installationId")

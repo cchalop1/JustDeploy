@@ -9,6 +9,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// @Summary Check GitHub connection status
+// @Description Checks if the application is connected to GitHub
+// @Tags github
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.GithubIsConnected "Connection status"
+// @Router /api/v1/github/is-connected [get]
 func GetGithubIsConnectedHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		isConnected := application.GithubIsConnected(deployService)

@@ -53,6 +53,139 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/github/connect/{code}": {
+            "post": {
+                "description": "Connects the application to GitHub using an authorization code",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "github"
+                ],
+                "summary": "Connect GitHub application",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "GitHub authorization code",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Connection result",
+                        "schema": {}
+                    },
+                    "400": {
+                        "description": "Code is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/github/is-connected": {
+            "get": {
+                "description": "Checks if the application is connected to GitHub",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "github"
+                ],
+                "summary": "Check GitHub connection status",
+                "responses": {
+                    "200": {
+                        "description": "Connection status",
+                        "schema": {
+                            "$ref": "#/definitions/cchalop1_com_deploy_internal_api_dto.GithubIsConnected"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/github/repos": {
+            "get": {
+                "description": "Retrieves all GitHub repositories accessible to the application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "github"
+                ],
+                "summary": "Get GitHub repositories",
+                "responses": {
+                    "200": {
+                        "description": "List of GitHub repositories",
+                        "schema": {
+                            "type": "array",
+                            "items": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/github/save-token/{installationId}": {
+            "post": {
+                "description": "Saves a GitHub access token using the provided installation ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "github"
+                ],
+                "summary": "Save GitHub access token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "GitHub installation ID",
+                        "name": "installationId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Access token saved successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Installation ID is required",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/repo": {
             "post": {
                 "description": "Creates a new service by cloning and configuring a GitHub repository",
@@ -144,6 +277,14 @@ const docTemplate = `{
                 },
                 "value": {
                     "type": "string"
+                }
+            }
+        },
+        "cchalop1_com_deploy_internal_api_dto.GithubIsConnected": {
+            "type": "object",
+            "properties": {
+                "isConnected": {
+                    "type": "boolean"
                 }
             }
         },
