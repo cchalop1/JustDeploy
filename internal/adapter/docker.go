@@ -300,6 +300,59 @@ func (d *DockerAdapter) RunRouter(email string) error {
 	return nil
 }
 
+// RunRouterWithServer runs the Traefik router with server configuration
+func (d *DockerAdapter) RunRouterWithServer(server domain.Server) error {
+	d.Stop(ROUTER_NAME)
+	d.Remove(ROUTER_NAME)
+	d.client.NetworkCreate(context.Background(), "databases_default", types.NetworkCreate{})
+
+	config := container.Config{
+		Image: TRAEFIK_IMAGE,
+		Cmd: []string{
+			"--api.insecure=true",
+			"--providers.docker=true",
+			"--providers.docker.exposedbydefault=false",
+			"--entrypoints.web.address=:80",
+			"--entrypoints.websecure.address=:443",
+			"--certificatesresolvers.myresolver.acme.tlschallenge=true",
+			"--certificatesresolvers.myresolver.acme.email=" + server.Email,
+			"--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json",
+		},
+		ExposedPorts: nat.PortSet{
+			"80/tcp":  struct{}{},
+			"443/tcp": struct{}{},
+		},
+	}
+
+	portMap := nat.PortMap{
+		"80/tcp":  []nat.PortBinding{{HostIP: "", HostPort: "80"}},
+		"443/tcp": []nat.PortBinding{{HostIP: "", HostPort: "443"}},
+	}
+
+	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{
+		Binds: []string{
+			// "/root/letsencrypt:/letsencrypt",
+			"/var/run/docker.sock:/var/run/docker.sock:ro",
+		},
+		NetworkMode:  "default",
+		PortBindings: portMap,
+	}, &network.NetworkingConfig{
+		EndpointsConfig: map[string]*network.EndpointSettings{
+			"databases_default": {},
+		},
+	}, &v1.Platform{}, ROUTER_NAME)
+
+	if err != nil {
+		return err
+	}
+
+	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
+	fmt.Printf("Container %s is started", con.ID)
+
+	fmt.Println("Run image", ROUTER_NAME)
+	return nil
+}
+
 func envToSlice(envVars []dto.Env) []string {
 	envSlice := make([]string, 0, len(envVars))
 	for _, value := range envVars {
@@ -356,6 +409,59 @@ func (d *DockerAdapter) RunImage(service domain.Service, domain string) error {
 	if domain != "" {
 		d.ExposeContainer(&config, ExposeContainerParams{
 			IsTls:  false,
+			Domain: domain,
+			Port:   service.ExposeSettings.ExposePort,
+		})
+	}
+	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, &network.NetworkingConfig{
+		EndpointsConfig: map[string]*network.EndpointSettings{
+			"databases_default": {},
+		},
+	}, &v1.Platform{}, service.GetDockerName())
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	err = d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to start container: %v", err)
+	}
+
+	fmt.Printf("Container %s is started\n", con.ID)
+	fmt.Println("Run image", service.GetDockerName())
+
+	// Vérifier si le conteneur est bien en cours d'exécution
+	// Attendre un court instant pour laisser le temps au conteneur de démarrer
+	time.Sleep(2 * time.Second)
+
+	containerInfo, err := d.client.ContainerInspect(context.Background(), con.ID)
+	if err != nil {
+		return fmt.Errorf("failed to inspect container: %v", err)
+	}
+
+	if !containerInfo.State.Running {
+		// Si le conteneur n'est pas en cours d'exécution, récupérer les logs pour comprendre pourquoi
+		logs, logErr := d.GetLogsOfContainer(service.GetDockerName())
+		if logErr == nil && len(logs) > 0 {
+			return fmt.Errorf("container failed to start. Logs: %s", strings.Join(logs, "\n"))
+		}
+		return fmt.Errorf("container failed to start. Exit code: %d, Error: %s",
+			containerInfo.State.ExitCode, containerInfo.State.Error)
+	}
+
+	return nil
+}
+
+// RunImageWithTLS runs a container with optional TLS settings from the server
+func (d *DockerAdapter) RunImageWithTLS(service domain.Service, domain string, useHttps bool) error {
+	config := d.ConfigContainer(service)
+	d.Stop(service.GetDockerName())
+	d.Remove(service.GetDockerName())
+	if domain != "" {
+		d.ExposeContainer(&config, ExposeContainerParams{
+			IsTls:  useHttps,
 			Domain: domain,
 			Port:   service.ExposeSettings.ExposePort,
 		})

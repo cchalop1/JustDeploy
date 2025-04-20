@@ -60,7 +60,11 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 
 	serviceDomain := serviceToDeploy.Name + "." + baseDomain
 
-	err = deployService.DockerAdapter.RunImage(serviceToDeploy, serviceDomain)
+	// Get the server to check HTTPS settings
+	server := deployService.DatabaseAdapter.GetServer()
+
+	// Use RunImageWithTLS to incorporate HTTPS settings
+	err = deployService.DockerAdapter.RunImageWithTLS(serviceToDeploy, serviceDomain, server.UseHttps)
 
 	if err != nil {
 		return fmt.Errorf("error running Docker image: %w", err)
@@ -78,8 +82,11 @@ func deployDatabaseService(deployService *service.DeployService, dbService domai
 
 	fmt.Printf("Deploying database service: %s\n", dbService.GetDockerName())
 
-	// Deploy the database service
-	err := deployService.DockerAdapter.RunImage(dbService, "")
+	// Get the server to get HTTPS settings
+	server := deployService.DatabaseAdapter.GetServer()
+
+	// Deploy the database service (we pass empty domain since databases don't need external exposure)
+	err := deployService.DockerAdapter.RunImageWithTLS(dbService, "", server.UseHttps)
 
 	if err != nil {
 		dbService.Status = "Error"
@@ -129,7 +136,7 @@ func DeployApplication(deployService *service.DeployService) error {
 			return fmt.Errorf("error pulling Traefik image: %w", err)
 		}
 
-		err = deployService.DockerAdapter.RunRouter("clement.chalopin@gmail.com")
+		err = deployService.DockerAdapter.RunRouterWithServer(server)
 		if err != nil {
 			return fmt.Errorf("error running Traefik router: %w", err)
 		}
