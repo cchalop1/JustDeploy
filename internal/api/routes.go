@@ -2,55 +2,63 @@ package api
 
 import (
 	"cchalop1.com/deploy/internal/api/handlers"
+	"cchalop1.com/deploy/internal/api/middleware"
 	"cchalop1.com/deploy/internal/api/service"
 )
 
 func CreateRoutes(app *Application, deployService *service.DeployService) {
+	// Create API key auth middleware
+	apiKeyAuth := middleware.APIKeyAuth(deployService)
 
-	app.Echo.GET("/api/deploy", handlers.GetDeployListHandler(deployService))
-	app.Echo.GET("/api/server/:id/logs", handlers.GetServerProxyLogs(deployService))
-	app.Echo.GET("/api/server/:id/deploy", handlers.GetDeployByServerIdHandler(deployService))
-	app.Echo.GET("/api/server/info", handlers.GetServerInfoHandler(deployService))
+	// Apply middleware to all routes
+	api := app.Echo.Group("")
+	api.Use(apiKeyAuth)
 
-	app.Echo.POST("/api/deploy/config/", handlers.GetDeployConfigHandler(deployService))
-	app.Echo.POST("/api/deploy/config/:deployId", handlers.GetDeployConfigHandler(deployService))
+	// API routes
+	api.GET("/api/deploy", handlers.GetDeployListHandler(deployService))
+	api.GET("/api/server/:id/logs", handlers.GetServerProxyLogs(deployService))
+	api.GET("/api/server/:id/deploy", handlers.GetDeployByServerIdHandler(deployService))
+	api.GET("/api/server/info", handlers.GetServerInfoHandler(deployService))
 
-	app.Echo.PUT("/api/deploy/edit", handlers.EditDeployementHandler(deployService))
-	app.Echo.POST("/api/server", handlers.ConnectNewServer(deployService))
+	api.POST("/api/deploy/config/", handlers.GetDeployConfigHandler(deployService))
+	api.POST("/api/deploy/config/:deployId", handlers.GetDeployConfigHandler(deployService))
 
-	app.Echo.DELETE("/api/deploy/remove/:id", handlers.RemoveApplicationHandler(deployService))
-	app.Echo.POST("/api/deploy/start/:id", handlers.StartAppHandler(deployService))
-	app.Echo.POST("/api/deploy/stop/:id", handlers.StopAppHandler(deployService))
-	app.Echo.POST("/api/deploy/redeploy/:id", handlers.ReDeployAppHandler(deployService))
+	api.PUT("/api/deploy/edit", handlers.EditDeployementHandler(deployService))
+	api.POST("/api/server", handlers.ConnectNewServer(deployService))
 
-	app.Echo.GET("/api/service/:productId", handlers.GetServicesListHandler(deployService))
-	app.Echo.GET("/api/services", handlers.GetServicesHandler(deployService))
-	app.Echo.GET("/api/deploy/:deployId/service-docker-compose", handlers.GetServicesFromDockerComposeHandler(deployService))
+	api.DELETE("/api/deploy/remove/:id", handlers.RemoveApplicationHandler(deployService))
+	api.POST("/api/deploy/start/:id", handlers.StartAppHandler(deployService))
+	api.POST("/api/deploy/stop/:id", handlers.StopAppHandler(deployService))
+	api.POST("/api/deploy/redeploy/:id", handlers.ReDeployAppHandler(deployService))
 
-	app.Echo.PUT("/api/service", handlers.UpdateServiceHandler(deployService))
+	api.GET("/api/service/:productId", handlers.GetServicesListHandler(deployService))
+	api.GET("/api/services", handlers.GetServicesHandler(deployService))
+	api.GET("/api/deploy/:deployId/service-docker-compose", handlers.GetServicesFromDockerComposeHandler(deployService))
 
-	app.Echo.POST("/api/server/domain", handlers.PostAddDomainToServerById(deployService))
+	api.PUT("/api/service", handlers.UpdateServiceHandler(deployService))
 
-	app.Echo.DELETE("/api/service/:serviceId", handlers.DeleteServiceHandler(deployService))
+	api.POST("/api/server/domain", handlers.PostAddDomainToServerById(deployService))
 
-	app.Echo.GET("/api/server/:id/loading", handlers.SubscriptionCreateServerLoadingState(deployService))
-	app.Echo.GET("/api/deploy/:id/loading", handlers.SubscriptionCreateDeployLoadingState(deployService))
+	api.DELETE("/api/service/:serviceId", handlers.DeleteServiceHandler(deployService))
 
-	app.Echo.GET("/api/version", handlers.GetVersionHandler(deployService))
+	api.GET("/api/server/:id/loading", handlers.SubscriptionCreateServerLoadingState(deployService))
+	api.GET("/api/deploy/:id/loading", handlers.SubscriptionCreateDeployLoadingState(deployService))
+
+	api.GET("/api/version", handlers.GetVersionHandler(deployService))
 
 	// Github
-	app.Echo.GET("/api/github/is-connected", handlers.GetGithubIsConnectedHandler(deployService))
+	api.GET("/api/github/is-connected", handlers.GetGithubIsConnectedHandler(deployService))
 
-	app.Echo.POST("/api/github/connect/:code", handlers.PostConnectGithubAppHandler(deployService))
+	api.POST("/api/github/connect/:code", handlers.PostConnectGithubAppHandler(deployService))
 
-	app.Echo.GET("/api/github/repos", handlers.GetGithubRepos(deployService))
+	api.GET("/api/github/repos", handlers.GetGithubRepos(deployService))
 
-	app.Echo.POST("/api/github/save-access-token/:installationId", handlers.PostSaveAccessTokenHandler(deployService))
+	api.POST("/api/github/save-access-token/:installationId", handlers.PostSaveAccessTokenHandler(deployService))
 
 	// Create Service
-	// app.Echo.POST("/api/database/create", handlers.PostCreateDatabaseHandler(deployService))
-	app.Echo.POST("/api/repo/create", handlers.PostCreateRepoHandler(deployService))
+	// api.POST("/api/database/create", handlers.PostCreateDatabaseHandler(deployService))
+	api.POST("/api/repo/create", handlers.PostCreateRepoHandler(deployService))
 
 	// Deploy
-	app.Echo.POST("/api/deploy", handlers.PostDeployHandler(deployService))
+	api.POST("/api/deploy", handlers.PostDeployHandler(deployService))
 }

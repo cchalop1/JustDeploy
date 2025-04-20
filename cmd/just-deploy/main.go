@@ -74,7 +74,7 @@ func main() {
 
 	getArgsOptions()
 
-	server, err := application.CreateCurrentServer(&deployService, port)
+	server, apiKey, err := application.CreateCurrentServer(&deployService, port)
 	isNewServer := err == nil
 
 	if err != nil {
@@ -92,7 +92,7 @@ func main() {
 		api.InitValidator(app)
 		api.CreateRoutes(app, &deployService)
 		web.CreateMiddlewareWebFiles(app)
-		displayServerURL(networkAdapter, server, isNewServer)
+		displayServerURL(networkAdapter, server, isNewServer, apiKey)
 		app.StartServer(port)
 	}
 }
@@ -111,7 +111,7 @@ func showHelp() {
 	os.Exit(0)
 }
 
-func displayServerURL(networkAdapter *adapter.NetworkAdapter, server domain.Server, isNewServer bool) {
+func displayServerURL(networkAdapter *adapter.NetworkAdapter, server domain.Server, isNewServer bool, apiKey string) {
 	url, err := networkAdapter.GetServerURL(server.Port)
 	if err != nil {
 		fmt.Println("Error getting server URL:", err)
@@ -121,6 +121,15 @@ func displayServerURL(networkAdapter *adapter.NetworkAdapter, server domain.Serv
 	// Add welcome parameter if this is a new server
 	if isNewServer {
 		url = url + "?welcome=true"
+	}
+
+	// Add API key parameter if available
+	if apiKey != "" {
+		if isNewServer {
+			url = url + "&api_key=" + apiKey
+		} else {
+			url = url + "?api_key=" + apiKey
+		}
 	}
 
 	yellow := "\033[33m"
