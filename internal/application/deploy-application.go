@@ -58,7 +58,8 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 		}
 	}
 
-	serviceDomain := serviceToDeploy.Name + "." + baseDomain
+	// serviceDomain := serviceToDeploy.Name + "." + baseDomain
+	serviceDomain := baseDomain
 
 	// Get the server to check HTTPS settings
 	server := deployService.DatabaseAdapter.GetServer()
