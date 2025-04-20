@@ -331,7 +331,7 @@ func (d *DockerAdapter) RunRouterWithServer(server domain.Server) error {
 
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{
 		Binds: []string{
-			// "/root/letsencrypt:/letsencrypt",
+			"/root/letsencrypt:/letsencrypt",
 			"/var/run/docker.sock:/var/run/docker.sock:ro",
 		},
 		NetworkMode:  "default",
