@@ -18,6 +18,7 @@ type Server struct {
 	CreatedDate time.Time `json:"createdDate"`
 	Status      string    `json:"status"`
 	Email       string    `json:"email"`
+	UseHttps    bool      `json:"useHttps"`
 }
 
 type ServerCertsPath struct {
@@ -28,11 +29,13 @@ type ServerCertsPath struct {
 
 func (s *Server) ToServerDto() dto.ServerDto {
 	return dto.ServerDto{
-		Id:     s.Id,
-		Name:   s.Name,
-		Ip:     s.Ip,
-		Domain: s.Domain,
-		Status: s.Status,
+		Id:       s.Id,
+		Name:     s.Name,
+		Ip:       s.Ip,
+		Domain:   s.Domain,
+		Status:   s.Status,
+		UseHttps: s.UseHttps,
+		Email:    s.Email,
 	}
 }
 

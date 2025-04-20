@@ -10,9 +10,11 @@ type ConnectNewServerDto struct {
 }
 
 type ServerDto struct {
-	Id     string `json:"id"`
-	Name   string `json:"name"`
-	Ip     string `json:"ip"`
-	Domain string `json:"domain"`
-	Status string `json:"status"`
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	Ip       string `json:"ip"`
+	Domain   string `json:"domain"`
+	Status   string `json:"status"`
+	UseHttps bool   `json:"useHttps"`
+	Email    string `json:"email"`
 }

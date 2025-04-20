@@ -38,6 +38,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	api.PUT("/api/service", handlers.UpdateServiceHandler(deployService))
 
 	api.POST("/api/server/domain", handlers.PostAddDomainToServerById(deployService))
+	api.PUT("/api/server/tls-settings", handlers.PutTlsServerSettings(deployService))
 
 	api.DELETE("/api/service/:serviceId", handlers.DeleteServiceHandler(deployService))
 

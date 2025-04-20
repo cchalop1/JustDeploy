@@ -14,6 +14,8 @@ export type ServerDto = {
   domain: string;
   createdDate: string;
   status: ServerStatusType;
+  useHttps?: boolean;
+  email?: string;
 };
 
 export async function getServersListApi(): Promise<Array<ServerDto>> {
