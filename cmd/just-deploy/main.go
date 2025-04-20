@@ -90,8 +90,8 @@ func main() {
 		os.Exit(0)
 	} else {
 		api.InitValidator(app)
-		api.CreateRoutes(app, &deployService)
 		web.CreateMiddlewareWebFiles(app)
+		api.CreateRoutes(app, &deployService)
 		displayServerURL(networkAdapter, server, isNewServer, apiKey)
 		app.StartServer(port)
 	}

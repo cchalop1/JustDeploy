@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
@@ -12,6 +13,14 @@ import (
 func APIKeyAuth(deployService *service.DeployService) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			path := c.Request().URL.Path
+
+			if strings.HasPrefix(path, "/github/auth") ||
+				!strings.HasPrefix(path, "/api") ||
+				strings.HasPrefix(path, "/api/github/connect") {
+				return next(c)
+			}
+
 			// Get settings from database
 			settings := deployService.DatabaseAdapter.GetSettings()
 

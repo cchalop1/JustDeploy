@@ -69,10 +69,10 @@ export default function Home() {
 
   async function fetchServices() {
     // Only fetch services if authenticated
-    if (isAuthenticated) {
-      const services = await getServicesApi();
-      setServices(services);
-    }
+    // if (isAuthenticated) {
+    const services = await getServicesApi();
+    setServices(services);
+    // }
   }
 
   async function getAuthKey() {

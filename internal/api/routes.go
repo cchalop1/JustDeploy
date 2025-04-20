@@ -10,7 +10,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	// Create API key auth middleware
 	apiKeyAuth := middleware.APIKeyAuth(deployService)
 
-	// Apply middleware to all routes
+	// Apply middleware to all API routes
 	api := app.Echo.Group("")
 	api.Use(apiKeyAuth)
 
