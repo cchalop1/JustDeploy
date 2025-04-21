@@ -156,6 +156,18 @@ export default function ModalGlobalSettings({
                   <p>
                     This configuration will direct your domain to this server.
                   </p>
+                  <p className="mt-2">
+                    Additionally, create a wildcard CNAME record that points to
+                    your domain:
+                  </p>
+                  <code className="bg-blue-100 px-2 py-1 rounded font-mono text-blue-900 block my-2">
+                    *.{domain + "." || "example.com."} →{" "}
+                    {domain + "." || "example.com."}
+                  </code>
+                  <p>
+                    This allows subdomains to work with your server
+                    automatically.
+                  </p>
                 </div>
               </div>
             </Card>

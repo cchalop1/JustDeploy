@@ -33,17 +33,13 @@ func CreateServiceFromGithubRepo(deployService *service.DeployService, repoUrl s
 
 	// Create the main application service
 	service := domain.Service{
-		Id:          utils.GenerateRandomPassword(5),
-		Status:      "ready_to_deploy",
-		Name:        Name,
-		CurrentPath: repoPath,
-		Type:        "github_repo",
-		ImageName:   Name,
-		ExposeSettings: domain.ServiceExposeSettings{
-			IsExposed:  true,
-			SubDomain:  Name,
-			ExposePort: "80",
-		},
+		Id:             utils.GenerateRandomPassword(5),
+		Status:         "ready_to_deploy",
+		Name:           Name,
+		CurrentPath:    repoPath,
+		Type:           "github_repo",
+		ImageName:      Name,
+		ExposeSettings: BuildExposeSettings(deployService, Name, true, "80"),
 	}
 
 	// Check for docker-compose file

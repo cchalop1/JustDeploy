@@ -11,9 +11,28 @@ import (
 	"cchalop1.com/deploy/internal/domain"
 )
 
+// buildServiceDomain constructs the appropriate domain for a service based on its ExposeSettings.
+//
+// The domain is constructed as follows:
+// - If ExposeSettings.SubDomain is empty: domain will be just the baseDomain (e.g. "example.com")
+// - If ExposeSettings.SubDomain is provided: domain will be subdomain.baseDomain (e.g. "api.example.com")
+//
+// This allows services to be deployed either at the root domain or at a subdomain, consistent
+// with how Service.SetUrl handles domain construction.
+func buildServiceDomain(service domain.Service, baseDomain string) string {
+	subDomain := service.ExposeSettings.SubDomain
+
+	if subDomain == "" {
+		return baseDomain // No subdomain - deploy at root domain (e.g. "example.com")
+	}
+
+	return subDomain + "." + baseDomain // With subdomain (e.g. "api.example.com")
+}
+
 func deployGithubService(deployService *service.DeployService, serviceToDeploy domain.Service, baseDomain string) error {
+	// Stop any existing instance of the service
 	deployService.DockerAdapter.Stop(serviceToDeploy.GetDockerName())
-	// deployService.DockerAdapter.Remove(serviceToDeploy.GetDockerName())
+
 	fmt.Println("service to deploy : ", serviceToDeploy, baseDomain)
 	pathToDir, err := filepath.Abs(serviceToDeploy.CurrentPath)
 
@@ -45,6 +64,7 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 
 	serviceToDeploy.Envs = append(portEnv, serviceToDeploy.Envs...)
 
+	// Build the appropriate image based on whether a Dockerfile exists
 	isDockerfile := deployService.FilesystemAdapter.FindDockerFile(serviceToDeploy.CurrentPath)
 	if isDockerfile {
 		err := deployService.DockerAdapter.BuildImage(serviceToDeploy)
@@ -58,27 +78,32 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 		}
 	}
 
-	// serviceDomain := serviceToDeploy.Name + "." + baseDomain
-	serviceDomain := baseDomain
+	// Construct the domain for the service based on ExposeSettings
+	serviceDomain := buildServiceDomain(serviceToDeploy, baseDomain)
 
 	// Get the server to check HTTPS settings
 	server := deployService.DatabaseAdapter.GetServer()
 
-	// Use RunImageWithTLS to incorporate HTTPS settings
+	// Run the container with the appropriate domain and TLS settings
 	err = deployService.DockerAdapter.RunImageWithTLS(serviceToDeploy, serviceDomain, server.UseHttps)
 
 	if err != nil {
 		return fmt.Errorf("error running Docker image: %w", err)
 	}
 
+	// Update and save service status
 	serviceToDeploy.Status = "Running"
+
+	// Set the service URL - use baseDomain as SetUrl will handle subdomain logic internally
 	serviceToDeploy.SetUrl(baseDomain)
+
 	deployService.DatabaseAdapter.SaveService(serviceToDeploy)
 
 	return nil
 }
 
 func deployDatabaseService(deployService *service.DeployService, dbService domain.Service) error {
+	// Stop any existing instance of the service
 	deployService.DockerAdapter.Stop(dbService.GetDockerName())
 
 	fmt.Printf("Deploying database service: %s\n", dbService.GetDockerName())
@@ -91,25 +116,31 @@ func deployDatabaseService(deployService *service.DeployService, dbService domai
 
 	if err != nil {
 		dbService.Status = "Error"
+		deployService.DatabaseAdapter.SaveService(dbService)
+		return fmt.Errorf("error running database container: %w", err)
 	}
 
+	// Update and save service status
 	dbService.Status = "Running"
-
-	// Save the service to the database
 	deployService.DatabaseAdapter.SaveService(dbService)
 
 	return nil
 }
 
+// deployOneService routes the service deployment to the appropriate handler based on service type
 func deployOneService(deployService *service.DeployService, serviceToDeploy domain.Service, baseDomain string) error {
-	fmt.Println(serviceToDeploy)
+	fmt.Printf("Initiating deployment of service: %s (type: %s)\n", serviceToDeploy.Name, serviceToDeploy.Type)
+
 	switch serviceToDeploy.Type {
 	case "database":
+		// For database services, no domain/subdomain is needed
 		return deployDatabaseService(deployService, serviceToDeploy)
 	case "github_repo":
+		// For GitHub repos, we use the domain/subdomain pattern
 		return deployGithubService(deployService, serviceToDeploy, baseDomain)
 	default:
 		// For backward compatibility or other service types, default to GitHub repo deployment
+		fmt.Printf("Unspecified service type '%s', defaulting to GitHub repo deployment\n", serviceToDeploy.Type)
 		return deployGithubService(deployService, serviceToDeploy, baseDomain)
 	}
 }

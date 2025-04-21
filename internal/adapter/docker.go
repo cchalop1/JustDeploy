@@ -248,58 +248,6 @@ func (d *DockerAdapter) PullImage(image string) error {
 	return nil
 }
 
-func (d *DockerAdapter) RunRouter(email string) error {
-	d.Stop(ROUTER_NAME)
-	d.Remove(ROUTER_NAME)
-	d.client.NetworkCreate(context.Background(), "databases_default", types.NetworkCreate{})
-
-	config := container.Config{
-		Image: TRAEFIK_IMAGE,
-		Cmd: []string{
-			"--api.insecure=true",
-			"--providers.docker=true",
-			"--providers.docker.exposedbydefault=false",
-			"--entrypoints.web.address=:80",
-			"--entrypoints.websecure.address=:443",
-			"--certificatesresolvers.myresolver.acme.tlschallenge=true",
-			"--certificatesresolvers.myresolver.acme.email=" + email,
-			"--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json",
-		},
-		ExposedPorts: nat.PortSet{
-			"80/tcp":  struct{}{},
-			"443/tcp": struct{}{},
-		},
-	}
-
-	portMap := nat.PortMap{
-		"80/tcp":  []nat.PortBinding{{HostIP: "", HostPort: "80"}},
-		"443/tcp": []nat.PortBinding{{HostIP: "", HostPort: "443"}},
-	}
-
-	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{
-		Binds: []string{
-			// "/root/letsencrypt:/letsencrypt",
-			"/var/run/docker.sock:/var/run/docker.sock:ro",
-		},
-		NetworkMode:  "default",
-		PortBindings: portMap,
-	}, &network.NetworkingConfig{
-		EndpointsConfig: map[string]*network.EndpointSettings{
-			"databases_default": {},
-		},
-	}, &v1.Platform{}, ROUTER_NAME)
-
-	if err != nil {
-		return err
-	}
-
-	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
-	fmt.Printf("Container %s is started", con.ID)
-
-	fmt.Println("Run image", ROUTER_NAME)
-	return nil
-}
-
 // RunRouterWithServer runs the Traefik router with server configuration
 func (d *DockerAdapter) RunRouterWithServer(server domain.Server) error {
 	d.Stop(ROUTER_NAME)
@@ -331,7 +279,7 @@ func (d *DockerAdapter) RunRouterWithServer(server domain.Server) error {
 
 	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{
 		Binds: []string{
-			"/root/letsencrypt:/letsencrypt",
+			"letsencrypt:/letsencrypt",
 			"/var/run/docker.sock:/var/run/docker.sock:ro",
 		},
 		NetworkMode:  "default",
@@ -402,6 +350,7 @@ func (d *DockerAdapter) ExposeContainer(containersConfig *container.Config, expo
 	containersConfig.Labels = Labels
 }
 
+// TODO: to remove
 func (d *DockerAdapter) RunImage(service domain.Service, domain string) error {
 	config := d.ConfigContainer(service)
 	d.Stop(service.GetDockerName())

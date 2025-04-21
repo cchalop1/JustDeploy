@@ -17,36 +17,6 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	log.Println("Starting ConnectAndSetupServer function")
 	sshAdapter := adapter.NewSshAdapter()
 
-	// eventsList := []adapter.EventServer{
-	// 	{
-	// 		Title:     "Connect to the server by ssh",
-	// 		EventType: "create_server",
-	// 	},
-	// 	{
-	// 		Title:     "Install packages and docker",
-	// 		EventType: "create_server",
-	// 	},
-	// 	{
-	// 		Title:     "Genereates certificates",
-	// 		EventType: "create_server",
-	// 	},
-	// 	{
-	// 		Title:     "Setting up docker port",
-	// 		EventType: "create_server",
-	// 	},
-	// 	{
-	// 		Title:     "Connect to the docker client",
-	// 		EventType: "create_server",
-	// 	},
-	// }
-
-	// eventWrapper := adapter.EventServerWrapper{
-	// 	ServerName:       server.Name,
-	// 	ServerId:         server.Id,
-	// 	EventServersList: eventsList,
-	// 	CurrentStep:      0,
-	// }
-
 	// Connect to the server by ssh
 	log.Println("Connecting to the server via SSH")
 	sshAdapter.Connect(dto.ConnectNewServerDto{
@@ -57,9 +27,6 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	})
 
 	// Install packages and docker
-
-	// eventWrapper.NextStep()
-	// deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
 	log.Println("Checking if Docker is installed")
 	dockerIsInstalled := checkIfDockerIsIntalled(sshAdapter)
@@ -79,11 +46,6 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 		log.Println("Docker is already installed")
 	}
 
-	// Genereates certificates
-
-	// eventWrapper.NextStep()
-	// deployService.EventAdapter.SendNewServerEvent(eventWrapper)
-
 	log.Println("Setting up Docker certificates")
 	err = setupDockerCertificates(sshAdapter, server)
 	if err != nil {
@@ -94,10 +56,6 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 
 	log.Println("Copying certificates")
 	copyCertificates(sshAdapter, server.Id)
-
-	// Setting up docker port
-	// eventWrapper.NextStep()
-	// deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
 	log.Println("Opening Docker port")
 	err = openPortDockerConfig(sshAdapter)
@@ -112,11 +70,6 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 
 	log.Println("Creating new Docker adapter")
 	adapterDocker := adapter.NewDockerAdapter()
-
-	// Connect to the docker client
-
-	// eventWrapper.NextStep()
-	// deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
 	log.Println("Connecting to Docker client")
 	err = adapterDocker.ConnectClient(server)
@@ -136,20 +89,9 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 		return nil
 	}
 
-	// Run the traefik router
-	err = adapterDocker.RunRouter(server.Email)
-
-	if err != nil {
-		log.Printf("Error running the traefik router: %v", err)
-		return nil
-	}
-
 	log.Println("Updating server status")
 	server.Status = "Runing"
 	deployService.DatabaseAdapter.SaveServer(server)
-
-	// eventWrapper.NextStep()
-	// deployService.EventAdapter.SendNewServerEvent(eventWrapper)
 
 	return nil
 }
