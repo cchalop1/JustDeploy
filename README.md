@@ -44,7 +44,7 @@ To install JustDeploy on your server, run the following command:
 Your server needs to be running Debian.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/cchalop1/JustDeploy/refs/heads/main/install.sh | bash
+curl -fsSL https://get.justdeploy.app | bash
 ```
 
 ---
