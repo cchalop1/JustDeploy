@@ -12,6 +12,39 @@ release_url="https://api.github.com/repos/cchalop1/JustDeploy/releases/latest"
 zip_file="justdeploy.zip"
 binary_file="justdeploy"
 
+# Function to check if JustDeploy is already installed and stop the service if needed
+check_existing_installation() {
+  echo "🔍 Checking for existing JustDeploy installation..."
+  
+  if [ -f "/usr/local/bin/$binary_file" ]; then
+    echo "🔄 JustDeploy is already installed. Preparing for reinstallation..."
+    
+    # Check if the service is running and stop it
+    if systemctl is-active --quiet justdeploy.service; then
+      echo "🛑 Stopping JustDeploy service..."
+      sudo systemctl stop justdeploy.service
+      echo "✅ JustDeploy service stopped."
+    fi
+    
+    # Disable the service
+    if systemctl is-enabled --quiet justdeploy.service; then
+      echo "🔧 Disabling JustDeploy service..."
+      sudo systemctl disable justdeploy.service
+      echo "✅ JustDeploy service disabled."
+    fi
+    
+    echo "🗑️ Removing existing JustDeploy binary..."
+    sudo rm -f /usr/local/bin/$binary_file
+    
+    # Return true (0) to indicate reinstallation is needed
+    return 0
+  else
+    echo "🆕 No existing JustDeploy installation detected. Proceeding with fresh installation."
+    # Return false (1) to indicate fresh installation
+    return 1
+  fi
+}
+
 # Function to install prerequisites
 install_prerequisites() {
   echo "🔍 Checking for required packages..."
@@ -95,7 +128,11 @@ install_docker_compose() {
   fi
 }
 
-# Install prerequisites first
+# Check for existing installation first
+check_existing_installation
+is_reinstall=$?
+
+# Install prerequisites
 install_prerequisites
 
 # Get the current platform and architecture
@@ -136,7 +173,7 @@ curl -L -o $zip_file $download_url
 
 # Unzip binary file
 echo "📦 Extracting binary..."
-unzip $zip_file
+unzip -o $zip_file
 
 # Make the binary executable
 chmod +x ./bin/$binary_file_arch
@@ -148,7 +185,11 @@ sudo mv ./bin/$binary_file_arch /usr/local/bin/$binary_file
 rm $zip_file
 rm -rf ./bin
 
-echo "✨ JustDeploy binary installation complete."
+if [ $is_reinstall -eq 0 ]; then
+  echo "✨ JustDeploy binary reinstallation complete."
+else
+  echo "✨ JustDeploy binary installation complete."
+fi
 
 # Create systemd service file
 echo "🔧 Creating systemd service for JustDeploy..."
@@ -179,7 +220,11 @@ sudo systemctl daemon-reload
 sudo systemctl enable justdeploy.service
 sudo systemctl start justdeploy.service
 
-echo "✅ JustDeploy service has been installed and started"
+if [ $is_reinstall -eq 0 ]; then
+  echo "✅ JustDeploy service has been reinstalled and started"
+else
+  echo "✅ JustDeploy service has been installed and started"
+fi
 
 # Display startup logs to show server IP
 echo "📋 Displaying JustDeploy startup logs (showing server IP):"
@@ -191,7 +236,11 @@ echo "💡 You can continue to monitor logs with: sudo journalctl -u justdeploy.
 
 # Print summary
 echo ""
-echo "🎉 Installation Summary:"
+if [ $is_reinstall -eq 0 ]; then
+  echo "🎉 Reinstallation Summary:"
+else
+  echo "🎉 Installation Summary:"
+fi
 echo "------------------------"
 echo "✅ JustDeploy installed at: /usr/local/bin/$binary_file"
 echo "✅ Systemd service created: justdeploy.service"
