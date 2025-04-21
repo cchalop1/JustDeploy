@@ -33,12 +33,18 @@ func CreateServiceFromGithubRepo(deployService *service.DeployService, repoUrl s
 
 	// Create the main application service
 	service := domain.Service{
-		Id:             utils.GenerateRandomPassword(5),
-		Status:         "ready_to_deploy",
-		Name:           Name,
-		CurrentPath:    repoPath,
-		Type:           "github_repo",
-		ImageName:      Name,
+		Id:          utils.GenerateRandomPassword(5),
+		Status:      "ready_to_deploy",
+		Name:        Name,
+		CurrentPath: repoPath,
+		Type:        "github_repo",
+		ImageName:   Name,
+		Envs: []dto.Env{
+			dto.Env{
+				Name:  "",
+				Value: "",
+			},
+		},
 		ExposeSettings: BuildExposeSettings(deployService, Name, true, "80"),
 	}
 

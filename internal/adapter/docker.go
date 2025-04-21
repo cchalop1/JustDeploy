@@ -350,59 +350,6 @@ func (d *DockerAdapter) ExposeContainer(containersConfig *container.Config, expo
 	containersConfig.Labels = Labels
 }
 
-// TODO: to remove
-func (d *DockerAdapter) RunImage(service domain.Service, domain string) error {
-	config := d.ConfigContainer(service)
-	d.Stop(service.GetDockerName())
-	d.Remove(service.GetDockerName())
-	if domain != "" {
-		d.ExposeContainer(&config, ExposeContainerParams{
-			IsTls:  false,
-			Domain: domain,
-			Port:   service.ExposeSettings.ExposePort,
-		})
-	}
-	con, err := d.client.ContainerCreate(context.Background(), &config, &container.HostConfig{}, &network.NetworkingConfig{
-		EndpointsConfig: map[string]*network.EndpointSettings{
-			"databases_default": {},
-		},
-	}, &v1.Platform{}, service.GetDockerName())
-
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	err = d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to start container: %v", err)
-	}
-
-	fmt.Printf("Container %s is started\n", con.ID)
-	fmt.Println("Run image", service.GetDockerName())
-
-	// Vérifier si le conteneur est bien en cours d'exécution
-	// Attendre un court instant pour laisser le temps au conteneur de démarrer
-	time.Sleep(2 * time.Second)
-
-	containerInfo, err := d.client.ContainerInspect(context.Background(), con.ID)
-	if err != nil {
-		return fmt.Errorf("failed to inspect container: %v", err)
-	}
-
-	if !containerInfo.State.Running {
-		// Si le conteneur n'est pas en cours d'exécution, récupérer les logs pour comprendre pourquoi
-		logs, logErr := d.GetLogsOfContainer(service.GetDockerName())
-		if logErr == nil && len(logs) > 0 {
-			return fmt.Errorf("container failed to start. Logs: %s", strings.Join(logs, "\n"))
-		}
-		return fmt.Errorf("container failed to start. Exit code: %d, Error: %s",
-			containerInfo.State.ExitCode, containerInfo.State.Error)
-	}
-
-	return nil
-}
-
 // RunImageWithTLS runs a container with optional TLS settings from the server
 func (d *DockerAdapter) RunImageWithTLS(service domain.Service, domain string, useHttps bool) error {
 	config := d.ConfigContainer(service)
