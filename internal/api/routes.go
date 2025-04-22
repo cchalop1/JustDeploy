@@ -56,6 +56,8 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	api.POST("/api/github/save-access-token/:installationId", handlers.PostSaveAccessTokenHandler(deployService))
 
+	api.POST("/github/events", handlers.PostGithubEvent(deployService))
+
 	// Create Service
 	api.POST("/api/database/create", handlers.PostCreateDatabaseHandler(deployService))
 	api.POST("/api/repo/create", handlers.PostCreateRepoHandler(deployService))
