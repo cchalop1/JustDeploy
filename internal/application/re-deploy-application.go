@@ -1,34 +1,31 @@
 package application
 
 import (
+	"errors"
+
 	"cchalop1.com/deploy/internal/api/service"
 )
 
-func ReDeployApplication(deployService *service.DeployService, deployId string) error {
-	// deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
-	// if err != nil {
-	// 	return err
-	// }
+func ReDeployApplication(deployService *service.DeployService, serviceName string) error {
+	var err error
 
-	// server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
-	// if err != nil {
-	// 	return err
-	// }
-	// deployService.DockerAdapter.ConnectClient(server)
-	// deployService.DockerAdapter.Delete(deploy.GetDockerName())
+	settings := deployService.DatabaseAdapter.GetSettings()
+	if settings.GithubToken == "" {
+		return errors.New("GitHub token not found. Please configure GitHub integration in settings")
+	}
 
-	// deploy.Status = "Installing"
-	// deployService.DatabaseAdapter.UpdateDeploy(deploy)
+	services := GetServices(deployService)
 
-	// runApplication(deployService, &deploy, server.Domain)
+	for _, s := range services {
+		if s.Name == serviceName {
+			err = deployService.GitAdapter.CloneRepository(s.RepoUrl, s.CurrentPath, settings.GithubToken)
+			if err != nil {
+				return err
+			}
+			break
+		}
+	}
 
-	// if err != nil {
-	// 	return err
-	// }
-
-	// deploy.Status = "Runing"
-	// deployService.DatabaseAdapter.UpdateDeploy(deploy)
-
-	// fmt.Println("Success to redeploy ", deploy.Name)
-	return nil
+	err = DeployApplication(deployService)
+	return err
 }

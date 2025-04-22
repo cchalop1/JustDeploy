@@ -85,16 +85,11 @@ func main() {
 		showHelp()
 	}
 
-	if flags.redeploy.deployId != "" {
-		application.ReDeployApplication(&deployService, flags.redeploy.deployId)
-		os.Exit(0)
-	} else {
-		api.InitValidator(app)
-		web.CreateMiddlewareWebFiles(app)
-		api.CreateRoutes(app, &deployService)
-		displayServerURL(networkAdapter, server, isNewServer, apiKey)
-		app.StartServer(port)
-	}
+	api.InitValidator(app)
+	web.CreateMiddlewareWebFiles(app)
+	api.CreateRoutes(app, &deployService)
+	displayServerURL(networkAdapter, server, isNewServer, apiKey)
+	app.StartServer(port)
 }
 
 func getArgsOptions() {
