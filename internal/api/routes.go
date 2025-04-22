@@ -12,6 +12,8 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	// Apply middleware to all API routes
 	api := app.Echo.Group("")
+
+	api.POST("/github/events", handlers.PostGithubEvent(deployService))
 	api.Use(apiKeyAuth)
 
 	// API routes
@@ -55,8 +57,6 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	api.GET("/api/github/repos", handlers.GetGithubRepos(deployService))
 
 	api.POST("/api/github/save-access-token/:installationId", handlers.PostSaveAccessTokenHandler(deployService))
-
-	api.POST("/github/events", handlers.PostGithubEvent(deployService))
 
 	// Create Service
 	api.POST("/api/database/create", handlers.PostCreateDatabaseHandler(deployService))
