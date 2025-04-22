@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"cchalop1.com/deploy/internal/adapter/database"
-	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
+	"cchalop1.com/deploy/internal/utils"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
@@ -38,20 +38,7 @@ const ROUTER_NAME = "traefik"
 func (d *DockerAdapter) ConnectClient(server domain.Server) error {
 	var err error
 
-	// if server.Ip != "localhost" {
-	// 	serverCerts := server.GetCertsPath()
-
-	// 	d.client, err = client.NewClientWithOpts(
-	// 		client.WithHost("tcp://"+server.Ip+":2376"),
-	// 		client.WithTLSClientConfig(
-	// 			serverCerts.CaCertPath,
-	// 			serverCerts.CertPath,
-	// 			serverCerts.KeyPath,
-	// 		),
-	// 	)
-	// } else {
 	d.client, err = client.NewClientWithOpts(client.FromEnv)
-	// }
 
 	if err != nil {
 		fmt.Println("Error creating Docker client:", err)
@@ -301,16 +288,6 @@ func (d *DockerAdapter) RunRouterWithServer(server domain.Server) error {
 	return nil
 }
 
-func envToSlice(envVars []dto.Env) []string {
-	envSlice := make([]string, 0, len(envVars))
-	for _, value := range envVars {
-		if value.Name != "" && value.Value != "" {
-			envSlice = append(envSlice, fmt.Sprintf("%s=%s", value.Name, value.Value))
-		}
-	}
-	return envSlice
-}
-
 func (d *DockerAdapter) ConfigContainer(service domain.Service) container.Config {
 	Image := service.ImageName
 
@@ -320,7 +297,7 @@ func (d *DockerAdapter) ConfigContainer(service domain.Service) container.Config
 
 	config := container.Config{
 		Image:    Image,
-		Env:      envToSlice(service.Envs),
+		Env:      utils.EnvToSlice(service.Envs),
 		Hostname: service.GetDockerName(),
 	}
 	return config
@@ -469,77 +446,4 @@ func (d *DockerAdapter) RunService(service database.ServicesConfig, exposedPort 
 	fmt.Printf("Container %s is started", con.ID)
 
 	fmt.Println("Run image", service.Name)
-}
-
-// func (d *DockerAdapter) RunServiceWithDeploy(service domain.Service, containerHostName string) {
-// 	config := container.Config{
-// 		Image:    service.ImageName,
-// 		Hostname: containerHostName,
-// 		Env:      envToSlice(service.Envs),
-// 		Labels: map[string]string{
-// 			"traefik.enable": "true",
-// 		},
-// 	}
-
-// 	hostConfig := &container.HostConfig{
-// 		NetworkMode: "databases_default",
-// 	}
-
-// 	if service.ExposeSettings.ExposePort != "" {
-// 		hostConfig.PortBindings = nat.PortMap{
-// 			nat.Port(service.ExposeSettings.ExposePort + "/tcp"): []nat.PortBinding{
-// 				{
-// 					HostIP:   "0.0.0.0",
-// 					HostPort: service.ExposeSettings.ExposePort,
-// 				},
-// 			},
-// 		}
-// 	}
-
-// 	d.
-
-// 	con, err := d.client.ContainerCreate(context.Background(), &config, hostConfig,
-// 		&network.NetworkingConfig{
-// 			EndpointsConfig: map[string]*network.EndpointSettings{
-// 				"databases_default": {},
-// 			},
-// 		}, &v1.Platform{}, containerHostName)
-
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		return
-// 	}
-
-// 	d.client.ContainerStart(context.Background(), con.ID, container.StartOptions{})
-// 	fmt.Printf("Container %s is started", con.ID)
-
-// 	fmt.Println("Run image", service.Name)
-// }
-
-func (d *DockerAdapter) GetLocalHostServer() domain.Server {
-	return domain.Server{
-		Id:       "local",
-		Name:     "local",
-		Ip:       "localhost",
-		Domain:   "localhost",
-		Password: nil,
-		SshKey:   nil,
-		// TODO: change the date
-		CreatedDate: time.Now(),
-		Status:      "active",
-	}
-}
-
-func (d *DockerAdapter) GetDockerHubUrl(image string) string {
-	// Remove tag if present
-	imageParts := strings.Split(image, ":")
-	imageName := imageParts[0]
-
-	// Handle official images (no slash)
-	if !strings.Contains(imageName, "/") {
-		return "https://hub.docker.com/_/" + imageName
-	}
-
-	// Handle organization/user images
-	return "https://hub.docker.com/r/" + imageName
 }
