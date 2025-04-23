@@ -14,12 +14,12 @@ type ServiceExposeSettings struct {
 }
 
 type Service struct {
-	Id      string    `json:"id"`
-	Type    string    `json:"type"`
-	Url     string    `json:"url"`
-	Name    string    `json:"name"`
-	RepoUrl string    `json:"repo_url"`
-	Envs    []dto.Env `json:"envs"`
+	Id       string    `json:"id"`
+	Type     string    `json:"type"`
+	Url      string    `json:"url"`
+	Name     string    `json:"name"`
+	FullName string    `json:"full_name"`
+	Envs     []dto.Env `json:"envs"`
 	// VolumsNames []string  `json:"volumsNames"`
 	Status string `json:"status"`
 	// Host      string `json:"host"`

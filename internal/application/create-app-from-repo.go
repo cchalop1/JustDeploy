@@ -37,7 +37,7 @@ func CreateServiceFromGithubRepo(deployService *service.DeployService, repoUrl s
 		Status:      "ready_to_deploy",
 		Name:        Name,
 		CurrentPath: repoPath,
-		RepoUrl:     repoUrl,
+		FullName:    repoUrl,
 		Type:        "github_repo",
 		ImageName:   Name,
 		Envs: []dto.Env{

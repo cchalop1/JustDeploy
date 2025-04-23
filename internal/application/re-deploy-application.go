@@ -26,7 +26,7 @@ func ReDeployApplication(deployService *service.DeployService, serviceName strin
 
 			s.CurrentPath = repoPath
 
-			err = deployService.GitAdapter.CloneRepository(s.RepoUrl, s.CurrentPath, settings.GithubToken)
+			err = deployService.GitAdapter.CloneRepository(s.FullName, s.CurrentPath, settings.GithubToken)
 			if err != nil {
 				return err
 			}
