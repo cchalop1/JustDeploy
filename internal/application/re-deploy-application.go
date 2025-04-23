@@ -30,6 +30,11 @@ func ReDeployApplication(deployService *service.DeployService, serviceName strin
 			if err != nil {
 				return err
 			}
+
+			err = deployService.DatabaseAdapter.SaveService(s)
+			if err != nil {
+				return err
+			}
 			break
 		}
 	}
