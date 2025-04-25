@@ -35,7 +35,7 @@ func NewDockerAdapter() *DockerAdapter {
 const TRAEFIK_IMAGE = "traefik"
 const ROUTER_NAME = "traefik"
 
-func (d *DockerAdapter) ConnectClient(server domain.Server) error {
+func (d *DockerAdapter) ConnectClient() error {
 	var err error
 
 	d.client, err = client.NewClientWithOpts(client.FromEnv)
@@ -217,6 +217,7 @@ func (d *DockerAdapter) PullTreafikImage() error {
 }
 
 func (d *DockerAdapter) PullImage(image string) error {
+	d.ConnectClient()
 	log.Printf("Pulling image: %s", image)
 	reader, err := d.client.ImagePull(context.Background(), image, types.ImagePullOptions{})
 
@@ -225,9 +226,28 @@ func (d *DockerAdapter) PullImage(image string) error {
 		return err
 	}
 
-	_, err = io.Copy(io.Discard, reader)
-	if err != nil {
-		log.Printf("Error discarding image pull output for %s: %v", image, err)
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		line := scanner.Text()
+		var msg DockerMessage
+		if err := json.Unmarshal([]byte(line), &msg); err != nil {
+			log.Printf("Error decoding JSON: %v", err)
+			log.Println(line) // Print raw line if JSON parsing fails
+			continue
+		}
+
+		if msg.Stream != "" {
+			fmt.Print(msg.Stream)
+		} else if msg.Error != "" {
+			log.Printf("Error: %s", msg.Error)
+		} else {
+			// Print the raw line if no stream or error field
+			log.Println(line)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Printf("Error reading image pull output for %s: %v", image, err)
 		return err
 	}
 

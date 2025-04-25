@@ -27,12 +27,14 @@ func CreateServiceFromDatabase(deployService *service.DeployService, databaseNam
 	// Generate values for environment variables
 	envsWithValues := utils.GenerateEnvValues(dbConfig.Env)
 
+	fmt.Println(dbConfig)
+
 	// Create a new service for the database
 	service := domain.Service{
 		Id:           serviceId,
 		Status:       "ready_to_deploy",
 		Name:         strings.ToLower(databaseName) + "-" + serviceId,
-		Type:         "database",
+		Type:         dbConfig.Type,
 		ImageName:    dbConfig.Config.Image,
 		ImageUrl:     dbConfig.Icon,
 		Envs:         envsWithValues,
@@ -47,8 +49,18 @@ func CreateServiceFromDatabase(deployService *service.DeployService, databaseNam
 	fmt.Printf("Creating new database service: %s (type: %s, image: %s)\n",
 		service.Name, service.Type, service.ImageName)
 
-	// Save the service to the database
+	service.Status = "pulling"
 	deployService.DatabaseAdapter.SaveService(service)
 
+	go pullImage(deployService, service)
 	return service, nil
+}
+
+func pullImage(deployService *service.DeployService, service domain.Service) {
+	deployService.DockerAdapter.PullImage(service.ImageName)
+	// Save the service to the database
+
+	service.Status = "ready_to_deploy"
+	deployService.DatabaseAdapter.SaveService(service)
+
 }

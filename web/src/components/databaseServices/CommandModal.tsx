@@ -33,6 +33,10 @@ export default function CommandModal({
   createDatabaseToDeploy,
   createRepoToDeploy,
 }: CommandModalProps) {
+  const llmServices = preConfiguredServices.filter((s) => s.type === "llm");
+  const databaseServices = preConfiguredServices.filter(
+    (s) => s.type === "database"
+  );
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
       <CommandInput placeholder="Search a github repos or a services to deploy on your server ..." />
@@ -60,8 +64,21 @@ export default function CommandModal({
             ))}
         </CommandGroup>
         <CommandSeparator />
+
+        {/* LLM Models Section */}
+        <CommandGroup heading="LLM Models">
+          {llmServices.map((s) => (
+            <NewServiceItem
+              key={s.name}
+              service={s}
+              onSelect={(serviceName) => createDatabaseToDeploy(serviceName)}
+            />
+          ))}
+        </CommandGroup>
+        <CommandSeparator />
+
         <CommandGroup heading="Other databases">
-          {preConfiguredServices.map((s) => (
+          {databaseServices.map((s) => (
             <NewServiceItem
               key={s.name}
               service={s}

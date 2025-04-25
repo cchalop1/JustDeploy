@@ -33,6 +33,9 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 	// Stop any existing instance of the service
 	deployService.DockerAdapter.Stop(serviceToDeploy.GetDockerName())
 
+	serviceToDeploy.Status = "Deploying"
+	deployService.DatabaseAdapter.SaveService(serviceToDeploy)
+
 	fmt.Println("service to deploy : ", serviceToDeploy, baseDomain)
 	pathToDir, err := filepath.Abs(serviceToDeploy.CurrentPath)
 
@@ -52,12 +55,6 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 	}
 
 	portEnv := make([]dto.Env, 1)
-
-	// // TODO: find the write port
-	// portEnv[0] = dto.Env{
-	// 	Name:  "PORT",
-	// 	Value: "80",
-	// }
 
 	fmt.Println("Path to dir: ", pathToDir)
 	fmt.Println("Docker file name: ", DockerFileName)
@@ -135,6 +132,8 @@ func deployOneService(deployService *service.DeployService, serviceToDeploy doma
 	case "database":
 		// For database services, no domain/subdomain is needed
 		return deployDatabaseService(deployService, serviceToDeploy)
+	case "llm":
+		return deployDatabaseService(deployService, serviceToDeploy)
 	case "github_repo":
 		// For GitHub repos, we use the domain/subdomain pattern
 		return deployGithubService(deployService, serviceToDeploy, baseDomain)
@@ -149,12 +148,6 @@ func DeployApplication(deployService *service.DeployService) error {
 	services := deployService.DatabaseAdapter.GetServices()
 
 	server := deployService.DatabaseAdapter.GetServer()
-
-	err := deployService.DockerAdapter.ConnectClient(server)
-
-	if err != nil {
-		return fmt.Errorf("error connecting Docker client: %w", err)
-	}
 
 	// Check if Traefik router is running, if not, pull and run it
 	routerRunning, err := deployService.DockerAdapter.CheckRouterIsRunning()
@@ -180,22 +173,14 @@ func DeployApplication(deployService *service.DeployService) error {
 		return errors.New("server does not have domain")
 	}
 
-	// Deploy application services that are not already running
 	for _, service := range services {
-		// isRunning, err := deployService.DockerAdapter.IsServiceRunning(service.GetDockerName())
-		// if err != nil {
-		// 	return fmt.Errorf("error checking if service %s is running: %w", service.Name, err)
-		// }
-
-		// if !isRunning {
 		fmt.Printf("Deploying service: %s\n", service.Name)
 		err = deployOneService(deployService, service, server.Domain)
 		if err != nil {
+			service.Status = "Error"
+			deployService.DatabaseAdapter.SaveService(service)
 			return fmt.Errorf("error deploying service: %w", err)
 		}
-		// } else {
-		// 	fmt.Printf("Service %s is already running\n", service.Name)
-		// }
 	}
 
 	return nil

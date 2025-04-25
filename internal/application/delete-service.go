@@ -11,10 +11,6 @@ func DeleteService(deployService *service.DeployService, serviceId string) error
 		return err
 	}
 
-	server := deployService.DatabaseAdapter.GetServer()
-
-	deployService.DockerAdapter.ConnectClient(server)
-
 	deployService.DockerAdapter.Stop(s.GetDockerName())
 	deployService.DockerAdapter.Remove(s.GetDockerName())
 

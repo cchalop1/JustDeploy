@@ -72,6 +72,8 @@ func main() {
 		GitAdapter:        gitAdapter,
 	}
 
+	deployService.DockerAdapter.ConnectClient()
+
 	getArgsOptions()
 
 	server, apiKey, err := application.CreateCurrentServer(&deployService, port)

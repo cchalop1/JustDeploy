@@ -7,12 +7,7 @@ import (
 )
 
 func GetServerProxyLogs(deployService *service.DeployService, serverId string) ([]dto.Logs, error) {
-	server := deployService.DatabaseAdapter.GetServer()
-
 	logs := []dto.Logs{}
-
-	// TODO: move all the connect client to a midleware
-	deployService.DockerAdapter.ConnectClient(server)
 
 	dockerLogs, err := deployService.DockerAdapter.GetLogsOfContainer(adapter.ROUTER_NAME)
 

@@ -71,9 +71,6 @@ func ConnectAndSetupServer(deployService *service.DeployService, server domain.S
 	log.Println("Creating new Docker adapter")
 	adapterDocker := adapter.NewDockerAdapter()
 
-	log.Println("Connecting to Docker client")
-	err = adapterDocker.ConnectClient(server)
-
 	if err != nil {
 		log.Printf("Error connecting to Docker client: %v", err)
 		return nil

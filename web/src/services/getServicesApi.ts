@@ -3,6 +3,7 @@ import { Service } from "./getServicesByDeployId";
 
 export type ServiceDto = {
   name: string;
+  type: "llm" | "database";
   icon: string;
 };
 

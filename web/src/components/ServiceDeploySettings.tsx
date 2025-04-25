@@ -133,11 +133,6 @@ export default function ServiceDeploySettings({
           </Label>
 
           <div className="font-bold mt-2 mb-2">Environement variables :</div>
-          <EnvsManagements
-            setEnvs={handleEnvsChange}
-            envs={envs}
-            canEdit={true}
-          />
         </div>
       )}
     </>

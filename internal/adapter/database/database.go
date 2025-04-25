@@ -11,6 +11,7 @@ type ServicesConfig struct {
 	Env         []dto.Env `json:"env"`
 	DefaultPort int       `json:"defaultPort"`
 	Config      container.Config
+	Type        string `json:"type"`
 }
 
 var servicesConfigMap = map[string]ServicesConfig{
@@ -18,6 +19,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 		DefaultPort: 5432,
 		Name:        "Postgres",
 		Icon:        "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/640px-Postgresql_elephant.svg.png",
+		Type:        "database",
 		Env: []dto.Env{
 			{Name: "POSTGRES_USER", Value: "", IsSecret: false},
 			{Name: "POSTGRES_PASSWORD", Value: "", IsSecret: true},
@@ -37,6 +39,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 		DefaultPort: 27017,
 		Name:        "Mongo",
 		Icon:        "https://upload.wikimedia.org/wikipedia/fr/thumb/4/45/MongoDB-Logo.svg/1280px-MongoDB-Logo.svg.png",
+		Type:        "database",
 		Env: []dto.Env{
 			{Name: "MONGO_INITDB_ROOT_USERNAME", Value: "", IsSecret: false},
 			{Name: "MONGO_INITDB_ROOT_PASSWORD", Value: "", IsSecret: true},
@@ -52,6 +55,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 	"Redis": {
 		DefaultPort: 6379,
 		Name:        "Redis",
+		Type:        "database",
 		Icon:        "https://grafikart.fr/uploads/icons/redis.svg",
 		Env: []dto.Env{
 			{Name: "REDIS_PASSWORD", Value: "", IsSecret: true},
@@ -64,6 +68,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 	"Keycloak": {
 		DefaultPort: 8080,
 		Name:        "Keycloak",
+		Type:        "database",
 		Icon:        "https://www.keycloak.org/resources/images/logo.svg",
 		Env: []dto.Env{
 			{Name: "KEYCLOAK_USER", Value: "", IsSecret: false},
@@ -81,6 +86,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 	"Minio": {
 		DefaultPort: 9000,
 		Name:        "Minio",
+		Type:        "database",
 		Icon:        "https://min.io/resources/img/logo.svg",
 		Env: []dto.Env{
 			{Name: "MINIO_ACCESS_KEY", Value: "", IsSecret: false},
@@ -93,6 +99,51 @@ var servicesConfigMap = map[string]ServicesConfig{
 				"MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY",
 				"MINIO_SECRET_KEY=$MINIO_SECRET_KEY",
 			},
+		},
+	},
+	// Ollama LLM Models
+	"Gemma3": {
+		DefaultPort: 11434,
+		Name:        "Gemma3",
+		Type:        "llm",
+		Icon:        "https://ollama.com/public/ollama.png",
+		Env:         []dto.Env{},
+		Config: container.Config{
+			Image: "ollama/ollama",
+			Cmd:   []string{"ollama", "run", "gemma3"},
+		},
+	},
+	"Llama3.2": {
+		DefaultPort: 11434,
+		Name:        "Llama3.2",
+		Type:        "llm",
+		Icon:        "https://ollama.com/public/ollama.png",
+		Env:         []dto.Env{},
+		Config: container.Config{
+			Image: "ollama/ollama",
+			Cmd:   []string{"ollama", "run", "llama3.2"},
+		},
+	},
+	"Mistral": {
+		DefaultPort: 11434,
+		Name:        "Mistral",
+		Type:        "llm",
+		Icon:        "https://ollama.com/public/ollama.png",
+		Env:         []dto.Env{},
+		Config: container.Config{
+			Image: "ollama/ollama",
+			Cmd:   []string{"ollama", "run", "mistral"},
+		},
+	},
+	"Qwen2.5": {
+		DefaultPort: 11434,
+		Name:        "Qwen2.5",
+		Type:        "llm",
+		Icon:        "https://ollama.com/public/ollama.png",
+		Env:         []dto.Env{},
+		Config: container.Config{
+			Image: "ollama/ollama",
+			Cmd:   []string{"ollama", "run", "qwen2.5"},
 		},
 	},
 }

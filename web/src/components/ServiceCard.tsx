@@ -48,6 +48,8 @@ export default function ServiceCard({ service, onClick }: ServiceCardProps) {
             ? "Database"
             : service.type === "github_repo"
             ? "GitHub Repo"
+            : service.type === "llm"
+            ? "LLM"
             : service.type}
         </Badge>
       </div>
