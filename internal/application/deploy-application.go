@@ -53,11 +53,11 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 
 	portEnv := make([]dto.Env, 1)
 
-	// TODO: find the write port
-	portEnv[0] = dto.Env{
-		Name:  "PORT",
-		Value: "80",
-	}
+	// // TODO: find the write port
+	// portEnv[0] = dto.Env{
+	// 	Name:  "PORT",
+	// 	Value: "80",
+	// }
 
 	fmt.Println("Path to dir: ", pathToDir)
 	fmt.Println("Docker file name: ", DockerFileName)

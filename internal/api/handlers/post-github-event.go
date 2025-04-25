@@ -23,6 +23,6 @@ func PostGithubEvent(deployService *service.DeployService) echo.HandlerFunc {
 			return c.JSON(http.StatusInternalServerError, dto.ResponseApi{Message: err.Error()})
 		}
 
-		return c.JSON(http.StatusOK, true)
+		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Ok"})
 	}
 }

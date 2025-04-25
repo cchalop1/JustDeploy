@@ -15,9 +15,28 @@ func ReDeployApplication(deployService *service.DeployService, serviceName strin
 		return errors.New("GitHub token not found. Please configure GitHub integration in settings")
 	}
 
-	services := GetServices(deployService)
+	// Check if token is valid, renew it if necessary
+	githubToken := settings.GithubToken
+	appSettings := settings.GithubAppSettings
 
-	// Clone the repository to a temporary directory
+	// Check if token is valid before using it
+	if !deployService.GithubAdapter.IsTokenValid(githubToken) {
+		// Token is invalid or expired, renew it
+		newToken, err := renewGithubToken(deployService, appSettings)
+		if err != nil {
+			return errors.New("Failed to renew GitHub token: " + err.Error())
+		}
+		githubToken = newToken
+
+		// Update the settings with the new token
+		settings.GithubToken = newToken
+		err = deployService.DatabaseAdapter.SaveSettings(settings)
+		if err != nil {
+			return errors.New("Failed to save new GitHub token: " + err.Error())
+		}
+	}
+
+	services := GetServices(deployService)
 
 	for _, s := range services {
 		if s.Name == serviceName {
@@ -26,7 +45,7 @@ func ReDeployApplication(deployService *service.DeployService, serviceName strin
 
 			s.CurrentPath = repoPath
 
-			err = deployService.GitAdapter.CloneRepository(s.FullName, s.CurrentPath, settings.GithubToken)
+			err = deployService.GitAdapter.CloneRepository(s.FullName, s.CurrentPath, githubToken)
 			if err != nil {
 				return err
 			}
