@@ -154,7 +154,7 @@ if [ "$platform" == "darwin" ]; then
     binary_file_arch="justdeploy-darwin-x86"
   fi
 else
-  if [ "$(expr substr $(uname -m) 1 5)" == "armv7" ] || [ "$(expr substr $(uname -m) 1 3)" == "aarch64" ]; then
+  if [ "$(expr $(uname -m))" == "armv7" ] || [ "$(expr $(uname -m))" == "aarch64" ]; then
     zip_file="justdeploy-linux-arm.zip"
     binary_file_arch="justdeploy-linux-arm"
   else
