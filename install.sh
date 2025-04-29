@@ -56,6 +56,15 @@ install_prerequisites() {
   else
     echo "✅ unzip is already installed."
   fi
+  
+  # Check if Nixpacks is installed
+  # if ! command -v nixpacks &> /dev/null; then
+  #   echo "📦 Installing Nixpacks..."
+  #   curl -sSL https://nixpacks.com/install.sh | bash
+  #   echo "✅ Nixpacks installed successfully."
+  # else
+  #   echo "✅ Nixpacks is already installed."
+  # fi
 }
 
 # Function to check if Docker is installed and install it if not
@@ -253,6 +262,7 @@ if [ "$platform" != "darwin" ]; then
   fi
 fi
 echo "✅ Unzip installed (prerequisite)"
+# echo "✅ Nixpacks installed (prerequisite)"
 echo ""
 echo "🚀 JustDeploy is now running as a system service!"
 echo "💡 Access the web interface using the URL shown in the service logs above"

@@ -1,6 +1,7 @@
 import { ResponseApi, callApi } from "./api";
 
 export function buildGithubAppManifest(serverIp: string) {
+  // TODO: change to valid port
   const serverUrl = "http://" + serverIp + ":8080";
   const randomString = Math.random().toString(36).substring(2, 6);
 

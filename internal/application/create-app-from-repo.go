@@ -41,9 +41,9 @@ func CreateServiceFromGithubRepo(deployService *service.DeployService, repoUrl s
 		Type:        "github_repo",
 		ImageName:   Name,
 		Envs: []dto.Env{
-			dto.Env{
-				Name:  "",
-				Value: "",
+			{
+				Name:  "PORT",
+				Value: "80",
 			},
 		},
 		ExposeSettings: BuildExposeSettings(deployService, Name, true, "80"),

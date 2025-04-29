@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 import Modal from "@/components/modals/Modal";
 import { Service } from "@/services/getServicesByDeployId";
@@ -8,6 +9,7 @@ import { Button } from "../ui/button";
 import { deleteServiceByIdApi } from "@/services/deleteServiceApi";
 import { useNotification } from "@/hooks/useNotifications";
 import { Badge } from "../ui/badge";
+import SpinnerIcon from "@/assets/SpinnerIcon";
 
 type ModalServiceSettingsProps = {
   service: Service;
@@ -20,16 +22,27 @@ export default function ModalServiceSettings({
   fetchServices,
 }: ModalServiceSettingsProps) {
   const notif = useNotification();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   async function deleteServiceById() {
-    const res = await deleteServiceByIdApi(service.id);
-    if (res) {
-      onClose();
-      notif.success({
-        title: "Service is deleted",
-        content: `${service.name} is deleted`,
+    setIsDeleting(true);
+    try {
+      const res = await deleteServiceByIdApi(service.id);
+      if (res) {
+        onClose();
+        notif.success({
+          title: "Service is deleted",
+          content: `${service.name} is deleted`,
+        });
+        await fetchServices();
+      }
+    } catch (error) {
+      notif.error({
+        title: "Error deleting service",
+        content: "An error occurred while deleting the service.",
       });
-      await fetchServices();
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -69,8 +82,19 @@ export default function ModalServiceSettings({
           </div>
         </div>
         <div className="flex justify-end mt-4">
-          <Button variant="destructive" onClick={deleteServiceById}>
-            Delete
+          <Button
+            variant="destructive"
+            onClick={deleteServiceById}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <SpinnerIcon color="text-white" />
+                Deleting...
+              </>
+            ) : (
+              "Delete"
+            )}
           </Button>
         </div>
       </Modal>
