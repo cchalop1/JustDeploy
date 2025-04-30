@@ -1,228 +1,215 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
 
-# ——————————————————————————————————————
-# Variables globales
-# ——————————————————————————————————————
-BIN_DIR="/usr/local/bin"
-SERVICE_NAME="justdeploy.service"
-SYSTEMD_DIR="/etc/systemd/system"
-RELEASE_URL="https://api.github.com/repos/cchalop1/JustDeploy/releases/latest"
-SUDO=""
+# Check if script is run as root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "🛑 This script must be run as root or with sudo privileges."
+  echo "Please run: sudo $0"
+  exit 1
+fi
 
-# ——————————————————————————————————————
-# Fonction : élévation des privilèges (sudo une fois)
-# ——————————————————————————————————————
-elevate_priv() {
-  if [ "$EUID" -ne 0 ]; then
-    if ! command -v sudo &> /dev/null; then
-      echo "🛑 sudo n'est pas installé : exécutez le script en root." >&2
-      exit 1
-    fi
-    sudo -v >&2 || {
-      echo "🛑 Impossible d'obtenir les privilèges sudo." >&2
-      exit 1
-    }
-    SUDO="sudo"
-  fi
-}
+# Define the release URL and the binary file name
+release_url="https://api.github.com/repos/cchalop1/JustDeploy/releases/latest"
+zip_file="justdeploy.zip"
+binary_file="justdeploy"
 
-# ——————————————————————————————————————
-# Fonction : teste si on peut écrire dans un dossier
-# ——————————————————————————————————————
-test_writeable() {
-  local dir="$1"
-  if touch "${dir}/.perm_test" &> /dev/null; then
-    rm -f "${dir}/.perm_test"
-    return 0
-  else
-    return 1
-  fi
-}
-
-# ——————————————————————————————————————
-# 1) Vérification et désinstallation éventuelle
-# ——————————————————————————————————————
+# Function to check if JustDeploy is already installed and stop the service if needed
 check_existing_installation() {
-  echo "🔍 Vérification d'une installation existante…"
-  if [ -f "${BIN_DIR}/justdeploy" ]; then
-    echo "🔄 JustDeploy déjà installé, préparation de la réinstallation…"
-    if systemctl is-active --quiet "${SERVICE_NAME}"; then
-      echo "🛑 Arrêt du service ${SERVICE_NAME}…"
-      ${SUDO} systemctl stop "${SERVICE_NAME}"
+  echo "🔍 Checking for existing JustDeploy installation..."
+  
+  if [ -f "/usr/local/bin/$binary_file" ]; then
+    echo "🔄 JustDeploy is already installed. Preparing for reinstallation..."
+    
+    # Check if the service is running and stop it
+    if systemctl is-active --quiet justdeploy.service; then
+      echo "🛑 Stopping JustDeploy service..."
+      sudo systemctl stop justdeploy.service
+      echo "✅ JustDeploy service stopped."
     fi
-    if systemctl is-enabled --quiet "${SERVICE_NAME}"; then
-      echo "🔧 Désactivation du service…"
-      ${SUDO} systemctl disable "${SERVICE_NAME}"
+    
+    # Disable the service
+    if systemctl is-enabled --quiet justdeploy.service; then
+      echo "🔧 Disabling JustDeploy service..."
+      sudo systemctl disable justdeploy.service
+      echo "✅ JustDeploy service disabled."
     fi
-    echo "🗑️ Suppression de l’ancien binaire…"
-    ${SUDO} rm -f "${BIN_DIR}/justdeploy"
+    
+    echo "🗑️ Removing existing JustDeploy binary..."
+    sudo rm -f /usr/local/bin/$binary_file
+    
+    # Return true (0) to indicate reinstallation is needed
     return 0
   else
-    echo "🆕 Aucune installation détectée, installation fraîche."
+    echo "🆕 No existing JustDeploy installation detected. Proceeding with fresh installation."
+    # Return false (1) to indicate fresh installation
     return 1
   fi
 }
 
-# ——————————————————————————————————————
-# 2) Installation des prérequis système (unzip…)
-# ——————————————————————————————————————
+# Function to install prerequisites
 install_prerequisites() {
-  echo "🔍 Vérification des prérequis…"
+  echo "🔍 Checking for required packages..."
   if ! command -v unzip &> /dev/null; then
-    echo "📦 Installation de unzip…"
-    ${SUDO} apt-get update
-    ${SUDO} apt-get install -y unzip
-    echo "✅ unzip installé."
+    echo "📦 Installing unzip..."
+    sudo apt-get update
+    sudo apt-get install -y unzip
+    echo "✅ unzip installed successfully."
   else
-    echo "✅ unzip déjà présent."
+    echo "✅ unzip is already installed."
   fi
+  
+  # Check if Nixpacks is installed
+  # if ! command -v nixpacks &> /dev/null; then
+  #   echo "📦 Installing Nixpacks..."
+  #   curl -sSL https://nixpacks.com/install.sh | bash
+  #   echo "✅ Nixpacks installed successfully."
+  # else
+  #   echo "✅ Nixpacks is already installed."
+  # fi
 }
 
-# ——————————————————————————————————————
-# 3) Installation de nixpacks
-# ——————————————————————————————————————
-install_nixpacks() {
-  echo "🔍 Vérification de nixpacks…"
-  if command -v nixpacks &> /dev/null; then
-    echo "✅ nixpacks déjà installé."
-  else
-    echo "📦 Installation de nixpacks…"
-    curl -sSL https://nixpacks.com/install.sh | bash
-    echo "✅ nixpacks installé."
-  fi
-}
-
-# ——————————————————————————————————————
-# 4) Installation de Docker (Debian/Ubuntu)
-# ——————————————————————————————————————
+# Function to check if Docker is installed and install it if not
 install_docker() {
-  echo "🔍 Vérification de Docker…"
-  if ! command -v docker &> /dev/null; then
-    echo "🐳 Installation de Docker…"
-    ${SUDO} apt-get update
-    ${SUDO} apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
-    curl -fsSL \
-      https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg \
-      | ${SUDO} gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  echo "🔍 Checking if Docker is installed..."
+  if command -v docker &> /dev/null; then
+    echo "✅ Docker is already installed."
+  else
+    echo "🐳 Docker not found. Installing Docker..."
+    
+    # Check if we're on a Debian-based system
+    if ! command -v apt-get &> /dev/null; then
+      echo "❌ This script only supports Docker installation on Debian-based systems (Ubuntu, Debian, etc.)."
+      echo "Please install Docker manually according to your OS instructions: https://docs.docker.com/engine/install/"
+      return 1
+    fi
+    
+    # Update package index
+    sudo apt-get update
+    
+    # Install packages to allow apt to use a repository over HTTPS
+    sudo apt-get install -y \
+      apt-transport-https \
+      ca-certificates \
+      curl \
+      gnupg \
+      lsb-release
+    
+    # Add Docker's official GPG key
+    curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    
+    # Set up the stable repository
     echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
-      https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') \
-      $(lsb_release -cs) stable" \
-      | ${SUDO} tee /etc/apt/sources.list.d/docker.list > /dev/null
-    ${SUDO} apt-get update
-    ${SUDO} apt-get install -y docker-ce docker-ce-cli containerd.io
-    ${SUDO} groupadd -f docker
-    ${SUDO} usermod -aG docker "$USER"
-    ${SUDO} systemctl enable docker
-    ${SUDO} systemctl start docker
-    echo "✅ Docker installé."
-  else
-    echo "✅ Docker déjà présent."
+      "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') \
+      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    
+    # Update apt package index again
+    sudo apt-get update
+    
+    # Install Docker Engine
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+    
+    # Add current user to docker group to run docker without sudo
+    sudo groupadd -f docker
+    sudo usermod -aG docker $USER
+    
+    # Enable and start Docker service
+    sudo systemctl enable docker
+    sudo systemctl start docker
+    
+    echo "✅ Docker has been installed successfully."
+    echo "💡 NOTE: You may need to log out and log back in for the docker group changes to take effect."
   fi
 }
 
-# ——————————————————————————————————————
-# 5) Installation de Docker Compose
-# ——————————————————————————————————————
+# Function to check if Docker Compose is installed and install it if not
 install_docker_compose() {
-  echo "🔍 Vérification de Docker Compose…"
-  if ! command -v docker-compose &> /dev/null; then
-    echo "🐳 Installation de Docker Compose…"
-    local ver
-    ver=$(curl -s https://api.github.com/repos/docker/compose/releases/latest \
-      | grep '"tag_name"' | cut -d\" -f4)
-    ${SUDO} curl -L \
-      "https://github.com/docker/compose/releases/download/${ver}/docker-compose-$(uname -s)-$(uname -m)" \
-      -o /usr/local/bin/docker-compose
-    ${SUDO} chmod +x /usr/local/bin/docker-compose
-    echo "✅ Docker Compose installé."
+  echo "🔍 Checking if Docker Compose is installed..."
+  if command -v docker-compose &> /dev/null; then
+    echo "✅ Docker Compose is already installed."
   else
-    echo "✅ Docker Compose déjà présent."
+    echo "🐳 Docker Compose not found. Installing Docker Compose..."
+    
+    # Install Docker Compose
+    COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
+    sudo curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+    
+    echo "✅ Docker Compose has been installed successfully."
   fi
 }
 
-# ——————————————————————————————————————
-# Début de l’exécution
-# ——————————————————————————————————————
-elevate_priv
+# Check for existing installation first
 check_existing_installation
 is_reinstall=$?
 
+# Install prerequisites
 install_prerequisites
-install_nixpacks
 
+# Get the current platform and architecture
 platform=$(uname -s | tr '[:upper:]' '[:lower:]')
+arch=$(uname -m)
+
+# Check and install Docker and Docker Compose if needed (only on Linux)
 if [ "$platform" != "darwin" ]; then
   install_docker
   install_docker_compose
 fi
 
-# ——————————————————————————————————————
-# Détermination du zip et du binaire selon OS/arch
-# ——————————————————————————————————————
-if [ "$platform" = "darwin" ]; then
-  if [ "$(uname -m)" = "arm64" ]; then
-    zip_name="justdeploy-darwin-arm.zip"
-    bin_src="justdeploy-darwin-arm"
+if [ "$platform" == "darwin" ]; then
+  if [ "$arch" == "arm64" ]; then
+    zip_file="justdeploy-darwin-arm.zip"
+    binary_file_arch="justdeploy-darwin-arm"
   else
-    zip_name="justdeploy-darwin-x86.zip"
-    bin_src="justdeploy-darwin-x86"
+    zip_file="justdeploy-darwin-x86.zip"
+    binary_file_arch="justdeploy-darwin-x86"
   fi
 else
-  arch=$(uname -m)
-  if [[ "$arch" == arm* ]] || [[ "$arch" == aarch64 ]]; then
-    zip_name="justdeploy-linux-arm.zip"
-    bin_src="justdeploy-linux-arm"
+  if [ "$(expr $(uname -m))" == "armv7" ] || [ "$(expr $(uname -m))" == "aarch64" ]; then
+    zip_file="justdeploy-linux-arm.zip"
+    binary_file_arch="justdeploy-linux-arm"
   else
-    zip_name="justdeploy-linux-x86.zip"
-    bin_src="justdeploy-linux-x86"
+    zip_file="justdeploy-linux-x86.zip"
+    binary_file_arch="justdeploy-linux-x86"
   fi
 fi
 
-# ——————————————————————————————————————
-# Récupération du lien de téléchargement
-# ——————————————————————————————————————
-response=$(curl -sSL "$RELEASE_URL")
-download_url=$(echo "$response" \
-  | grep -o "https://github.com/cchalop1/JustDeploy/releases/download/[^ ]*/${zip_name}" \
-  | head -n1)
+# Get the latest release download URL for the specific platform
+response=$(curl -s $release_url)
+download_url=$(echo $response | grep -o "https://github.com/cchalop1/JustDeploy/releases/download/[^ ]*/$zip_file" | head -n 1)
 
-# ——————————————————————————————————————
-# Téléchargement & installation du binaire
-# ——————————————————————————————————————
-echo "📥 Téléchargement de JustDeploy…"
-curl -sSL -o "$zip_name" "$download_url"
+# Download the binary
+echo "📥 Downloading JustDeploy binary..."
+curl -L -o $zip_file $download_url
 
-echo "📦 Extraction…"
-unzip -o "$zip_name" -d ./bin
+# Unzip binary file
+echo "📦 Extracting binary..."
+unzip -o $zip_file
 
-echo "🔧 Permissions et déplacement…"
-chmod +x ./bin/"$bin_src"
-${SUDO} mv "./bin/${bin_src}" "${BIN_DIR}/justdeploy"
+# Make the binary executable
+chmod +x ./bin/$binary_file_arch
 
-# nettoyage
-rm -f "$zip_name"
+# Move the binary to a system directory (e.g., /usr/local/bin)
+sudo mv ./bin/$binary_file_arch /usr/local/bin/$binary_file
+
+# Clean up downloaded files
+rm $zip_file
 rm -rf ./bin
 
-if [ "$is_reinstall" -eq 0 ]; then
-  echo "✨ Réinstallation du binaire terminée."
+if [ $is_reinstall -eq 0 ]; then
+  echo "✨ JustDeploy binary reinstallation complete."
 else
-  echo "✨ Installation du binaire terminée."
+  echo "✨ JustDeploy binary installation complete."
 fi
 
-# ——————————————————————————————————————
-# Création du service systemd
-# ——————————————————————————————————————
-echo "🔧 Création du service systemd…"
-cat > /tmp/${SERVICE_NAME} << EOF
+# Create systemd service file
+echo "🔧 Creating systemd service for JustDeploy..."
+cat > /tmp/justdeploy.service << EOF
 [Unit]
 Description=JustDeploy Service
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=${BIN_DIR}/justdeploy
+ExecStart=/usr/local/bin/$binary_file
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal
@@ -232,36 +219,51 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
-${SUDO} mv /tmp/${SERVICE_NAME} "${SYSTEMD_DIR}/"
-${SUDO} systemctl daemon-reload
-${SUDO} systemctl enable "${SERVICE_NAME}"
-${SUDO} systemctl start "${SERVICE_NAME}"
+# Move service file to systemd directory
+sudo mv /tmp/justdeploy.service /etc/systemd/system/
 
-echo "✅ Service ${SERVICE_NAME} installé et démarré."
+# Reload systemd to recognize the new service
+sudo systemctl daemon-reload
 
-# ——————————————————————————————————————
-# Affichage des logs de démarrage
-# ——————————————————————————————————————
-echo ""
-echo "📋 Logs de démarrage (dernières 20 lignes) :"
-echo "----------------------------------------------------------------"
-sleep 3
-${SUDO} journalctl -u "${SERVICE_NAME}" -n 20 --no-pager
-echo "----------------------------------------------------------------"
-echo "💡 Pour suivre en temps réel : sudo journalctl -u ${SERVICE_NAME} -f"
+# Enable and start the service
+sudo systemctl enable justdeploy.service
+sudo systemctl start justdeploy.service
 
-# ——————————————————————————————————————
-# Résumé final
-# ——————————————————————————————————————
-echo ""
-echo "🎉 JustDeploy est opérationnel !"
-echo "  • Binaire : ${BIN_DIR}/justdeploy"
-echo "  • Service : ${SERVICE_NAME}"
-if [ "$platform" != "darwin" ]; then
-  command -v docker &> /dev/null && echo "  • Docker : installé"
-  command -v docker-compose &> /dev/null && echo "  • Docker Compose : installé"
+if [ $is_reinstall -eq 0 ]; then
+  echo "✅ JustDeploy service has been reinstalled and started"
+else
+  echo "✅ JustDeploy service has been installed and started"
 fi
-echo "  • unzip : présent"
-echo "  • nixpacks : $(command -v nixpacks &> /dev/null && echo 'présent' || echo 'installé')"
+
+# Display startup logs to show server IP
+echo "📋 Displaying JustDeploy startup logs (showing server IP):"
+echo "----------------------------------------------------------------"
+sleep 3  # Give the service a moment to start
+sudo journalctl -u justdeploy.service -n 20 --no-pager
+echo "----------------------------------------------------------------"
+echo "💡 You can continue to monitor logs with: sudo journalctl -u justdeploy.service -f"
+
+# Print summary
 echo ""
-echo "🚀 Vous pouvez maintenant utiliser JustDeploy !"
+if [ $is_reinstall -eq 0 ]; then
+  echo "🎉 Reinstallation Summary:"
+else
+  echo "🎉 Installation Summary:"
+fi
+echo "------------------------"
+echo "✅ JustDeploy installed at: /usr/local/bin/$binary_file"
+echo "✅ Systemd service created: justdeploy.service"
+if [ "$platform" != "darwin" ]; then
+  if command -v docker &> /dev/null; then
+    echo "✅ Docker is installed"
+  fi
+  if command -v docker-compose &> /dev/null; then
+    echo "✅ Docker Compose is installed"
+  fi
+fi
+echo "✅ Unzip installed (prerequisite)"
+# echo "✅ Nixpacks installed (prerequisite)"
+echo ""
+echo "🚀 JustDeploy is now running as a system service!"
+echo "💡 Access the web interface using the URL shown in the service logs above"
+echo ""
