@@ -2,6 +2,7 @@ import { Service } from "@/services/getServicesByDeployId";
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { useState } from "react";
+import { copyToClipboard } from "@/lib/utils";
 
 type DatabaseServiceCardProps = {
   service: Service;
@@ -15,9 +16,13 @@ export default function DatabaseServiceCard({
   const [isCopied, setIsCopied] = useState(false);
 
   function copyEnv() {
-    const env = service.envs.map((e) => `${e.name}=${e.value}`).join("\n");
-    navigator.clipboard.writeText(env);
-    setIsCopied(true);
+    const env = service.envs
+      .map((e: { name: string; value: string }) => `${e.name}=${e.value}`)
+      .join("\n");
+    copyToClipboard(env, () => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    });
   }
 
   return (
@@ -32,7 +37,9 @@ export default function DatabaseServiceCard({
         </div>
       </div>
       <div className="flex gap-3 items-center">
-        Click to copy
+        <Button variant="outline" onClick={copyEnv}>
+          {isCopied ? "Copied!" : "Click to copy"}
+        </Button>
         <Button
           variant="destructive"
           onClick={() => setServiceToDelete(service)}

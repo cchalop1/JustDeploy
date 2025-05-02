@@ -16,7 +16,7 @@ func NewApplication(port string) *Application {
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:" + port, "http://localhost:5173"},
 		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, "x-api-key"},
 	}))
 
 	return &Application{

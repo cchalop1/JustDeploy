@@ -1,5 +1,7 @@
 export const baseUrl = import.meta.env.VITE_BACKEND_URL;
 
+import { getStoredApiKey, saveApiKey } from "./authStorage";
+
 // Function to get the API key from URL or localStorage
 export function getApiKey(): string | null {
   // First check if API key is in URL
@@ -7,13 +9,13 @@ export function getApiKey(): string | null {
   const apiKeyParam = urlParams.get("api_key");
 
   if (apiKeyParam) {
-    // Save API key to localStorage
-    localStorage.setItem("api_key", apiKeyParam);
+    // Save API key to localStorage using authStorage function
+    saveApiKey(apiKeyParam);
     return apiKeyParam;
   }
 
-  // Otherwise, try to get from localStorage
-  return localStorage.getItem("api_key");
+  // Otherwise, try to get from localStorage using authStorage function
+  return getStoredApiKey();
 }
 
 export async function callApi<T>(
@@ -59,15 +61,3 @@ export async function callApi<T>(
 export type ResponseApi = {
   message: string;
 };
-
-// Specific API to retrieve a new API key if needed
-export async function fetchApiKey(): Promise<string> {
-  const response = await callApi<{ api_key: string }>("/apikey", "GET");
-
-  if (response.api_key) {
-    localStorage.setItem("api_key", response.api_key);
-    return response.api_key;
-  }
-
-  throw new Error("Failed to retrieve API key");
-}

@@ -1,369 +1,327 @@
 {
-    "swagger": "2.0",
-    "info": {
-        "description": "JustDeploy is a PaaS tool designed to simplify the lives of developers. It allows you to easily deploy your projects and databases using Docker. JustDeploy fetches your GitHub repository and deploys your application using your Docker and Docker Compose configurations, all while deploying to any VPS of your choice without vendor lock-in.",
-        "title": "JustDeploy API",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "Clément Chalopin",
-            "url": "https://github.com/cchalop1/JustDeploy",
-            "email": "support@justdeploy.dev"
-        },
-        "license": {
-            "name": "AGPL-3.0 License",
-            "url": "https://github.com/cchalop1/JustDeploy/blob/main/LICENSE"
-        },
-        "version": "1.0"
+  "swagger": "2.0",
+  "info": {
+    "description": "JustDeploy is a PaaS tool designed to simplify the lives of developers. It allows you to easily deploy your projects and databases using Docker. JustDeploy fetches your GitHub repository and deploys your application using your Docker and Docker Compose configurations, all while deploying to any VPS of your choice without vendor lock-in.",
+    "title": "JustDeploy API",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "name": "Clément Chalopin",
+      "url": "https://github.com/cchalop1/JustDeploy",
+      "email": "support@justdeploy.dev"
     },
-    "host": "localhost:8080",
-    "basePath": "/api/v1",
-    "paths": {
-        "/api/v1/deploy": {
-            "post": {
-                "description": "Deploys the current application using the deploy service",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "deployment"
-                ],
-                "summary": "Deploy application",
-                "responses": {
-                    "200": {
-                        "description": "Successfully deployed",
-                        "schema": {
-                            "$ref": "#/definitions/cchalop1_com_deploy_internal_api_dto.ResponseApi"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error with error message",
-                        "schema": {
-                            "$ref": "#/definitions/cchalop1_com_deploy_internal_api_dto.ResponseApi"
-                        }
-                    }
-                }
+    "license": {
+      "name": "AGPL-3.0 License",
+      "url": "https://github.com/cchalop1/JustDeploy/blob/main/LICENSE"
+    },
+    "version": "1.0"
+  },
+  "host": "localhost:5915",
+  "basePath": "/api/v1",
+  "paths": {
+    "/api/v1/deploy": {
+      "post": {
+        "description": "Deploys the current application using the deploy service",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["deployment"],
+        "summary": "Deploy application",
+        "responses": {
+          "200": {
+            "description": "Successfully deployed",
+            "schema": {
+              "$ref": "#/definitions/cchalop1_com_deploy_internal_api_dto.ResponseApi"
             }
-        },
-        "/api/v1/github/connect/{code}": {
-            "post": {
-                "description": "Connects the application to GitHub using an authorization code",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "github"
-                ],
-                "summary": "Connect GitHub application",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "GitHub authorization code",
-                        "name": "code",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Connection result",
-                        "schema": {}
-                    },
-                    "400": {
-                        "description": "Code is required",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Error message",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
+          },
+          "500": {
+            "description": "Internal server error with error message",
+            "schema": {
+              "$ref": "#/definitions/cchalop1_com_deploy_internal_api_dto.ResponseApi"
             }
-        },
-        "/api/v1/github/is-connected": {
-            "get": {
-                "description": "Checks if the application is connected to GitHub",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "github"
-                ],
-                "summary": "Check GitHub connection status",
-                "responses": {
-                    "200": {
-                        "description": "Connection status",
-                        "schema": {
-                            "$ref": "#/definitions/cchalop1_com_deploy_internal_api_dto.GithubIsConnected"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/github/repos": {
-            "get": {
-                "description": "Retrieves all GitHub repositories accessible to the application",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "github"
-                ],
-                "summary": "Get GitHub repositories",
-                "responses": {
-                    "200": {
-                        "description": "List of GitHub repositories",
-                        "schema": {
-                            "type": "array",
-                            "items": {}
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/github/save-token/{installationId}": {
-            "post": {
-                "description": "Saves a GitHub access token using the provided installation ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "github"
-                ],
-                "summary": "Save GitHub access token",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "GitHub installation ID",
-                        "name": "installationId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Access token saved successfully",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Installation ID is required",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Error message",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/repo": {
-            "post": {
-                "description": "Creates a new service by cloning and configuring a GitHub repository",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "repository"
-                ],
-                "summary": "Create a new service from a GitHub repository",
-                "parameters": [
-                    {
-                        "description": "Repository URL information",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.CreateRepoRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Service created successfully",
-                        "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.ServiceResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request - Invalid input",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/services": {
-            "get": {
-                "description": "Retrieves all services managed by the application",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "services"
-                ],
-                "summary": "Get all services",
-                "responses": {
-                    "200": {
-                        "description": "List of services",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/internal_api_handlers.ServiceResponse"
-                            }
-                        }
-                    }
-                }
-            }
+          }
         }
+      }
     },
-    "definitions": {
-        "cchalop1_com_deploy_internal_api_dto.Env": {
-            "type": "object",
-            "properties": {
-                "isSecret": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
+    "/api/v1/github/connect/{code}": {
+      "post": {
+        "description": "Connects the application to GitHub using an authorization code",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["github"],
+        "summary": "Connect GitHub application",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "GitHub authorization code",
+            "name": "code",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Connection result",
+            "schema": {}
+          },
+          "400": {
+            "description": "Code is required",
+            "schema": {
+              "type": "string"
             }
-        },
-        "cchalop1_com_deploy_internal_api_dto.GithubIsConnected": {
-            "type": "object",
-            "properties": {
-                "isConnected": {
-                    "type": "boolean"
-                }
+          },
+          "500": {
+            "description": "Error message",
+            "schema": {
+              "type": "string"
             }
-        },
-        "cchalop1_com_deploy_internal_api_dto.ResponseApi": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_api_handlers.CreateRepoRequest": {
-            "type": "object",
-            "properties": {
-                "repoUrl": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_api_handlers.ServiceExposeSettings": {
-            "type": "object",
-            "properties": {
-                "exposePort": {
-                    "type": "string"
-                },
-                "isExposed": {
-                    "type": "boolean"
-                },
-                "subDomain": {
-                    "type": "string"
-                },
-                "tls": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "internal_api_handlers.ServiceResponse": {
-            "type": "object",
-            "properties": {
-                "currentPath": {
-                    "type": "string"
-                },
-                "dockerHubUrl": {
-                    "type": "string"
-                },
-                "envs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/cchalop1_com_deploy_internal_api_dto.Env"
-                    }
-                },
-                "exposeSettings": {
-                    "$ref": "#/definitions/internal_api_handlers.ServiceExposeSettings"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "imageName": {
-                    "type": "string"
-                },
-                "imageUrl": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
+          }
         }
+      }
     },
-    "securityDefinitions": {
-        "BasicAuth": {
-            "type": "basic"
+    "/api/v1/github/is-connected": {
+      "get": {
+        "description": "Checks if the application is connected to GitHub",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["github"],
+        "summary": "Check GitHub connection status",
+        "responses": {
+          "200": {
+            "description": "Connection status",
+            "schema": {
+              "$ref": "#/definitions/cchalop1_com_deploy_internal_api_dto.GithubIsConnected"
+            }
+          }
         }
+      }
     },
-    "externalDocs": {
-        "description": "GitHub Repository",
-        "url": "https://github.com/cchalop1/JustDeploy"
+    "/api/v1/github/repos": {
+      "get": {
+        "description": "Retrieves all GitHub repositories accessible to the application",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["github"],
+        "summary": "Get GitHub repositories",
+        "responses": {
+          "200": {
+            "description": "List of GitHub repositories",
+            "schema": {
+              "type": "array",
+              "items": {}
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/github/save-token/{installationId}": {
+      "post": {
+        "description": "Saves a GitHub access token using the provided installation ID",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["github"],
+        "summary": "Save GitHub access token",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "GitHub installation ID",
+            "name": "installationId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Access token saved successfully",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Installation ID is required",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Error message",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/repo": {
+      "post": {
+        "description": "Creates a new service by cloning and configuring a GitHub repository",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["repository"],
+        "summary": "Create a new service from a GitHub repository",
+        "parameters": [
+          {
+            "description": "Repository URL information",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/internal_api_handlers.CreateRepoRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Service created successfully",
+            "schema": {
+              "$ref": "#/definitions/internal_api_handlers.ServiceResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/services": {
+      "get": {
+        "description": "Retrieves all services managed by the application",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["services"],
+        "summary": "Get all services",
+        "responses": {
+          "200": {
+            "description": "List of services",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/internal_api_handlers.ServiceResponse"
+              }
+            }
+          }
+        }
+      }
     }
+  },
+  "definitions": {
+    "cchalop1_com_deploy_internal_api_dto.Env": {
+      "type": "object",
+      "properties": {
+        "isSecret": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "cchalop1_com_deploy_internal_api_dto.GithubIsConnected": {
+      "type": "object",
+      "properties": {
+        "isConnected": {
+          "type": "boolean"
+        }
+      }
+    },
+    "cchalop1_com_deploy_internal_api_dto.ResponseApi": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "internal_api_handlers.CreateRepoRequest": {
+      "type": "object",
+      "properties": {
+        "repoUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "internal_api_handlers.ServiceExposeSettings": {
+      "type": "object",
+      "properties": {
+        "exposePort": {
+          "type": "string"
+        },
+        "isExposed": {
+          "type": "boolean"
+        },
+        "subDomain": {
+          "type": "string"
+        },
+        "tls": {
+          "type": "boolean"
+        }
+      }
+    },
+    "internal_api_handlers.ServiceResponse": {
+      "type": "object",
+      "properties": {
+        "currentPath": {
+          "type": "string"
+        },
+        "dockerHubUrl": {
+          "type": "string"
+        },
+        "envs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/cchalop1_com_deploy_internal_api_dto.Env"
+          }
+        },
+        "exposeSettings": {
+          "$ref": "#/definitions/internal_api_handlers.ServiceExposeSettings"
+        },
+        "id": {
+          "type": "string"
+        },
+        "imageName": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "BasicAuth": {
+      "type": "basic"
+    }
+  },
+  "externalDocs": {
+    "description": "GitHub Repository",
+    "url": "https://github.com/cchalop1/JustDeploy"
+  }
 }

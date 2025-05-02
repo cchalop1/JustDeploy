@@ -33,7 +33,7 @@ var flags struct {
 // @license.name  AGPL-3.0 License
 // @license.url   https://github.com/cchalop1/JustDeploy/blob/main/LICENSE
 
-// @host      localhost:8080
+// @host      localhost:5915
 // @BasePath  /api/v1
 
 // @securityDefinitions.basic  BasicAuth
@@ -47,7 +47,7 @@ func main() {
 		fmt.Println("There is a new version available. Please download it by typing: curl -fsSL https://raw.githubusercontent.com/cchalop1/JustDeploy/refs/heads/main/install.sh | bash")
 	}
 
-	port := adapter.FindOpenLocalPort(8080)
+	port := "5915"
 
 	app := api.NewApplication(port)
 
@@ -76,8 +76,7 @@ func main() {
 
 	getArgsOptions()
 
-	server, apiKey, err := application.CreateCurrentServer(&deployService, port)
-	isNewServer := err == nil
+	server, err := application.CreateCurrentServer(&deployService, port)
 
 	if err != nil {
 		fmt.Println("Current Server is arealy created :", err)
@@ -90,7 +89,7 @@ func main() {
 	api.InitValidator(app)
 	web.CreateMiddlewareWebFiles(app)
 	api.CreateRoutes(app, &deployService)
-	displayServerURL(networkAdapter, server, isNewServer, apiKey)
+	displayServerURL(networkAdapter, server)
 	app.StartServer(port)
 }
 
@@ -108,25 +107,11 @@ func showHelp() {
 	os.Exit(0)
 }
 
-func displayServerURL(networkAdapter *adapter.NetworkAdapter, server domain.Server, isNewServer bool, apiKey string) {
+func displayServerURL(networkAdapter *adapter.NetworkAdapter, server domain.Server) {
 	url, err := networkAdapter.GetServerURL(server.Port)
 	if err != nil {
 		fmt.Println("Error getting server URL:", err)
 		return
-	}
-
-	// Add welcome parameter if this is a new server
-	if isNewServer {
-		url = url + "?welcome=true"
-	}
-
-	// Add API key parameter if available
-	if apiKey != "" {
-		if isNewServer {
-			url = url + "&api_key=" + apiKey
-		} else {
-			url = url + "?api_key=" + apiKey
-		}
 	}
 
 	yellow := "\033[33m"

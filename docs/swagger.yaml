@@ -43,10 +43,10 @@ definitions:
         type: string
       envs:
         items:
-          $ref: '#/definitions/cchalop1_com_deploy_internal_api_dto.Env'
+          $ref: "#/definitions/cchalop1_com_deploy_internal_api_dto.Env"
         type: array
       exposeSettings:
-        $ref: '#/definitions/internal_api_handlers.ServiceExposeSettings'
+        $ref: "#/definitions/internal_api_handlers.ServiceExposeSettings"
       id:
         type: string
       imageName:
@@ -65,13 +65,14 @@ definitions:
 externalDocs:
   description: GitHub Repository
   url: https://github.com/cchalop1/JustDeploy
-host: localhost:8080
+host: localhost:5915
 info:
   contact:
     email: support@justdeploy.dev
     name: Clément Chalopin
     url: https://github.com/cchalop1/JustDeploy
-  description: JustDeploy is a PaaS tool designed to simplify the lives of developers.
+  description:
+    JustDeploy is a PaaS tool designed to simplify the lives of developers.
     It allows you to easily deploy your projects and databases using Docker. JustDeploy
     fetches your GitHub repository and deploys your application using your Docker
     and Docker Compose configurations, all while deploying to any VPS of your choice
@@ -86,35 +87,35 @@ paths:
   /api/v1/deploy:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Deploys the current application using the deploy service
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: Successfully deployed
           schema:
-            $ref: '#/definitions/cchalop1_com_deploy_internal_api_dto.ResponseApi'
+            $ref: "#/definitions/cchalop1_com_deploy_internal_api_dto.ResponseApi"
         "500":
           description: Internal server error with error message
           schema:
-            $ref: '#/definitions/cchalop1_com_deploy_internal_api_dto.ResponseApi'
+            $ref: "#/definitions/cchalop1_com_deploy_internal_api_dto.ResponseApi"
       summary: Deploy application
       tags:
-      - deployment
+        - deployment
   /api/v1/github/connect/{code}:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Connects the application to GitHub using an authorization code
       parameters:
-      - description: GitHub authorization code
-        in: path
-        name: code
-        required: true
-        type: string
+        - description: GitHub authorization code
+          in: path
+          name: code
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: Connection result
@@ -129,29 +130,29 @@ paths:
             type: string
       summary: Connect GitHub application
       tags:
-      - github
+        - github
   /api/v1/github/is-connected:
     get:
       consumes:
-      - application/json
+        - application/json
       description: Checks if the application is connected to GitHub
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: Connection status
           schema:
-            $ref: '#/definitions/cchalop1_com_deploy_internal_api_dto.GithubIsConnected'
+            $ref: "#/definitions/cchalop1_com_deploy_internal_api_dto.GithubIsConnected"
       summary: Check GitHub connection status
       tags:
-      - github
+        - github
   /api/v1/github/repos:
     get:
       consumes:
-      - application/json
+        - application/json
       description: Retrieves all GitHub repositories accessible to the application
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: List of GitHub repositories
@@ -160,20 +161,20 @@ paths:
             type: array
       summary: Get GitHub repositories
       tags:
-      - github
+        - github
   /api/v1/github/save-token/{installationId}:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Saves a GitHub access token using the provided installation ID
       parameters:
-      - description: GitHub installation ID
-        in: path
-        name: installationId
-        required: true
-        type: string
+        - description: GitHub installation ID
+          in: path
+          name: installationId
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: Access token saved successfully
@@ -189,26 +190,26 @@ paths:
             type: string
       summary: Save GitHub access token
       tags:
-      - github
+        - github
   /api/v1/repo:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Creates a new service by cloning and configuring a GitHub repository
       parameters:
-      - description: Repository URL information
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_api_handlers.CreateRepoRequest'
+        - description: Repository URL information
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: "#/definitions/internal_api_handlers.CreateRepoRequest"
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Service created successfully
           schema:
-            $ref: '#/definitions/internal_api_handlers.ServiceResponse'
+            $ref: "#/definitions/internal_api_handlers.ServiceResponse"
         "400":
           description: Bad request - Invalid input
           schema:
@@ -223,24 +224,24 @@ paths:
             type: object
       summary: Create a new service from a GitHub repository
       tags:
-      - repository
+        - repository
   /api/v1/services:
     get:
       consumes:
-      - application/json
+        - application/json
       description: Retrieves all services managed by the application
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: List of services
           schema:
             items:
-              $ref: '#/definitions/internal_api_handlers.ServiceResponse'
+              $ref: "#/definitions/internal_api_handlers.ServiceResponse"
             type: array
       summary: Get all services
       tags:
-      - services
+        - services
 securityDefinitions:
   BasicAuth:
     type: basic

@@ -3,17 +3,16 @@ import EnvsManagements from "./forms/EnvsManagements";
 import { Button } from "./ui/button";
 import { useNotification } from "@/hooks/useNotifications";
 import { deleteServiceByIdApi } from "@/services/deleteServiceApi";
-import { ProjectDto } from "@/services/getProjectById";
+import { copyToClipboard } from "@/lib/utils";
+import { Service } from "@/services/getServicesByDeployId";
 
 type ServiceLocalSettingsProps = {
-  project: ProjectDto;
   service: Service;
   onClose: () => void;
   getProjectById: () => Promise<void>;
 };
 
 export default function ServiceLocalSettings({
-  project,
   service,
   onClose,
   getProjectById,
@@ -22,16 +21,19 @@ export default function ServiceLocalSettings({
   const url = `http://localhost:${service.exposePort}`;
 
   function copyEnv() {
-    const env = service.envs.map((e) => `${e.name}=${e.value}`).join("\n");
-    navigator.clipboard.writeText(env);
-    notif.success({
-      title: "Copied",
-      content: "Environment variables copied to clipboard",
-    });
+    const env = service.envs
+      .map((e: { name: string; value: string }) => `${e.name}=${e.value}`)
+      .join("\n");
+    copyToClipboard(env, ({ title }) =>
+      notif.success({
+        title: title,
+        content: "Environment variables copied to clipboard",
+      })
+    );
   }
 
   const deleteSelectedService = async () => {
-    await deleteServiceByIdApi(project.id, service.id);
+    await deleteServiceByIdApi(service.id);
     onClose();
     await getProjectById();
   };

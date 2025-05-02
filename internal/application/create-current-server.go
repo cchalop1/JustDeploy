@@ -8,26 +8,11 @@ import (
 	"cchalop1.com/deploy/internal/utils"
 )
 
-func CreateCurrentServer(deployService *service.DeployService, port string) (domain.Server, string, error) {
-	oldServer := deployService.DatabaseAdapter.GetServer()
+func CreateCurrentServer(deployService *service.DeployService, port string) (domain.Server, error) {
 	currentIp, err := deployService.NetworkAdapter.GetCurrentIP()
 
-	if oldServer.Ip == currentIp {
-		// Existing server, check for API key
-		settings := deployService.DatabaseAdapter.GetSettings()
-		if settings.ApiKey == "" {
-			// Generate API key for existing server
-			apiKey, err := GenerateAndSaveApiKey(deployService)
-			if err != nil {
-				return oldServer, "", err
-			}
-			return oldServer, apiKey, nil
-		}
-		return oldServer, settings.ApiKey, nil
-	}
-
 	if err != nil {
-		return domain.Server{}, "", err
+		return domain.Server{}, err
 	}
 
 	server := domain.Server{
@@ -41,11 +26,5 @@ func CreateCurrentServer(deployService *service.DeployService, port string) (dom
 
 	deployService.DatabaseAdapter.SaveServer(server)
 
-	// Generate API key for new server
-	apiKey, err := GenerateAndSaveApiKey(deployService)
-	if err != nil {
-		return server, "", err
-	}
-
-	return server, apiKey, nil
+	return server, nil
 }

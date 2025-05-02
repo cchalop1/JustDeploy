@@ -18,12 +18,12 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<Layout />}>
       <Route path="/github/auth/redirect" element={<GithubRedirect />} />
-      <Route path="server/create" element={<ServerConfigForm />} />
+      {/* <Route path="server/create" element={<ServerConfigForm />} />
       <Route path="server/:id/installation" element={<CreateServerLoading />} />
 
       <Route path="deploy/:id/installation" element={<CreateDeployLoading />} />
-      <Route path="deploy/create" element={<CreateDeployForm />} />
-      <Route path="deploy/:id" element={<DeployPage />} />
+      <Route path="deploy/create" element={<CreateDeployForm />} /> */}
+      {/* <Route path="deploy/:id" element={<DeployPage />} /> */}
       <Route
         path="/"
         element={

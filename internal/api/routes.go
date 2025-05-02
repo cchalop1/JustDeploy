@@ -13,14 +13,18 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	// Apply middleware to all API routes
 	api := app.Echo.Group("")
 
+	// Public endpoints (no API key required)
 	api.POST("/github/events", handlers.PostGithubEvent(deployService))
+	api.GET("/api/info", handlers.GetServerInfoHandler(deployService))
+	api.POST("/api/setup", handlers.PostSaveInitialSetupHandler(deployService))
+
+	// Protected endpoints (API key required)
 	api.Use(apiKeyAuth)
 
 	// API routes
 	api.GET("/api/deploy", handlers.GetDeployListHandler(deployService))
 	api.GET("/api/server/:id/logs", handlers.GetServerProxyLogs(deployService))
 	api.GET("/api/server/:id/deploy", handlers.GetDeployByServerIdHandler(deployService))
-	api.GET("/api/server/info", handlers.GetServerInfoHandler(deployService))
 
 	api.POST("/api/deploy/config/", handlers.GetDeployConfigHandler(deployService))
 	api.POST("/api/deploy/config/:deployId", handlers.GetDeployConfigHandler(deployService))
@@ -46,8 +50,6 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	api.GET("/api/server/:id/loading", handlers.SubscriptionCreateServerLoadingState(deployService))
 	api.GET("/api/deploy/:id/loading", handlers.SubscriptionCreateDeployLoadingState(deployService))
-
-	api.GET("/api/version", handlers.GetVersionHandler(deployService))
 
 	// Github
 	api.GET("/api/github/is-connected", handlers.GetGithubIsConnectedHandler(deployService))
