@@ -11,6 +11,7 @@ import NewServiceItem from "./NewServiceItem";
 import { ServiceDto } from "@/services/getServicesApi";
 import { redirectToGithubAppRegistration } from "@/services/createGithubApp";
 import { GithubRepo } from "@/services/getGithubRepos";
+import { useInfo } from "@/hooks/useInfo";
 
 type CommandModalProps = {
   open: boolean;
@@ -20,7 +21,6 @@ type CommandModalProps = {
   createRepoToDeploy: (repoUrl: string) => Promise<void>;
   createDatabaseToDeploy: (databaseName: string) => Promise<void>;
   githubRepos: Array<GithubRepo>;
-  serverIp: string;
 };
 
 export default function CommandModal({
@@ -28,23 +28,27 @@ export default function CommandModal({
   setOpen,
   preConfiguredServices,
   isGithubConnected,
-  serverIp,
   githubRepos,
   createDatabaseToDeploy,
   createRepoToDeploy,
 }: CommandModalProps) {
+  const { serverInfo } = useInfo();
   const llmServices = preConfiguredServices.filter((s) => s.type === "llm");
   const databaseServices = preConfiguredServices.filter(
     (s) => s.type === "database"
   );
+  console.log(serverInfo?.server);
+
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
       <CommandInput placeholder="Search a github repos or a services to deploy on your server ..." />
       <CommandList onSelect={() => setOpen(false)}>
         <CommandGroup heading="Github repositories">
-          {!isGithubConnected && (
+          {!isGithubConnected && serverInfo?.server.ip && (
             <CommandItem
-              onSelect={() => redirectToGithubAppRegistration(serverIp)}
+              onSelect={() =>
+                redirectToGithubAppRegistration(serverInfo?.server.ip)
+              }
               className="flex gap-3"
             >
               <GithubIcon className="mr-2 h-5 w-5" />

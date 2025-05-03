@@ -45,6 +45,7 @@ export function redirectToGithubAppRegistration(serverIp: string) {
   input.type = "hidden";
   input.name = "manifest";
   const manifest = buildGithubAppManifest(serverIp);
+  console.log(manifest);
   input.value = JSON.stringify(manifest);
 
   form.appendChild(input);
