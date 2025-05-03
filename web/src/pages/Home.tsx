@@ -24,12 +24,9 @@ export default function Home() {
 
   const [serviceSelected, setServiceSelected] = useState<Service | null>(null);
   const [services, setServices] = useState<Service[]>([]);
-  // Modals states
   const [isGlobalSettingsModalOpen, setIsGlobalSettingsModalOpen] =
     useState(false);
   const [serviceIsLoading, setServiceIsCreating] = useState(false);
-  const [isCreateServiceModalOpen, setIsCreateServiceModalOpen] =
-    useState(false);
 
   const toDeploy = services.find(
     (service) => service.status === "ready_to_deploy"
@@ -69,8 +66,11 @@ export default function Home() {
   }
 
   useEffect(() => {
-    fetchServices();
-  }, []);
+    // Only fetch services if we're not showing the first connection modal
+    if (!shouldShowFirstConnectionModal) {
+      fetchServices();
+    }
+  }, [shouldShowFirstConnectionModal]);
 
   useEffect(() => {
     window.addEventListener("keydown", (ev: globalThis.KeyboardEvent) => {
@@ -96,9 +96,6 @@ export default function Home() {
       {isGlobalSettingsModalOpen && (
         <ModalGlobalSettings
           onClose={() => setIsGlobalSettingsModalOpen(false)}
-          onClickNewServer={() => {
-            setIsCreateServiceModalOpen(true);
-          }}
         />
       )}
       {shouldShowFirstConnectionModal && (
@@ -116,23 +113,25 @@ export default function Home() {
       />
       {displayWelcomeModal && <ModalWelcome />}
       <div className="flex flex-col justify-center items-center h-3/5">
-        <div className="flex flex-col gap-3 mt-3 ">
-          {services.map((service) => (
-            <ServiceCard
-              key={service.id}
-              service={service}
-              onClick={() => {
-                setServiceSelected(null);
-                setServiceSelected(service);
-              }}
+        {!shouldShowFirstConnectionModal && (
+          <div className="flex flex-col gap-3 mt-3 ">
+            {services.map((service) => (
+              <ServiceCard
+                key={service.id}
+                service={service}
+                onClick={() => {
+                  setServiceSelected(null);
+                  setServiceSelected(service);
+                }}
+              />
+            ))}
+            {serviceIsLoading && <ServiceCardLoading />}
+            <AddService
+              fetchServices={fetchServices}
+              setLoading={setServiceIsCreating}
             />
-          ))}
-          {serviceIsLoading && <ServiceCardLoading />}
-          <AddService
-            fetchServices={fetchServices}
-            setLoading={setServiceIsCreating}
-          />
-        </div>
+          </div>
+        )}
       </div>
       <div className="fixed bottom-6 right-4 pl-10 pr-10">
         <Version />

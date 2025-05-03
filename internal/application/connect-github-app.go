@@ -39,15 +39,15 @@ func SaveAccessTokenWithInstallationId(deployService *service.DeployService, ins
 }
 
 func saveGithubAppDetails(deployService *service.DeployService, response adapter.GitHubAppResponse) error {
-	settings := domain.Settings{
-		GithubAppSettings: domain.GithubAppSettings{
-			ClientID:      response.ClientID,
-			ClientSecret:  response.ClientSecret,
-			WebhookSecret: response.WebhookSecret,
-			Pem:           response.Pem,
-			ID:            response.ID,
-			Name:          response.Name,
-		},
+	settings := deployService.DatabaseAdapter.GetSettings()
+
+	settings.GithubAppSettings = domain.GithubAppSettings{
+		ClientID:      response.ClientID,
+		ClientSecret:  response.ClientSecret,
+		WebhookSecret: response.WebhookSecret,
+		Pem:           response.Pem,
+		ID:            response.ID,
+		Name:          response.Name,
 	}
 
 	err := deployService.DatabaseAdapter.SaveSettings(settings)

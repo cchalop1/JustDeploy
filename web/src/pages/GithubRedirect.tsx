@@ -35,6 +35,7 @@ export default function GithubRedirect() {
     const installationId = params.get("installation_id");
 
     if (code) {
+      console.log("Detected code: ", code);
       handleGithubAppCreation(code);
     }
 

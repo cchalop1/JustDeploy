@@ -10,8 +10,14 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	// Create API key auth middleware
 	apiKeyAuth := middleware.APIKeyAuth(deployService)
 
+	// Create request logger middleware
+	// requestLogger := middleware.RequestLogger()
+
 	// Apply middleware to all API routes
 	api := app.Echo.Group("api")
+
+	// Apply request logger to all API routes
+	// api.Use(requestLogger)
 
 	// Public endpoints (no API key required)
 	api.POST("/github/events", handlers.PostGithubEvent(deployService))
@@ -30,7 +36,6 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	api.POST("/deploy/config/:deployId", handlers.GetDeployConfigHandler(deployService))
 
 	api.PUT("/deploy/edit", handlers.EditDeployementHandler(deployService))
-	// api.POST("/server", handlers.ConnectNewServer(deployService))
 
 	api.DELETE("/deploy/remove/:id", handlers.RemoveApplicationHandler(deployService))
 	api.POST("/deploy/start/:id", handlers.StartAppHandler(deployService))
@@ -58,11 +63,11 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	api.GET("/github/repos", handlers.GetGithubRepos(deployService))
 
-	api.POST("/github/save-access-token/:installationId", handlers.PostSaveAccessTokenHandler(deployService))
-
 	// Create Service
 	api.POST("/database/create", handlers.PostCreateDatabaseHandler(deployService))
 	api.POST("/repo/create", handlers.PostCreateRepoHandler(deployService))
+
+	api.POST("/github/save-access-token/:installationId", handlers.PostSaveAccessTokenHandler(deployService))
 
 	// Deploy
 	api.POST("/deploy", handlers.PostDeployHandler(deployService))
