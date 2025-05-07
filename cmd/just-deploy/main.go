@@ -4,7 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 
+	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/adapter"
 	"cchalop1.com/deploy/internal/api"
 	"cchalop1.com/deploy/internal/api/service"
@@ -16,6 +18,10 @@ import (
 var flags struct {
 	noBrowser bool
 	help      bool
+	logs      bool
+	update    bool
+	stop      bool
+	uninstall bool
 	redeploy  struct {
 		deployId string
 	}
@@ -47,6 +53,32 @@ func main() {
 		fmt.Println("There is a new version available. Please download it by typing: curl -fsSL https://raw.githubusercontent.com/cchalop1/JustDeploy/refs/heads/main/install.sh | bash")
 	}
 
+	getArgsOptions()
+
+	if flags.help {
+		showHelp()
+	}
+
+	if flags.logs {
+		showLogs()
+		return
+	}
+
+	if flags.update {
+		updateJustDeploy()
+		return
+	}
+
+	if flags.stop {
+		stopJustDeploy()
+		return
+	}
+
+	if flags.uninstall {
+		uninstallJustDeploy()
+		return
+	}
+
 	port := "5915"
 
 	app := api.NewApplication(port)
@@ -74,16 +106,10 @@ func main() {
 
 	deployService.DockerAdapter.ConnectClient()
 
-	getArgsOptions()
-
 	server, err := application.CreateCurrentServer(&deployService, port)
 
 	if err != nil {
-		fmt.Println("Current Server is arealy created :", err)
-	}
-
-	if flags.help {
-		showHelp()
+		fmt.Println("Current Server is already created:", err)
 	}
 
 	api.InitValidator(app)
@@ -97,14 +123,99 @@ func getArgsOptions() {
 	flag.BoolVar(&flags.noBrowser, "no-browser", false, "Do not open the browser")
 	flag.StringVar(&flags.redeploy.deployId, "redeploy", "", "Redeploy application by deploy id")
 	flag.BoolVar(&flags.help, "help", false, "Show help")
+	flag.BoolVar(&flags.logs, "logs", false, "Show application logs")
+	flag.BoolVar(&flags.update, "update", false, "Update JustDeploy to the latest version")
+	flag.BoolVar(&flags.stop, "stop", false, "Stop JustDeploy service")
+	flag.BoolVar(&flags.uninstall, "uninstall", false, "Uninstall JustDeploy completely")
 	flag.Parse()
 }
 
 func showHelp() {
-	fmt.Println("Usage: main [options]")
+	fmt.Println("Usage: justdeploy [options]")
+	fmt.Println("Options:")
 	fmt.Println("  -no-browser    Do not open the browser")
 	fmt.Println("  -redeploy <id> Redeploy application by deploy id")
+	fmt.Println("  -logs          Show application logs")
+	fmt.Println("  -update        Update JustDeploy to the latest version")
+	fmt.Println("  -stop          Stop JustDeploy service")
+	fmt.Println("  -uninstall     Uninstall JustDeploy completely")
+	fmt.Println("  -help          Show this help message")
 	os.Exit(0)
+}
+
+func showLogs() {
+	cmd := exec.Command("sudo", "journalctl", "-u", "justdeploy.service", "-f")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	fmt.Println("Showing JustDeploy logs (press Ctrl+C to exit)...")
+	cmd.Run()
+}
+
+func updateJustDeploy() {
+	fmt.Println("Updating JustDeploy...")
+	cmd := exec.Command("bash", "-c", "curl -fsSL https://get.justdeploy.app | sudo bash")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("Error updating JustDeploy: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func stopJustDeploy() {
+	fmt.Println("Stopping JustDeploy service...")
+	cmd := exec.Command("sudo", "systemctl", "stop", "justdeploy.service")
+	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("Error stopping JustDeploy service: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("JustDeploy service stopped successfully.")
+}
+
+func uninstallJustDeploy() {
+	fmt.Println("Uninstalling JustDeploy...")
+
+	// Stop and disable service
+	stopCmd := exec.Command("sudo", "systemctl", "stop", "justdeploy.service")
+	stopCmd.Run()
+
+	disableCmd := exec.Command("sudo", "systemctl", "disable", "justdeploy.service")
+	disableCmd.Run()
+
+	// Remove service file
+	rmServiceCmd := exec.Command("sudo", "rm", "-f", "/etc/systemd/system/justdeploy.service")
+	rmServiceCmd.Run()
+
+	// Reload systemd
+	reloadCmd := exec.Command("sudo", "systemctl", "daemon-reload")
+	reloadCmd.Run()
+
+	// Remove binary
+	rmBinCmd := exec.Command("sudo", "rm", "-f", "/usr/local/bin/justdeploy")
+	rmBinCmd.Run()
+
+	// Remove justdeploy folder and all its contents
+	fmt.Println("Removing JustDeploy data directory...")
+	err := os.RemoveAll(internal.JUSTDEPLOY_FOLDER)
+	if err != nil {
+		fmt.Printf("Error removing JustDeploy data directory: %v\n", err)
+	}
+
+	// Remove database file
+	err = os.Remove(internal.DATABASE_FILE_PATH)
+	if err != nil && !os.IsNotExist(err) {
+		fmt.Printf("Error removing database file: %v\n", err)
+	}
+
+	// Remove cert docker folder
+	err = os.RemoveAll(internal.CERT_DOCKER_FOLDER)
+	if err != nil && !os.IsNotExist(err) {
+		fmt.Printf("Error removing certificate folder: %v\n", err)
+	}
+
+	fmt.Println("JustDeploy has been completely uninstalled.")
 }
 
 func displayServerURL(networkAdapter *adapter.NetworkAdapter, server domain.Server) {
