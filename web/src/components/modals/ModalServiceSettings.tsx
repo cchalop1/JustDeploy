@@ -10,6 +10,8 @@ import { deleteServiceByIdApi } from "@/services/deleteServiceApi";
 import { useNotification } from "@/hooks/useNotifications";
 import { Badge } from "../ui/badge";
 import SpinnerIcon from "@/assets/SpinnerIcon";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ServiceLogs from "../ServiceLogs";
 
 type ModalServiceSettingsProps = {
   service: Service;
@@ -55,7 +57,7 @@ export default function ModalServiceSettings({
         position: "absolute",
         right: 5,
         top: 28,
-        width: "35%",
+        width: "600px",
         zIndex: 20,
       }}
       animate={{ opacity: 1, x: 0 }}
@@ -69,16 +71,32 @@ export default function ModalServiceSettings({
             <div className="font-bold">{service.name}</div>
           </div>
         }
+        className="w-[600px] max-w-full"
       >
-        <div className="p-3 border-t mt-2">
-          <div className="flex flex-col justify-between gap-2">
+        <div className="p-3 border-t mt-2 w-full max-w-full overflow-hidden">
+          <div className="flex flex-col justify-between gap-2 w-full">
             <div>
               <Badge variant="outline">{service.status}</Badge>
             </div>
-            <ServiceDeploySettings
-              service={service}
-              fetchServices={fetchServices}
-            />
+            <Tabs defaultValue="settings" className="w-full">
+              <TabsList className="w-full">
+                <TabsTrigger value="settings" className="flex-1">
+                  Settings
+                </TabsTrigger>
+                <TabsTrigger value="logs" className="flex-1">
+                  Logs
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="settings">
+                <ServiceDeploySettings
+                  service={service}
+                  fetchServices={fetchServices}
+                />
+              </TabsContent>
+              <TabsContent value="logs">
+                <ServiceLogs serviceId={service.id} />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
         <div className="flex justify-end mt-4">

@@ -1,8 +1,8 @@
 package application
 
-// func GetApplicationLogs(deployService *service.DeployService, deployId string) ([]dto.Logs, error) {
+// func GetApplicationLogs(deployService *service.DeployService, deployId string) ([]domain.Logs, error) {
 // 	deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
-// 	logs := []dto.Logs{}
+// 	logs := []domain.Logs{}
 
 // 	if err != nil {
 // 		return logs, err
@@ -30,7 +30,7 @@ package application
 
 // 		datePart := log[0:30]
 // 		messagePart := log[30:]
-// 		logs = append(logs, dto.Logs{
+// 		logs = append(logs, domain.Logs{
 // 			Date:    datePart,
 // 			Message: messagePart,
 // 		})

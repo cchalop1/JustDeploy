@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"cchalop1.com/deploy/internal"
-	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
 )
 
@@ -155,7 +154,7 @@ func (d *DatabaseAdapter) CreateDeployLogsFileIfNot(deployId string) error {
 	return err
 }
 
-func (d *DatabaseAdapter) SaveLogs(deployId string, logs []dto.Logs) error {
+func (d *DatabaseAdapter) SaveLogs(deployId string, logs []domain.Logs) error {
 	file, err := os.OpenFile(internal.JUSTDEPLOY_FOLDER+"/"+deployId+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
@@ -172,16 +171,16 @@ func (d *DatabaseAdapter) SaveLogs(deployId string, logs []dto.Logs) error {
 	return err
 }
 
-func (d *DatabaseAdapter) GetLogs(deployId string) ([]dto.Logs, error) {
+func (d *DatabaseAdapter) GetLogs(deployId string) ([]domain.Logs, error) {
 	file, err := os.ReadFile(internal.JUSTDEPLOY_FOLDER + "/" + deployId + ".log")
 	if err != nil {
-		return []dto.Logs{}, err
+		return []domain.Logs{}, err
 	}
 
-	var logs []dto.Logs
+	var logs []domain.Logs
 	err = json.Unmarshal(file, &logs)
 	if err != nil {
-		return []dto.Logs{}, err
+		return []domain.Logs{}, err
 	}
 	return logs, nil
 }

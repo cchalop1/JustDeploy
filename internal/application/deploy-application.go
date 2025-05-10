@@ -46,33 +46,29 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 	pathToDir = adapter.NewFilesystemAdapter().CleanPath(pathToDir)
 
 	isFolder := adapter.NewFilesystemAdapter().IsFolder(pathToDir)
-	DockerFileName := "Dockerfile"
 
 	if !isFolder {
 		fmt.Println("Is not a folder")
-		DockerFileName = adapter.NewFilesystemAdapter().BaseDir(pathToDir)
-		pathToDir = adapter.NewFilesystemAdapter().GetDir(pathToDir)
+		// pathToDir = adapter.NewFilesystemAdapter().GetDir(pathToDir)
 	}
 
 	portEnv := make([]dto.Env, 1)
-
-	fmt.Println("Path to dir: ", pathToDir)
-	fmt.Println("Docker file name: ", DockerFileName)
-
 	serviceToDeploy.Envs = append(portEnv, serviceToDeploy.Envs...)
+
+	logs := domain.LogCollector{}
 
 	// Build the appropriate image based on whether a Dockerfile exists
 	isDockerfile := deployService.FilesystemAdapter.FindDockerFile(serviceToDeploy.CurrentPath)
 	if isDockerfile {
-		err := deployService.DockerAdapter.BuildImage(serviceToDeploy)
-		if err != nil {
-			return fmt.Errorf("error building Docker image: %w", err)
-		}
+		err = deployService.DockerAdapter.BuildImage(serviceToDeploy, &logs)
 	} else {
-		err = deployService.DockerAdapter.BuildNixpacksImage(serviceToDeploy)
-		if err != nil {
-			return fmt.Errorf("error building Nixpacks image: %w", err)
-		}
+		err = deployService.DockerAdapter.BuildNixpacksImage(serviceToDeploy, &logs)
+	}
+
+	StoreBuildLog(serviceToDeploy.Id, logs)
+
+	if err != nil {
+		return fmt.Errorf("error building image: %w", err)
 	}
 
 	// Construct the domain for the service based on ExposeSettings

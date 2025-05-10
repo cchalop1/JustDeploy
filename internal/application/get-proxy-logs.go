@@ -1,33 +1,32 @@
 package application
 
 import (
-	"cchalop1.com/deploy/internal/adapter"
-	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
+	"cchalop1.com/deploy/internal/domain"
 )
 
-func GetServerProxyLogs(deployService *service.DeployService, serverId string) ([]dto.Logs, error) {
-	logs := []dto.Logs{}
+func GetServerProxyLogs(deployService *service.DeployService, serverId string) ([]domain.Logs, error) {
+	logs := []domain.Logs{}
 
-	dockerLogs, err := deployService.DockerAdapter.GetLogsOfContainer(adapter.ROUTER_NAME)
+	// dockerLogs, err := deployService.DockerAdapter.GetLogsOfContainer(adapter.ROUTER_NAME)
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	for _, log := range dockerLogs {
+	// for _, log := range dockerLogs {
 
-		if len(log) < 30 {
-			continue
-		}
+	// 	if len(log) < 30 {
+	// 		continue
+	// 	}
 
-		datePart := log[0:30]
-		messagePart := log[30:]
-		logs = append(logs, dto.Logs{
-			Date:    datePart,
-			Message: messagePart,
-		})
-	}
+	// 	datePart := log[0:30]
+	// 	messagePart := log[30:]
+	// 	logs = append(logs, domain.Logs{
+	// 		Date:    datePart,
+	// 		Message: messagePart,
+	// 	})
+	// }
 
 	return logs, nil
 }

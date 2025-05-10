@@ -61,14 +61,15 @@ type DockerMessage struct {
 }
 
 // BuildImage builds a Docker image from the specified Dockerfile and context directory.
-func (d *DockerAdapter) BuildImage(service domain.Service) error {
-	fmt.Println("Make a tar of", service.CurrentPath)
+func (d *DockerAdapter) BuildImage(service domain.Service, logCollector *domain.LogCollector) error {
+	logCollector.AddLog(fmt.Sprintf("Making tar of %s", service.CurrentPath))
 	tar, err := makeTar(service.CurrentPath)
 	if err != nil {
+		logCollector.AddLog(fmt.Sprintf("Error creating tar: %v", err))
 		return err
 	}
-	fmt.Println("Tar created")
-	fmt.Println("Building image", service.GetDockerName())
+	logCollector.AddLog("Tar created")
+	logCollector.AddLog(fmt.Sprintf("Building image %s", service.GetDockerName()))
 
 	buildOptions := types.ImageBuildOptions{
 		Dockerfile: "Dockerfile",
@@ -78,7 +79,7 @@ func (d *DockerAdapter) BuildImage(service domain.Service) error {
 
 	buildResponse, err := d.client.ImageBuild(context.Background(), tar, buildOptions)
 	if err != nil {
-		fmt.Println("Error building image:", err)
+		logCollector.AddLog(fmt.Sprintf("Error building image: %v", err))
 		return err
 	}
 	defer buildResponse.Body.Close()
@@ -89,11 +90,12 @@ func (d *DockerAdapter) BuildImage(service domain.Service) error {
 		line := scanner.Text()
 		var msg DockerMessage
 		if err := json.Unmarshal([]byte(line), &msg); err != nil {
+			logCollector.AddLog(fmt.Sprintf("Error decoding JSON: %v", err))
 			return fmt.Errorf("error decoding JSON: %v", err)
 		}
 
 		if msg.Stream != "" {
-			fmt.Print(msg.Stream)
+			logCollector.AddLog(msg.Stream)
 		}
 
 		if msg.ErrorDetail.Message != "" || msg.Error != "" {
@@ -101,47 +103,46 @@ func (d *DockerAdapter) BuildImage(service domain.Service) error {
 			if errorMsg == "" {
 				errorMsg = msg.Error
 			}
+			logCollector.AddLog(fmt.Sprintf("Error building image: %s", errorMsg))
 			return fmt.Errorf("error building image: %s", errorMsg)
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
+		logCollector.AddLog(fmt.Sprintf("Error reading build output: %v", err))
 		return fmt.Errorf("error reading build output: %v", err)
 	}
 
-	fmt.Println("Image built successfully")
+	logCollector.AddLog("Image built successfully")
 	return nil
-
 }
 
-func (d *DockerAdapter) BuildNixpacksImage(service domain.Service) error {
-	// Construct the nixpacks command
+func (d *DockerAdapter) BuildNixpacksImage(service domain.Service, logCollector *domain.LogCollector) error {
+	logCollector.AddLog(fmt.Sprintf("Starting Nixpacks build for %s", service.GetDockerName()))
 
 	nixpacksCmd := exec.Command("nixpacks", "build",
 		"--name", service.GetDockerName(),
 		service.CurrentPath)
 
-	// Set up pipes for stdout and stderr
 	stdout, _ := nixpacksCmd.StdoutPipe()
 	stderr, _ := nixpacksCmd.StderrPipe()
 
-	// Start the command
 	if err := nixpacksCmd.Start(); err != nil {
+		logCollector.AddLog(fmt.Sprintf("Failed to start nixpacks build: %v", err))
 		return fmt.Errorf("failed to start nixpacks build: %v", err)
 	}
 
-	// Create a scanner to read the output line by line
 	scanner := bufio.NewScanner(io.MultiReader(stdout, stderr))
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
+		logCollector.AddLog(scanner.Text())
 	}
 
-	// Wait for the command to finish
 	if err := nixpacksCmd.Wait(); err != nil {
+		logCollector.AddLog(fmt.Sprintf("Nixpacks build failed: %v", err))
 		return fmt.Errorf("nixpacks build failed: %v", err)
 	}
 
-	fmt.Println("Nixpacks image built successfully")
+	logCollector.AddLog("Nixpacks image built successfully")
 	return nil
 }
 
@@ -382,20 +383,19 @@ func (d *DockerAdapter) RunImageWithTLS(service domain.Service, domain string, u
 	// Attendre un court instant pour laisser le temps au conteneur de démarrer
 	time.Sleep(2 * time.Second)
 
-	containerInfo, err := d.client.ContainerInspect(context.Background(), con.ID)
-	if err != nil {
-		return fmt.Errorf("failed to inspect container: %v", err)
-	}
+	// containerInfo, err := d.client.ContainerInspect(context.Background(), con.ID)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to inspect container: %v", err)
+	// }
 
-	if !containerInfo.State.Running {
-		// Si le conteneur n'est pas en cours d'exécution, récupérer les logs pour comprendre pourquoi
-		logs, logErr := d.GetLogsOfContainer(service.GetDockerName())
-		if logErr == nil && len(logs) > 0 {
-			return fmt.Errorf("container failed to start. Logs: %s", strings.Join(logs, "\n"))
-		}
-		return fmt.Errorf("container failed to start. Exit code: %d, Error: %s",
-			containerInfo.State.ExitCode, containerInfo.State.Error)
-	}
+	// if !containerInfo.State.Running {
+	// 	logs, logErr := d.GetLogsOfContainer(service.GetDockerName())
+	// 	if logErr == nil && len(logs) > 0 {
+	// 		return fmt.Errorf("container failed to start. Logs: %s", strings.Join(logs, "\n"))
+	// 	}
+	// 	return fmt.Errorf("container failed to start. Exit code: %d, Error: %s",
+	// 		containerInfo.State.ExitCode, containerInfo.State.Error)
+	// }
 
 	return nil
 }
@@ -417,28 +417,52 @@ func (d *DockerAdapter) Start(appName string) {
 	d.client.ContainerStart(context.Background(), appName, container.StartOptions{})
 }
 
-func (d *DockerAdapter) GetLogsOfContainer(containerName string) ([]string, error) {
+func (d *DockerAdapter) GetLogsOfContainer(containerName string) ([]domain.Logs, error) {
 	logs, err := d.client.ContainerLogs(context.Background(), containerName, container.LogsOptions{ShowStdout: true, ShowStderr: true, Timestamps: true})
 	if err != nil {
-		return make([]string, 0), err
+		return []domain.Logs{}, err
 	}
 	defer logs.Close()
 
-	lines := make([]string, 0)
-	buffer := make([]byte, 1024)
+	parsedLogs := make([]domain.Logs, 0)
+	scanner := bufio.NewScanner(logs)
 
-	for {
-		n, err := logs.Read(buffer)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if len(line) < 8 {
+			continue
+		}
+
+		// Skip the first 8 bytes (Docker log header)
+		content := line[8:]
+
+		// Parse the timestamp and message
+		// Format: 2025-05-10T03:25:42.310893047Z message
+		parts := strings.SplitN(content, " ", 2)
+		if len(parts) != 2 {
+			continue
+		}
+
+		timestamp := parts[0]
+		message := parts[1]
+
+		// Parse the timestamp
+		date, err := time.Parse(time.RFC3339Nano, timestamp)
 		if err != nil {
-			break
+			continue
 		}
-		clearLine := string(buffer[8:n])
-		if n > 0 {
-			lines = append(lines, clearLine)
-		}
+
+		parsedLogs = append(parsedLogs, domain.Logs{
+			Date:    date.Format(time.RFC3339),
+			Message: message,
+		})
 	}
 
-	return lines, nil
+	if err := scanner.Err(); err != nil {
+		return parsedLogs, err
+	}
+
+	return parsedLogs, nil
 }
 
 func (d *DockerAdapter) RunService(service database.ServicesConfig, exposedPort string, containerHostName string) {
