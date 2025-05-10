@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import Modal from "@/components/modals/Modal";
 import { Service } from "@/services/getServicesByDeployId";
@@ -94,7 +94,9 @@ export default function ModalServiceSettings({
                 />
               </TabsContent>
               <TabsContent value="logs">
-                <ServiceLogs serviceId={service.id} />
+                <Suspense fallback={<div>Loading...</div>}>
+                  <ServiceLogs serviceId={service.id} />
+                </Suspense>
               </TabsContent>
             </Tabs>
           </div>

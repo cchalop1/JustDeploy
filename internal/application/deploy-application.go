@@ -49,7 +49,7 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 
 	if !isFolder {
 		fmt.Println("Is not a folder")
-		// pathToDir = adapter.NewFilesystemAdapter().GetDir(pathToDir)
+		pathToDir = adapter.NewFilesystemAdapter().GetDir(pathToDir)
 	}
 
 	portEnv := make([]dto.Env, 1)
@@ -65,9 +65,15 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 		err = deployService.DockerAdapter.BuildNixpacksImage(serviceToDeploy, &logs)
 	}
 
+	fmt.Println("logs : ", logs)
+
+	fmt.Println("serviceToDeploy : ", serviceToDeploy)
+	fmt.Println("logs : ", logs)
+
 	StoreBuildLog(serviceToDeploy.Id, logs)
 
 	if err != nil {
+		fmt.Println("error building image: ", err)
 		return fmt.Errorf("error building image: %w", err)
 	}
 
