@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"cchalop1.com/deploy/internal/adapter/database"
+	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/domain"
 	"cchalop1.com/deploy/internal/utils"
@@ -27,8 +28,6 @@ func CreateServiceFromDatabase(deployService *service.DeployService, databaseNam
 	// Generate values for environment variables
 	envsWithValues := utils.GenerateEnvValues(dbConfig.Env)
 
-	fmt.Println(dbConfig)
-
 	// Create a new service for the database
 	service := domain.Service{
 		Id:           serviceId,
@@ -43,6 +42,7 @@ func CreateServiceFromDatabase(deployService *service.DeployService, databaseNam
 			IsExposed:  false,
 			ExposePort: strconv.Itoa(dbConfig.DefaultPort),
 		},
+		Cmd: utils.ReplaceEnvVariablesInCmd(dbConfig.Config.Cmd, envsWithValues),
 	}
 
 	// Log the service creation
@@ -52,14 +52,35 @@ func CreateServiceFromDatabase(deployService *service.DeployService, databaseNam
 	service.Status = "pulling"
 	deployService.DatabaseAdapter.SaveService(service)
 
-	go pullImage(deployService, service)
+	// Share environment variables with GitHub repository services
+	allServices := deployService.DatabaseAdapter.GetServices()
+	for _, existingService := range allServices {
+		if existingService.Type == "github_repo" {
+			// Add database connection environment variables to the GitHub repo service
+			for _, env := range service.Envs {
+				existingService.Envs = append(existingService.Envs, dto.Env{
+					Name:  env.Name,
+					Value: env.Value,
+				})
+			}
+			// Add the database host environment variable
+			existingService.Envs = append(existingService.Envs, dto.Env{
+				Name:  fmt.Sprintf("%s_HOST", strings.ToUpper(databaseName)),
+				Value: service.GetDockerName(),
+			})
+			// Save the updated GitHub repo service
+			deployService.DatabaseAdapter.SaveService(existingService)
+		}
+	}
+
+	pullImage(deployService, service)
+
 	return service, nil
 }
 
 func pullImage(deployService *service.DeployService, service domain.Service) {
 	deployService.DockerAdapter.PullImage(service.ImageName)
 	// Save the service to the database
-
 	service.Status = "ready_to_deploy"
 	deployService.DatabaseAdapter.SaveService(service)
 

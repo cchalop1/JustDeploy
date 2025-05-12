@@ -44,3 +44,17 @@ func EnvToSlice(envVars []dto.Env) []string {
 	}
 	return envSlice
 }
+
+func ReplaceEnvVariablesInCmd(cmd []string, envs []dto.Env) []string {
+	for i, c := range cmd {
+		if strings.Contains(c, "$") {
+			for _, env := range envs {
+				// find the $varble in the cmd in env to put in the env.Value in cmd
+				if strings.Contains(c, "$"+env.Name) {
+					cmd[i] = strings.Replace(c, "$"+env.Name, env.Value, 1)
+				}
+			}
+		}
+	}
+	return cmd
+}

@@ -29,6 +29,8 @@ type Service struct {
 	CurrentPath  string `json:"currentPath"`
 	DockerHubUrl string `json:"dockerHubUrl"`
 
+	Cmd []string `json:"cmd"`
+
 	ExposeSettings ServiceExposeSettings `json:"exposeSettings"`
 }
 

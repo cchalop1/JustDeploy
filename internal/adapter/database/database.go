@@ -62,7 +62,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 		},
 		Config: container.Config{
 			Image: "redis:latest",
-			Cmd:   []string{"redis-server", "--requirepass", "$REDIS_PASSWORD"},
+			Cmd:   []string{"--requirepass", "$REDIS_PASSWORD"},
 		},
 	},
 	"Keycloak": {

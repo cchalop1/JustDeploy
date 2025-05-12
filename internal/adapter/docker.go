@@ -320,6 +320,7 @@ func (d *DockerAdapter) ConfigContainer(service domain.Service) container.Config
 		Image:    Image,
 		Env:      utils.EnvToSlice(service.Envs),
 		Hostname: service.GetDockerName(),
+		Cmd:      service.Cmd,
 	}
 	return config
 }
