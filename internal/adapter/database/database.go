@@ -65,24 +65,24 @@ var servicesConfigMap = map[string]ServicesConfig{
 			Cmd:   []string{"--requirepass", "$REDIS_PASSWORD"},
 		},
 	},
-	"Keycloak": {
-		DefaultPort: 8080,
-		Name:        "Keycloak",
-		Type:        "database",
-		Icon:        "https://www.keycloak.org/resources/images/logo.svg",
-		Env: []dto.Env{
-			{Name: "KEYCLOAK_USER", Value: "", IsSecret: false},
-			{Name: "KEYCLOAK_PASSWORD", Value: "", IsSecret: true},
-		},
-		Config: container.Config{
-			Image: "quay.io/keycloak/keycloak",
-			Cmd:   []string{"start-dev"},
-			Env: []string{
-				"KEYCLOAK_USER=$KEYCLOAK_USER",
-				"KEYCLOAK_PASSWORD=$KEYCLOAK_PASSWORD",
-			},
-		},
-	},
+	// "Keycloak": {
+	// 	DefaultPort: 8080,
+	// 	Name:        "Keycloak",
+	// 	Type:        "database",
+	// 	Icon:        "https://www.keycloak.org/resources/images/logo.svg",
+	// 	Env: []dto.Env{
+	// 		{Name: "KEYCLOAK_USER", Value: "", IsSecret: false},
+	// 		{Name: "KEYCLOAK_PASSWORD", Value: "", IsSecret: true},
+	// 	},
+	// 	Config: container.Config{
+	// 		Image: "quay.io/keycloak/keycloak",
+	// 		Cmd:   []string{"start-dev"},
+	// 		Env: []string{
+	// 			"KEYCLOAK_USER=$KEYCLOAK_USER",
+	// 			"KEYCLOAK_PASSWORD=$KEYCLOAK_PASSWORD",
+	// 		},
+	// 	},
+	// },
 	"Minio": {
 		DefaultPort: 9000,
 		Name:        "Minio",

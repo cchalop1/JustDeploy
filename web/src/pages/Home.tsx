@@ -83,6 +83,10 @@ export default function Home() {
     };
   }, []);
 
+  // Filter services by type
+  const githubRepoServices = services.filter((s) => s.type === "github_repo");
+  const otherServices = services.filter((s) => s.type !== "github_repo");
+
   // Authentication Modal component
   return (
     <div className="bg-grid-image h-screen">
@@ -114,22 +118,39 @@ export default function Home() {
       {displayWelcomeModal && <ModalWelcome />}
       <div className="flex flex-col justify-center items-center h-3/5">
         {!shouldShowFirstConnectionModal && (
-          <div className="flex flex-col gap-3 mt-3 ">
-            {services.map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                onClick={() => {
-                  setServiceSelected(null);
-                  setServiceSelected(service);
-                }}
+          <div className="flex flex-col items-center gap-6 mt-3">
+            {/* GitHub Repo Services */}
+            <div className="flex gap-3">
+              {githubRepoServices.map((service) => (
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  onClick={() => {
+                    setServiceSelected(null);
+                    setServiceSelected(service);
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Other Services */}
+            <div className="flex gap-3">
+              {otherServices.map((service) => (
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  onClick={() => {
+                    setServiceSelected(null);
+                    setServiceSelected(service);
+                  }}
+                />
+              ))}
+              {serviceIsLoading && <ServiceCardLoading />}
+              <AddService
+                fetchServices={fetchServices}
+                setLoading={setServiceIsCreating}
               />
-            ))}
-            {serviceIsLoading && <ServiceCardLoading />}
-            <AddService
-              fetchServices={fetchServices}
-              setLoading={setServiceIsCreating}
-            />
+            </div>
           </div>
         )}
       </div>
