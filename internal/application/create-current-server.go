@@ -15,7 +15,13 @@ func CreateCurrentServer(deployService *service.DeployService, port string) (dom
 		return domain.Server{}, err
 	}
 
-	server := domain.Server{
+	server := deployService.DatabaseAdapter.GetServer()
+
+	if server.Id != "" {
+		return server, nil
+	}
+
+	server = domain.Server{
 		Id:          utils.GenerateRandomPassword(5),
 		Name:        "Local Server",
 		Ip:          currentIp,
