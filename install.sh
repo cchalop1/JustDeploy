@@ -91,6 +91,8 @@ if [ "$platform" != "darwin" ]; then
   install_docker
 fi
 
+check_existing_installation
+
 # Create data directory
 echo "📁 Creating data directory..."
 mkdir -p $DATA_DIR
