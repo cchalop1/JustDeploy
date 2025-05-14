@@ -18,7 +18,7 @@ fi
 
 # Construction de l'image Docker
 echo "🔨 Construction de l'image Docker $DOCKER_IMAGE:$GIT_TAG..."
-docker build -t $DOCKER_IMAGE:$GIT_TAG -t $DOCKER_IMAGE:latest -f Dockerfile  ../
+docker build --build-arg VERSION=$GIT_TAG -t $DOCKER_IMAGE:$GIT_TAG -t $DOCKER_IMAGE:latest -f Dockerfile  ../
 
 # Vérifier si la construction a réussi
 if [ $? -ne 0 ]; then
