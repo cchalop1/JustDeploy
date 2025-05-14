@@ -3,6 +3,12 @@
 # Variables
 DOCKER_IMAGE="cchalop1/justdeploy"
 GIT_TAG=$(git describe --tags --abbrev=0 || echo "latest")
+CI_MODE=false
+
+# Check if running in CI mode
+if [[ "$1" == "--ci" ]]; then
+    CI_MODE=true
+fi
 
 # Affiche le message de bienvenue
 echo "================================"
@@ -28,7 +34,16 @@ fi
 
 echo "✅ Construction réussie!"
 
-# Demander à l'utilisateur s'il souhaite pousser l'image
+# En mode CI, on pousse automatiquement l'image
+if [ "$CI_MODE" = true ]; then
+    echo "🚀 Mode CI détecté. Envoi de l'image vers Docker Hub..."
+    docker push $DOCKER_IMAGE:$GIT_TAG
+    docker push $DOCKER_IMAGE:latest
+    echo "✅ Images $DOCKER_IMAGE:$GIT_TAG et $DOCKER_IMAGE:latest poussées avec succès!"
+    exit 0
+fi
+
+# En mode interactif, demander à l'utilisateur
 read -p "Voulez-vous pousser l'image sur Docker Hub? (o/n): " PUSH_IMAGE
 
 if [ "$PUSH_IMAGE" = "o" ] || [ "$PUSH_IMAGE" = "O" ]; then

@@ -37,7 +37,7 @@ FROM alpine:latest
 
 WORKDIR /app
 
-RUN apk add --no-cache ca-certificates tzdata bash curl docker tar
+RUN apk add --no-cache ca-certificates tzdata bash curl docker tar git
 
 RUN curl -sSL https://nixpacks.com/install.sh | bash
 
