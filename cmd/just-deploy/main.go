@@ -27,25 +27,6 @@ var flags struct {
 	}
 }
 
-// @title           JustDeploy API
-// @version         1.0
-// @description     JustDeploy is a PaaS tool designed to simplify the lives of developers. It allows you to easily deploy your projects and databases using Docker. JustDeploy fetches your GitHub repository and deploys your application using your Docker and Docker Compose configurations, all while deploying to any VPS of your choice without vendor lock-in.
-// @termsOfService  http://swagger.io/terms/
-
-// @contact.name   Clément Chalopin
-// @contact.url    https://github.com/cchalop1/JustDeploy
-// @contact.email  support@justdeploy.dev
-
-// @license.name  AGPL-3.0 License
-// @license.url   https://github.com/cchalop1/JustDeploy/blob/main/LICENSE
-
-// @host      localhost:5915
-// @BasePath  /api/v1
-
-// @securityDefinitions.basic  BasicAuth
-
-// @externalDocs.description  GitHub Repository
-// @externalDocs.url          https://github.com/cchalop1/JustDeploy
 func main() {
 	isNewVersion := application.CheckIsNewVersion()
 
@@ -83,8 +64,6 @@ func main() {
 
 	app := api.NewApplication(port)
 
-	api.CreateSwaggerRoutes(app)
-
 	databaseAdapter := adapter.NewDatabaseAdapter()
 	filesystemAdapter := adapter.NewFilesystemAdapter()
 	dockerAdapter := adapter.NewDockerAdapter()
@@ -98,7 +77,6 @@ func main() {
 		DatabaseAdapter:   databaseAdapter,
 		DockerAdapter:     dockerAdapter,
 		FilesystemAdapter: filesystemAdapter,
-		EventAdapter:      adapter.NewAdapterEvent(),
 		NetworkAdapter:    networkAdapter,
 		GithubAdapter:     githubAdapter,
 		GitAdapter:        gitAdapter,

@@ -57,9 +57,6 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 
 	api.DELETE("/service/:serviceId", handlers.DeleteServiceHandler(deployService))
 
-	api.GET("/server/:id/loading", handlers.SubscriptionCreateServerLoadingState(deployService))
-	api.GET("/deploy/:id/loading", handlers.SubscriptionCreateDeployLoadingState(deployService))
-
 	// Github
 	api.GET("/github/is-connected", handlers.GetGithubIsConnectedHandler(deployService))
 
