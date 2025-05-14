@@ -83,9 +83,6 @@ install_docker() {
   fi
 }
 
-# Install prerequisites
-install_prerequisites
-
 # Get the current platform and architecture
 platform=$(uname -s | tr '[:upper:]' '[:lower:]')
 

@@ -1,5 +1,8 @@
 export const baseUrl = import.meta.env.VITE_BACKEND_URL;
 
+console.log(import.meta.env);
+console.log(baseUrl);
+
 import { getStoredApiKey, saveApiKey } from "./authStorage";
 
 // Function to get the API key from URL or localStorage
