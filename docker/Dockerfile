@@ -8,6 +8,8 @@ RUN bun install
 
 COPY web/ ./
 
+RUN rm -f .env.development
+
 RUN bun run build --mode production
 
 FROM golang:1.23-alpine as go-builder

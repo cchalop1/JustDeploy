@@ -28,9 +28,6 @@ build-web:
 copy-web-build:
 	cp -R web/dist internal/web/dist/
 
-swagger:
-	swag init --parseDependency --parseInternal -g cmd/just-deploy/main.go
-
 run:
 	@$(BINDIR)/$(EXECUTABLE)
 
