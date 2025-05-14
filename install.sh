@@ -7,64 +7,27 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-# Define the release URL and the binary file name
-release_url="https://api.github.com/repos/cchalop1/JustDeploy/releases/latest"
-zip_file="justdeploy.zip"
-binary_file="justdeploy"
+# Define variables
+DOCKER_IMAGE="cchalop1/justdeploy:latest"
+DATA_DIR="/var/lib/justdeploy"
+DOCKER_SOCKET="/var/run/docker.sock"
+CONTAINER_NAME="justdeploy"
 
-# Function to check if JustDeploy is already installed and stop the service if needed
+# Function to check if JustDeploy is already installed and stop if needed
 check_existing_installation() {
   echo "🔍 Checking for existing JustDeploy installation..."
   
-  if [ -f "/usr/local/bin/$binary_file" ]; then
-    echo "🔄 JustDeploy is already installed. Preparing for reinstallation..."
-    
-    # Check if the service is running and stop it
-    if systemctl is-active --quiet justdeploy.service; then
-      echo "🛑 Stopping JustDeploy service..."
-      sudo systemctl stop justdeploy.service
-      echo "✅ JustDeploy service stopped."
-    fi
-    
-    # Disable the service
-    if systemctl is-enabled --quiet justdeploy.service; then
-      echo "🔧 Disabling JustDeploy service..."
-      sudo systemctl disable justdeploy.service
-      echo "✅ JustDeploy service disabled."
-    fi
-    
-    echo "🗑️ Removing existing JustDeploy binary..."
-    sudo rm -f /usr/local/bin/$binary_file
-    
-    # Return true (0) to indicate reinstallation is needed
-    return 0
-  else
-    echo "🆕 No existing JustDeploy installation detected. Proceeding with fresh installation."
-    # Return false (1) to indicate fresh installation
-    return 1
-  fi
-}
-
-# Function to install prerequisites
-install_prerequisites() {
-  echo "🔍 Checking for required packages..."
-  if ! command -v unzip &> /dev/null; then
-    echo "📦 Installing unzip..."
-    sudo apt-get update
-    sudo apt-get install -y unzip
-    echo "✅ unzip installed successfully."
-  else
-    echo "✅ unzip is already installed."
+  # Remove existing Docker container if exists
+  if docker ps -a | grep -q $CONTAINER_NAME; then
+    echo "🛑 Stopping existing JustDeploy container..."
+    docker stop $CONTAINER_NAME > /dev/null 2>&1
+    echo "🗑️ Removing existing JustDeploy container..."
+    docker rm -f $CONTAINER_NAME > /dev/null 2>&1
+    echo "✅ Existing JustDeploy Docker container removed."
   fi
   
-  # Check if Nixpacks is installed
-  if ! command -v nixpacks &> /dev/null; then
-    echo "📦 Installing Nixpacks..."
-    curl -sSL https://nixpacks.com/install.sh | bash
-    echo "✅ Nixpacks installed successfully."
-  else
-    echo "✅ Nixpacks is already installed."
-  fi
+  # Return true (0) to indicate reinstallation is needed
+  return 0
 }
 
 # Function to check if Docker is installed and install it if not
@@ -120,150 +83,55 @@ install_docker() {
   fi
 }
 
-# Function to check if Docker Compose is installed and install it if not
-install_docker_compose() {
-  echo "🔍 Checking if Docker Compose is installed..."
-  if command -v docker-compose &> /dev/null; then
-    echo "✅ Docker Compose is already installed."
-  else
-    echo "🐳 Docker Compose not found. Installing Docker Compose..."
-    
-    # Install Docker Compose
-    COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
-    sudo curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
-    
-    echo "✅ Docker Compose has been installed successfully."
-  fi
-}
-
-# Check for existing installation first
-check_existing_installation
-is_reinstall=$?
-
 # Install prerequisites
 install_prerequisites
 
 # Get the current platform and architecture
 platform=$(uname -s | tr '[:upper:]' '[:lower:]')
-arch=$(uname -m)
 
-# Check and install Docker and Docker Compose if needed (only on Linux)
+# Check and install Docker if needed
 if [ "$platform" != "darwin" ]; then
   install_docker
-  install_docker_compose
 fi
 
-if [ "$platform" == "darwin" ]; then
-  if [ "$arch" == "arm64" ]; then
-    zip_file="justdeploy-darwin-arm.zip"
-    binary_file_arch="justdeploy-darwin-arm"
-  else
-    zip_file="justdeploy-darwin-x86.zip"
-    binary_file_arch="justdeploy-darwin-x86"
-  fi
+# Create data directory
+echo "📁 Creating data directory..."
+mkdir -p $DATA_DIR
+chmod 755 $DATA_DIR
+
+# Pull the latest JustDeploy Docker image
+echo "🐳 Pulling the latest JustDeploy Docker image..."
+docker pull $DOCKER_IMAGE
+
+# Run the Docker container
+echo "🚀 Starting JustDeploy Docker container..."
+docker run -d --name $CONTAINER_NAME \
+  -p 5915:5915 \
+  -v $DATA_DIR:/app/data \
+  -v $DOCKER_SOCKET:/var/run/docker.sock \
+  --restart=unless-stopped \
+  $DOCKER_IMAGE
+
+# Check if container started successfully
+if [ $? -eq 0 ]; then
+  echo "✅ JustDeploy Docker container started successfully!"
 else
-  if [ "$(expr $(uname -m))" == "armv7" ] || [ "$(expr $(uname -m))" == "aarch64" ]; then
-    zip_file="justdeploy-linux-arm.zip"
-    binary_file_arch="justdeploy-linux-arm"
-  else
-    zip_file="justdeploy-linux-x86.zip"
-    binary_file_arch="justdeploy-linux-x86"
-  fi
+  echo "❌ Failed to start JustDeploy Docker container. Check Docker logs for details."
+  exit 1
 fi
 
-# Get the latest release download URL for the specific platform
-response=$(curl -s $release_url)
-download_url=$(echo $response | grep -o "https://github.com/cchalop1/JustDeploy/releases/download/[^ ]*/$zip_file" | head -n 1)
-
-# Download the binary
-echo "📥 Downloading JustDeploy binary..."
-curl -L -o $zip_file $download_url
-
-# Unzip binary file
-echo "📦 Extracting binary..."
-unzip -o $zip_file
-
-# Make the binary executable
-chmod +x ./bin/$binary_file_arch
-
-# Move the binary to a system directory (e.g., /usr/local/bin)
-sudo mv ./bin/$binary_file_arch /usr/local/bin/$binary_file
-
-# Clean up downloaded files
-rm $zip_file
-rm -rf ./bin
-
-if [ $is_reinstall -eq 0 ]; then
-  echo "✨ JustDeploy binary reinstallation complete."
-else
-  echo "✨ JustDeploy binary installation complete."
-fi
-
-# Create systemd service file
-echo "🔧 Creating systemd service for JustDeploy..."
-cat > /tmp/justdeploy.service << EOF
-[Unit]
-Description=JustDeploy Service
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=/usr/local/bin/$binary_file
-Restart=on-failure
-RestartSec=10
-StandardOutput=journal
-StandardError=journal
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Move service file to systemd directory
-sudo mv /tmp/justdeploy.service /etc/systemd/system/
-
-# Reload systemd to recognize the new service
-sudo systemctl daemon-reload
-
-# Enable and start the service
-sudo systemctl enable justdeploy.service
-sudo systemctl start justdeploy.service
-
-if [ $is_reinstall -eq 0 ]; then
-  echo "✅ JustDeploy service has been reinstalled and started"
-else
-  echo "✅ JustDeploy service has been installed and started"
-fi
-
-# Display startup logs to show server IP
-echo "📋 Displaying JustDeploy startup logs (showing server IP):"
-echo "----------------------------------------------------------------"
-sleep 3  # Give the service a moment to start
-sudo journalctl -u justdeploy.service -n 20 --no-pager
-echo "----------------------------------------------------------------"
-echo "💡 You can continue to monitor logs with: sudo journalctl -u justdeploy.service -f"
-
-# Print summary
-echo ""
-if [ $is_reinstall -eq 0 ]; then
-  echo "🎉 Reinstallation Summary:"
-else
-  echo "🎉 Installation Summary:"
-fi
 echo "------------------------"
-echo "✅ JustDeploy installed at: /usr/local/bin/$binary_file"
-echo "✅ Systemd service created: justdeploy.service"
+echo "✅ JustDeploy Docker container running"
 if [ "$platform" != "darwin" ]; then
   if command -v docker &> /dev/null; then
     echo "✅ Docker is installed"
   fi
-  if command -v docker-compose &> /dev/null; then
-    echo "✅ Docker Compose is installed"
-  fi
 fi
-echo "✅ Unzip installed (prerequisite)"
 echo "✅ Nixpacks installed (prerequisite)"
 echo ""
-echo "🚀 JustDeploy is now running as a system service!"
-echo "💡 Access the web interface using the URL shown in the service logs above"
+echo "🚀 JustDeploy is now running in a Docker container!"
+echo "💡 Access the web interface: http://localhost:5915"
+echo "💻 To stop the container: docker stop $CONTAINER_NAME"
+echo "💻 To start the container: docker start $CONTAINER_NAME"
+echo "💻 To view logs: docker logs $CONTAINER_NAME"
 echo ""
