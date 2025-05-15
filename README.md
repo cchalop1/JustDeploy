@@ -47,6 +47,17 @@ Your server needs to be running Debian.
 curl -fsSL https://get.justdeploy.app | bash
 ```
 
+If you prefer, you can also run JustDeploy in Docker. With the following command, you will pull and run JustDeploy.
+
+```bash
+docker run -d --name justdeploy \
+  -p 5915:5915 \
+  -v /var/lib/justdeploy:/app/data \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --restart=unless-stopped \
+  cchalop1/justdeploy
+```
+
 ---
 
 ## Usage
