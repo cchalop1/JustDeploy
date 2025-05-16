@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# Check if the OS is Linux
+if [ "$(uname -s)" != "Linux" ]; then
+  echo "🛑 This script is intended for Linux systems only (Debian/Ubuntu)."
+  echo "Installation on $(uname -s) is not supported."
+  exit 1
+fi
+
+# Check if the architecture is supported (x86 or ARM)
+arch=$(uname -m)
+if [[ "$arch" != "x86_64" && "$arch" != "i686" && "$arch" != "armv7l" && "$arch" != "aarch64" ]]; then
+  echo "🛑 Unsupported architecture: $arch"
+  echo "This script only supports x86 (32/64-bit) or ARM architectures."
+  exit 1
+fi
+
 # Check if script is run as root
 if [ "$(id -u)" -ne 0 ]; then
   echo "🛑 This script must be run as root or with sudo privileges."
@@ -146,30 +161,18 @@ install_prerequisites
 
 # Get the current platform and architecture
 platform=$(uname -s | tr '[:upper:]' '[:lower:]')
-arch=$(uname -m)
 
-# Check and install Docker and Docker Compose if needed (only on Linux)
-if [ "$platform" != "darwin" ]; then
-  install_docker
-  install_docker_compose
-fi
+# Check and install Docker and Docker Compose if needed
+install_docker
+install_docker_compose
 
-if [ "$platform" == "darwin" ]; then
-  if [ "$arch" == "arm64" ]; then
-    zip_file="justdeploy-darwin-arm.zip"
-    binary_file_arch="justdeploy-darwin-arm"
-  else
-    zip_file="justdeploy-darwin-x86.zip"
-    binary_file_arch="justdeploy-darwin-x86"
-  fi
+# Determine the appropriate binary based on architecture
+if [ "$arch" == "armv7l" ] || [ "$arch" == "aarch64" ]; then
+  zip_file="justdeploy-linux-arm.zip"
+  binary_file_arch="justdeploy-linux-arm"
 else
-  if [ "$(expr $(uname -m))" == "armv7" ] || [ "$(expr $(uname -m))" == "aarch64" ]; then
-    zip_file="justdeploy-linux-arm.zip"
-    binary_file_arch="justdeploy-linux-arm"
-  else
-    zip_file="justdeploy-linux-x86.zip"
-    binary_file_arch="justdeploy-linux-x86"
-  fi
+  zip_file="justdeploy-linux-x86.zip"
+  binary_file_arch="justdeploy-linux-x86"
 fi
 
 # Get the latest release download URL for the specific platform
@@ -253,16 +256,18 @@ fi
 echo "------------------------"
 echo "✅ JustDeploy installed at: /usr/local/bin/$binary_file"
 echo "✅ Systemd service created: justdeploy.service"
-if [ "$platform" != "darwin" ]; then
-  if command -v docker &> /dev/null; then
-    echo "✅ Docker is installed"
-  fi
-  if command -v docker-compose &> /dev/null; then
-    echo "✅ Docker Compose is installed"
-  fi
+if command -v docker &> /dev/null; then
+  echo "✅ Docker is installed"
 fi
-echo "✅ Unzip installed (prerequisite)"
-echo "✅ Nixpacks installed (prerequisite)"
+if command -v docker-compose &> /dev/null; then
+  echo "✅ Docker Compose is installed"
+fi
+if command -v unzip &> /dev/null; then
+  echo "✅ Unzip installed (prerequisite)"
+fi
+if command -v nixpacks &> /dev/null; then
+  echo "✅ Nixpacks installed (prerequisite)"
+fi
 echo ""
 echo "🚀 JustDeploy is now running as a system service!"
 echo "💡 Access the web interface using the URL shown in the service logs above"
