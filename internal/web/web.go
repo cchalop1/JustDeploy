@@ -19,7 +19,7 @@ func CreateMiddlewareWebFiles(app *api.Application) {
 		Root:       "dist",
 		Filesystem: http.FS(webAssets),
 		Skipper: func(c echo.Context) bool {
-			return strings.HasPrefix(c.Request().URL.Path, "/swagger")
+			return strings.HasPrefix(c.Request().URL.Path, "/api")
 		},
 	}))
 }

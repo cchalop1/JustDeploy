@@ -8,7 +8,7 @@ export function buildGithubAppManifest(serverIp: string) {
     name: `JustDeploy-${randomString}`,
     url: serverUrl,
     hook_attributes: {
-      url: serverUrl + "/github/events",
+      url: serverUrl + "/api/github/events",
     },
     redirect_url: serverUrl + "/github/auth/redirect",
     callback_urls: [serverUrl + "/github/auth/redirect"],
