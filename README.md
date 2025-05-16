@@ -1,5 +1,5 @@
 <h1 align="center">JustDeploy 🛵</h1>
-<p align="center">Streamline your development process and deploy where you want</p>
+<p align="center">Deploy what you want where you want !</p>
 
 <p align="center">
   <a href="https://www.producthunt.com/posts/justdeploy-2?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-justdeploy&#0045;2" target="_blank">
@@ -22,6 +22,7 @@ JustDeploy is a PaaS tool designed to simplify the lives of developers. Install 
 - 🗂️ **Project Management**
 - 🌐 **Deploy on any VPS**
 - 🔓 **No vendor lock-in—deploy wherever you want**
+- 🐙 **Github integration push to deploy**
 
 <br>
 
@@ -29,11 +30,7 @@ JustDeploy is a PaaS tool designed to simplify the lives of developers. Install 
 
 ## Prerequisites
 
-Before getting started, ensure your development machine has the following installed:
-
-- **SSH**: For secure connection and deployment.
-- **Docker**: To manage containers and environments.
-- **OpenSSL**: For generating certificates.
+Before getting started, your server need to be debian base or have docker.
 
 ---
 
