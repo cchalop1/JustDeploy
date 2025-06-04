@@ -49,6 +49,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	// Service logs endpoints
 	api.GET("/service/:serviceId/build-logs", handlers.GetServiceBuildLogs(deployService))
 	api.GET("/service/:serviceId/run-logs", handlers.GetServiceRunLogs(deployService))
+	api.GET("/service/:serviceId/commit-info", handlers.GetServiceCommitInfo(deployService))
 
 	api.PUT("/service", handlers.UpdateServiceHandler(deployService))
 

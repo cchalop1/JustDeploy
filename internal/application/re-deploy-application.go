@@ -2,6 +2,7 @@ package application
 
 import (
 	"errors"
+	"fmt"
 	"path/filepath"
 
 	"cchalop1.com/deploy/internal/api/service"
@@ -48,6 +49,13 @@ func ReDeployApplication(deployService *service.DeployService, serviceName strin
 			err = deployService.GitAdapter.CloneRepository(s.FullName, s.CurrentPath, githubToken)
 			if err != nil {
 				return err
+			}
+
+			// Mettre à jour les informations du commit après le clonage
+			err = UpdateServiceCommitInfo(deployService, &s)
+			if err != nil {
+				// Log l'erreur mais ne pas faire échouer le redéploiement
+				fmt.Printf("Warning: failed to update commit info for service %s: %v\n", s.Name, err)
 			}
 
 			err = deployService.DatabaseAdapter.SaveService(s)

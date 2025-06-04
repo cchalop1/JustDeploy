@@ -77,6 +77,13 @@ func deployGithubService(deployService *service.DeployService, serviceToDeploy d
 		return fmt.Errorf("error building image: %w", err)
 	}
 
+	// Mettre à jour les informations du commit après le build réussi
+	err = UpdateServiceCommitInfo(deployService, &serviceToDeploy)
+	if err != nil {
+		fmt.Printf("Warning: failed to update commit info for service %s: %v\n", serviceToDeploy.Name, err)
+		// Ne pas faire échouer le déploiement si la mise à jour du commit échoue
+	}
+
 	// Construct the domain for the service based on ExposeSettings
 	serviceDomain := buildServiceDomain(serviceToDeploy, baseDomain)
 

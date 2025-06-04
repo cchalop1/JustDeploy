@@ -27,6 +27,13 @@ type ServerCertsPath struct {
 	KeyPath    string
 }
 
+type CommitInfo struct {
+	Hash    string `json:"hash"`
+	Message string `json:"message"`
+	Author  string `json:"author"`
+	Date    string `json:"date"`
+}
+
 func (s *Server) ToServerDto() dto.ServerDto {
 	return dto.ServerDto{
 		Id:       s.Id,

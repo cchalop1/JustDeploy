@@ -32,6 +32,9 @@ type Service struct {
 	Cmd []string `json:"cmd"`
 
 	ExposeSettings ServiceExposeSettings `json:"exposeSettings"`
+
+	// Informations du dernier commit déployé
+	LastCommit CommitInfo `json:"lastCommit"`
 }
 
 func (s *Service) GetDockerName() string {

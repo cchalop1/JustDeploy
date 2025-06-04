@@ -12,6 +12,7 @@ import { Badge } from "../ui/badge";
 import SpinnerIcon from "@/assets/SpinnerIcon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ServiceLogs from "../ServiceLogs";
+import ServiceCommitInfo from "../ServiceCommitInfo";
 
 type ModalServiceSettingsProps = {
   service: Service;
@@ -88,10 +89,13 @@ export default function ModalServiceSettings({
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="settings">
-                <ServiceDeploySettings
-                  service={service}
-                  fetchServices={fetchServices}
-                />
+                <div className="space-y-4">
+                  <ServiceCommitInfo serviceId={service.id} />
+                  <ServiceDeploySettings
+                    service={service}
+                    fetchServices={fetchServices}
+                  />
+                </div>
               </TabsContent>
               <TabsContent value="logs">
                 <Suspense fallback={<div>Loading...</div>}>

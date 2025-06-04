@@ -92,6 +92,12 @@ func CreateServiceFromGithubRepo(deployService *service.DeployService, repoUrl s
 		}
 	}
 
+	// Mettre à jour les informations du commit après le clonage
+	err = UpdateServiceCommitInfo(deployService, &service)
+	if err != nil {
+		fmt.Printf("Warning: failed to update commit info for service %s: %v\n", service.Name, err)
+	}
+
 	// Save the main application service
 	deployService.DatabaseAdapter.SaveService(service)
 
