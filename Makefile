@@ -26,7 +26,8 @@ build-web:
 	@cd web && bun install && bun run build
 
 copy-web-build:
-	cp -R web/dist internal/web/dist/
+	rm -rf internal/web/dist
+	cp -R web/dist internal/web/dist
 
 run:
 	@$(BINDIR)/$(EXECUTABLE)
