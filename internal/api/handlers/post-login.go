@@ -9,18 +9,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func PostSaveInitialSetupHandler(deployService *service.DeployService) echo.HandlerFunc {
+func PostLoginHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		setupDto := dto.InitialSetupDto{}
-		if err := c.Bind(&setupDto); err != nil {
+		loginDto := dto.LoginDto{}
+		if err := c.Bind(&loginDto); err != nil {
 			return c.JSON(http.StatusBadRequest, dto.ResponseApi{
 				Message: "Invalid request format",
 			})
 		}
 
-		token, err := application.SaveInitialSetup(deployService, setupDto)
+		token, err := application.Login(deployService, loginDto)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, dto.ResponseApi{
+			return c.JSON(http.StatusUnauthorized, dto.ResponseApi{
 				Message: err.Error(),
 			})
 		}

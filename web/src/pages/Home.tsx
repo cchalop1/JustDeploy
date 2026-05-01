@@ -11,10 +11,11 @@ import { useIsWelcome } from "@/hooks/useIsWelcome";
 import { ServiceCardLoading } from "@/components/ServiceCardLoading";
 import ModalGlobalSettings from "@/components/modals/ModalGlobalSettings";
 import ModalFirstConnection from "@/components/modals/ModalFirstConnection";
+import ModalLogin from "@/components/modals/ModalLogin";
 import { getServicesApi } from "@/services/getServicesApi";
 import { deployApi } from "@/services/deployApi";
 import { useInfo } from "@/hooks/useInfo";
-import { hasApiKey } from "@/services/authStorage";
+import { hasToken } from "@/services/authStorage";
 
 export default function Home() {
   const notif = useNotification();
@@ -32,9 +33,21 @@ export default function Home() {
     (service) => service.status === "ready_to_deploy"
   );
 
-  // Check if we should display the first connection modal
+  const isFirstConnection = serverInfo?.firstConnection ?? false;
+  const isLoggedIn = hasToken();
+
   const [shouldShowFirstConnectionModal, setShouldShowFirstConnectionModal] =
-    useState(serverInfo?.firstConnection || !hasApiKey());
+    useState(false);
+  const [shouldShowLoginModal, setShouldShowLoginModal] = useState(false);
+
+  useEffect(() => {
+    if (serverInfo === null) return;
+    if (isFirstConnection) {
+      setShouldShowFirstConnectionModal(true);
+    } else if (!isLoggedIn) {
+      setShouldShowLoginModal(true);
+    }
+  }, [serverInfo]);
 
   async function deploy() {
     notif.info({
@@ -66,11 +79,10 @@ export default function Home() {
   }
 
   useEffect(() => {
-    // Only fetch services if we're not showing the first connection modal
-    if (!shouldShowFirstConnectionModal) {
+    if (!shouldShowFirstConnectionModal && !shouldShowLoginModal && isLoggedIn) {
       fetchServices();
     }
-  }, [shouldShowFirstConnectionModal]);
+  }, [shouldShowFirstConnectionModal, shouldShowLoginModal]);
 
   useEffect(() => {
     window.addEventListener("keydown", (ev: globalThis.KeyboardEvent) => {
@@ -105,7 +117,18 @@ export default function Home() {
       {shouldShowFirstConnectionModal && (
         <ModalFirstConnection
           serverIp={serverInfo?.server?.ip || ""}
-          onClose={() => setShouldShowFirstConnectionModal(false)}
+          onClose={() => {
+            setShouldShowFirstConnectionModal(false);
+            fetchServices();
+          }}
+        />
+      )}
+      {shouldShowLoginModal && (
+        <ModalLogin
+          onClose={() => {
+            setShouldShowLoginModal(false);
+            fetchServices();
+          }}
         />
       )}
       <ProjectPageHeader
@@ -117,7 +140,7 @@ export default function Home() {
       />
       {displayWelcomeModal && <ModalWelcome />}
       <div className="flex flex-col justify-center items-center h-3/5">
-        {!shouldShowFirstConnectionModal && (
+        {!shouldShowFirstConnectionModal && !shouldShowLoginModal && (
           <div className="flex flex-col items-center gap-6 mt-3">
             {/* GitHub Repo Services */}
             <div className="flex gap-3">

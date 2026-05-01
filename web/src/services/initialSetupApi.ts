@@ -1,17 +1,17 @@
-import { ResponseApi, callApi } from "./api";
+import { callApi } from "./api";
 
 type InitialSetupDto = {
-  apiKey: string;
+  email: string;
+  password: string;
   domain: string;
 };
 
-/**
- * Save the initial setup with API key and domain
- * @param setupData The setup data containing API key and domain
- * @returns Promise with the API response
- */
+type AuthResponseDto = {
+  token: string;
+};
+
 export async function saveInitialSetup(
   setupData: InitialSetupDto
-): Promise<ResponseApi> {
-  return await callApi<ResponseApi>("/setup", "POST", setupData);
+): Promise<AuthResponseDto> {
+  return await callApi<AuthResponseDto>("/setup", "POST", setupData);
 }

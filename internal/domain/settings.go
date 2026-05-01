@@ -12,5 +12,7 @@ type GithubAppSettings struct {
 type Settings struct {
 	GithubAppSettings GithubAppSettings `json:"github_app_settings"`
 	GithubToken       string            `json:"github_token"`
-	ApiKey            string            `json:"api_key"`
+	AdminEmail        string            `json:"admin_email"`
+	AdminPasswordHash string            `json:"admin_password_hash"`
+	JwtSecret         string            `json:"jwt_secret"`
 }

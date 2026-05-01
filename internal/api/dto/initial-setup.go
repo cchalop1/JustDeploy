@@ -1,7 +1,7 @@
 package dto
 
-// InitialSetupDto represents the data for the initial application setup
 type InitialSetupDto struct {
-	ApiKey string `json:"apiKey"`
-	Domain string `json:"domain"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Domain   string `json:"domain"`
 }

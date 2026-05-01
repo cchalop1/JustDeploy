@@ -1,25 +1,6 @@
 export const baseUrl = import.meta.env.VITE_BACKEND_URL;
 
-console.log(baseUrl);
-console.log(import.meta.env);
-
-import { getStoredApiKey, saveApiKey } from "./authStorage";
-
-// Function to get the API key from URL or localStorage
-export function getApiKey(): string | null {
-  // First check if API key is in URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const apiKeyParam = urlParams.get("api_key");
-
-  if (apiKeyParam) {
-    // Save API key to localStorage using authStorage function
-    saveApiKey(apiKeyParam);
-    return apiKeyParam;
-  }
-
-  // Otherwise, try to get from localStorage using authStorage function
-  return getStoredApiKey();
-}
+import { getStoredToken } from "./authStorage";
 
 export async function callApi<T>(
   path: string,
@@ -27,21 +8,18 @@ export async function callApi<T>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any
 ): Promise<T> {
-  const apiUrl = baseUrl ? baseUrl : window.location.origin; // Fallback to the current URL
+  const apiUrl = baseUrl ? baseUrl : window.location.origin;
   const fullUrl = new URL("api" + path, apiUrl).toString();
 
-  // Get API key
-  const apiKey = getApiKey();
+  const token = getStoredToken();
 
-  // Prepare headers
   const headers: HeadersInit = {
     Accept: "application/json",
     "Content-type": "application/json",
   };
 
-  // Add API key header if available
-  if (apiKey) {
-    headers["X-API-Key"] = apiKey;
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   const res = await fetch(fullUrl, {
@@ -52,8 +30,7 @@ export async function callApi<T>(
 
   if (res.status >= 400) {
     if (res.status === 401) {
-      // Handle unauthorized access
-      console.error("Unauthorized access. API key may be invalid.");
+      console.error("Unauthorized. Token may be invalid or expired.");
     }
     const body = (await res.json()) as ResponseApi;
     throw new Error(body.message);

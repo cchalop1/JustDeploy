@@ -5,35 +5,39 @@ import (
 
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
+	"golang.org/x/crypto/bcrypt"
 )
 
-// SaveInitialSetup saves the API key and domain during initial setup
-func SaveInitialSetup(deployService *service.DeployService, setupDto dto.InitialSetupDto) error {
-	// Get current settings
+func SaveInitialSetup(deployService *service.DeployService, setupDto dto.InitialSetupDto) (string, error) {
 	settings := deployService.DatabaseAdapter.GetSettings()
 
-	// Check if API key already exists
-	if settings.ApiKey != "" {
-		// If API key already exists, don't allow changing it
-		return errors.New("API key already set and cannot be changed through this endpoint")
+	if settings.AdminEmail != "" {
+		return "", errors.New("admin account already exists")
 	}
 
-	// First, save the API key to settings
-	settings.ApiKey = setupDto.ApiKey
-
-	err := deployService.DatabaseAdapter.SaveSettings(settings)
+	hash, err := bcrypt.GenerateFromPassword([]byte(setupDto.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	// Then, save the domain to the server
+	jwtSecret, err := GenerateJwtSecret()
+	if err != nil {
+		return "", err
+	}
+
+	settings.AdminEmail = setupDto.Email
+	settings.AdminPasswordHash = string(hash)
+	settings.JwtSecret = jwtSecret
+
+	if err := deployService.DatabaseAdapter.SaveSettings(settings); err != nil {
+		return "", err
+	}
+
 	server := deployService.DatabaseAdapter.GetServer()
 	server.Domain = setupDto.Domain
-
-	err = deployService.DatabaseAdapter.SaveServer(server)
-	if err != nil {
-		return err
+	if err := deployService.DatabaseAdapter.SaveServer(server); err != nil {
+		return "", err
 	}
 
-	return nil
+	return GenerateJWT(settings.AdminEmail, jwtSecret)
 }

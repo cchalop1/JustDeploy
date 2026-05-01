@@ -7,8 +7,8 @@ import (
 )
 
 func CreateRoutes(app *Application, deployService *service.DeployService) {
-	// Create API key auth middleware
-	apiKeyAuth := middleware.APIKeyAuth(deployService)
+	// Create JWT auth middleware
+	apiKeyAuth := middleware.JWTAuth(deployService)
 
 	// Create request logger middleware
 	// requestLogger := middleware.RequestLogger()
@@ -23,6 +23,7 @@ func CreateRoutes(app *Application, deployService *service.DeployService) {
 	api.POST("/github/events", handlers.PostGithubEvent(deployService))
 	api.GET("/info", handlers.GetServerInfoHandler(deployService))
 	api.POST("/setup", handlers.PostSaveInitialSetupHandler(deployService))
+	api.POST("/login", handlers.PostLoginHandler(deployService))
 
 	// Protected endpoints (API key required)
 	api.Use(apiKeyAuth)

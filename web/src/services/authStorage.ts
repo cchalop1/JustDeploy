@@ -1,49 +1,17 @@
-/**
- * Utility functions to manage API key storage
- */
+const TOKEN_STORAGE_KEY = "auth_token";
 
-const API_KEY_STORAGE_KEY = "api_key";
-
-/**
- * Saves the API key to localStorage
- * @param apiKey - The API key to save
- */
-export function saveApiKey(apiKey: string): void {
-  try {
-    localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
-  } catch (error) {
-    console.error("Failed to save API key to localStorage:", error);
-  }
+export function saveToken(token: string): void {
+  localStorage.setItem(TOKEN_STORAGE_KEY, token);
 }
 
-/**
- * Retrieves the API key from localStorage
- * @returns The stored API key or null if not found
- */
-export function getStoredApiKey(): string | null {
-  try {
-    return localStorage.getItem(API_KEY_STORAGE_KEY);
-  } catch (error) {
-    console.error("Failed to retrieve API key from localStorage:", error);
-    return null;
-  }
+export function getStoredToken(): string | null {
+  return localStorage.getItem(TOKEN_STORAGE_KEY);
 }
 
-/**
- * Removes the API key from localStorage
- */
-export function removeApiKey(): void {
-  try {
-    localStorage.removeItem(API_KEY_STORAGE_KEY);
-  } catch (error) {
-    console.error("Failed to remove API key from localStorage:", error);
-  }
+export function removeToken(): void {
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
 }
 
-/**
- * Checks if an API key exists in localStorage
- * @returns True if an API key exists, false otherwise
- */
-export function hasApiKey(): boolean {
-  return getStoredApiKey() !== null;
+export function hasToken(): boolean {
+  return getStoredToken() !== null;
 }

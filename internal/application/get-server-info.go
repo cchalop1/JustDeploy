@@ -6,17 +6,12 @@ import (
 )
 
 func GetServerInfo(deployService *service.DeployService) dto.Info {
-	apiKey := deployService.DatabaseAdapter.GetSettings().ApiKey
-	var serverDto dto.ServerDto
-
+	settings := deployService.DatabaseAdapter.GetSettings()
 	server := deployService.DatabaseAdapter.GetServer()
-	serverDto = server.ToServerDto()
 
-	info := dto.Info{
+	return dto.Info{
 		Version:         GetVersion(),
-		FirstConnection: apiKey == "",
-		Server:          serverDto,
+		FirstConnection: settings.AdminEmail == "",
+		Server:          server.ToServerDto(),
 	}
-
-	return info
 }
