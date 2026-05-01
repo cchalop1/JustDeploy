@@ -6,19 +6,24 @@ type DisplayLogsProps = {
 };
 
 export default function DisplayLogs({ logs }: DisplayLogsProps) {
+  if (logs.length === 0) {
+    return (
+      <p className="text-xs text-gray-500 font-mono py-4 px-3">No logs yet.</p>
+    );
+  }
+
   return (
-    <div className="flex flex-col pb-20">
+    <div className="flex flex-col">
       {logs.map((log, idx) => (
-        <code
+        <div
           key={idx}
-          className="flex gap-1 text-xs w-full mb-2 hover:bg-slate-50 rounded pt-1 pl-2 pr-2"
+          className="flex gap-3 px-3 py-0.5 hover:bg-gray-100 font-mono text-xs leading-5"
         >
-          <div className="font-bold">
-            {dayjs(log.date).format("DD/MM/YYYY - HH:mm:ss")}
-          </div>
-          {">"}
-          <div>{log.message}</div>
-        </code>
+          <span className="flex-shrink-0 text-gray-400 select-none">
+            {dayjs(log.date).format("HH:mm:ss")}
+          </span>
+          <span className="text-gray-700 break-all">{log.message}</span>
+        </div>
       ))}
     </div>
   );

@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-
 import { useNotification } from "@/hooks/useNotifications";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Service } from "@/services/getServicesByDeployId";
-import { Input } from "@/components/ui/input";
 import { ServerDto } from "@/services/getServerListApi";
 import { saveServiceApi } from "@/services/saveServiceApi";
 import { getServerInfoApi } from "@/services/getServerInfoApi";
@@ -16,126 +13,103 @@ type ServiceDeploySettingsProps = {
   fetchServices: () => Promise<void>;
 };
 
-export default function ServiceDeploySettings({
-  service,
-  fetchServices,
-}: ServiceDeploySettingsProps) {
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
+      {children}
+    </p>
+  );
+}
+
+export default function ServiceDeploySettings({ service, fetchServices }: ServiceDeploySettingsProps) {
   const notif = useNotification();
   const timeoutRef = useRef<number | null>(null);
   const [server, setServer] = useState<null | ServerDto>(null);
-
-  const [isExposed, setIsServiceExposed] = useState<boolean>(
-    service.exposeSettings.isExposed
-  );
-  const [subDomain, setSubdomain] = useState<string>(
-    service.exposeSettings.subDomain
-  );
+  const [isExposed, setIsExposed] = useState<boolean>(service.exposeSettings.isExposed);
+  const [subDomain, setSubdomain] = useState<string>(service.exposeSettings.subDomain);
   const [envs, setLocalEnvs] = useState<Env[]>(service.envs || []);
-
-  async function saveService(serviceUpdated: Service) {
-    try {
-      serviceUpdated = {
-        ...serviceUpdated,
-        status: "ready_to_deploy",
-      };
-      const res = await saveServiceApi(serviceUpdated);
-      await fetchServices();
-    } catch (e) {
-      console.log(e);
-      notif.error({
-        title: "Error",
-        content: (e as Error).message,
-      });
-      return;
-    }
-    notif.success({
-      title: "Settings saved",
-      content: "Service settings have been saved !",
-    });
-  }
-
-  function onCheckedChange(value: boolean) {
-    setIsServiceExposed(value);
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = window.setTimeout(() => {
-      saveService({
-        ...service,
-        exposeSettings: { ...service.exposeSettings, isExposed: value },
-      });
-    }, 1000);
-  }
-
-  function onSubdomainChange(value: string) {
-    setSubdomain(value);
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = window.setTimeout(() => {
-      saveService({
-        ...service,
-        exposeSettings: { ...service.exposeSettings, subDomain: value },
-      });
-    }, 1000);
-  }
-
-  function handleEnvsChange(updatedEnvs: Env[]) {
-    setLocalEnvs(updatedEnvs);
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = window.setTimeout(() => {
-      saveService({
-        ...service,
-        envs: updatedEnvs,
-      });
-    }, 1000);
-  }
 
   useEffect(() => {
     getServerInfoApi().then(setServer);
   }, []);
 
-  return (
-    <>
-      <div className="flex items-center space-x-2 w-[25vw]">
-        <Switch
-          checked={isExposed}
-          onCheckedChange={onCheckedChange}
-          id="expose-service"
-        />
-        <Label htmlFor="expose-service">Expose this service</Label>
-      </div>
-      {isExposed && (
-        <div className="space-y-2">
-          <Label htmlFor="subdomain">Subdomain</Label>
-          <div className="flex items-center space-x-2">
-            <Input
-              id="subdomain"
-              placeholder="Enter subdomain"
-              value={subDomain}
-              onChange={(e) => onSubdomainChange(e.target.value)}
-            />
-            <span className="text-sm text-muted-foreground">
-              {" "}
-              .{server?.domain}
-            </span>
-          </div>
-          <Label htmlFor="subdomain" className="text-gray-500">
-            Leave the domain empty if you want only the base domain
-          </Label>
+  function debounce(fn: () => void) {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = window.setTimeout(fn, 600);
+  }
 
-          <div className="font-bold mt-2 mb-2">Environement variables :</div>
-          <EnvsManagements envs={envs} setEnvs={handleEnvsChange} canEdit />
+  async function saveService(updated: Service) {
+    try {
+      await saveServiceApi({ ...updated, status: "ready_to_deploy" });
+      await fetchServices();
+      notif.success({ title: "Saved", content: "Settings updated." });
+    } catch (e) {
+      notif.error({ title: "Error", content: (e as Error).message });
+    }
+  }
+
+  function onExposedChange(value: boolean) {
+    setIsExposed(value);
+    debounce(() =>
+      saveService({ ...service, exposeSettings: { ...service.exposeSettings, isExposed: value } })
+    );
+  }
+
+  function onSubdomainChange(value: string) {
+    setSubdomain(value);
+    debounce(() =>
+      saveService({ ...service, exposeSettings: { ...service.exposeSettings, subDomain: value } })
+    );
+  }
+
+  function handleEnvsChange(updated: Env[]) {
+    setLocalEnvs(updated);
+    debounce(() => saveService({ ...service, envs: updated }));
+  }
+
+  return (
+    <div className="divide-y divide-gray-100">
+
+      {/* Expose */}
+      <div className="py-4">
+        <SectionTitle>Visibility</SectionTitle>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-800">Expose this service</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Make it accessible via a public URL.
+            </p>
+          </div>
+          <Switch checked={isExposed} onCheckedChange={onExposedChange} />
         </div>
-      )}
-    </>
+
+        {isExposed && (
+          <div className="mt-4">
+            <label className="text-xs text-gray-500 mb-1.5 block">Subdomain</label>
+            <div className="flex items-center gap-0">
+              <input
+                className="flex-1 h-9 px-3 rounded-l-md border border-r-0 border-gray-200 bg-white text-sm font-mono focus:outline-none focus:ring-1 focus:ring-gray-300"
+                placeholder="myapp"
+                value={subDomain}
+                onChange={(e) => onSubdomainChange(e.target.value)}
+              />
+              <span className="h-9 px-3 flex items-center rounded-r-md border border-gray-200 bg-gray-50 text-xs text-gray-400 font-mono whitespace-nowrap">
+                .{server?.server.domain || "yourdomain.com"}
+              </span>
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">
+              Leave empty to use the root domain.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Env vars */}
+      <div className="py-4">
+        <SectionTitle>Environment variables</SectionTitle>
+        <EnvsManagements envs={envs} setEnvs={handleEnvsChange} canEdit />
+      </div>
+
+    </div>
   );
 }

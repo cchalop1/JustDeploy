@@ -96,7 +96,7 @@ export default function AddService({
     <>
       <div
         onClick={() => setOpenCommandModal(true)}
-        className="hover:shadow-md text-gray-600 hover:text-black bg-white cursor-pointer pt-5 pb-6 pl-5 pr-5 w-80 h-36 rounded-lg border border-dashed border-gray-500 hover:border-black"
+        className="hover:shadow-md text-gray-600 hover:text-black bg-white cursor-pointer pt-5 pb-6 pl-5 pr-5 w-80 h-36 rounded-xl border border-dashed border-gray-500 hover:border-black"
       >
         <div className="font-bold text-xl mb-1">Click here</div>
         <div>

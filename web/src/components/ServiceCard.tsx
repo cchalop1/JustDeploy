@@ -10,7 +10,7 @@ type ServiceCardProps = {
 export default function ServiceCard({ service, onClick }: ServiceCardProps) {
   return (
     <div
-      className={`relative w-80 h-36 bg-white border rounded shadow-lg hover:shadow-xl cursor-pointer p-4 flex flex-col`}
+      className={`relative w-80 h-36 bg-white border rounded-xl shadow-lg hover:shadow-xl cursor-pointer p-4 flex flex-col`}
       onClick={onClick}
     >
       <div className="flex justify-between items-center">

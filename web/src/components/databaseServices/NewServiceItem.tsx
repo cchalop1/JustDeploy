@@ -17,7 +17,7 @@ export default function NewServiceItem({
       key={service.name}
       value={service.name}
     >
-      <img src={service.icon} className="w-5" />
+      <img src={service.icon} className="w-5 h-5 object-contain flex-shrink-0" />
       <span className="h-4">{service.name}</span>
     </CommandItem>
   );
