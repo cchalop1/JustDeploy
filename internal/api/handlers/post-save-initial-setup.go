@@ -28,8 +28,6 @@ func PostSaveInitialSetupHandler(deployService *service.DeployService) echo.Hand
 			})
 		}
 
-		return c.JSON(http.StatusOK, dto.ResponseApi{
-			Message: "Initial setup completed successfully",
-		})
+		return c.JSON(http.StatusOK, dto.AuthResponseDto{Token: token})
 	}
 }
