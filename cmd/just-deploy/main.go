@@ -181,12 +181,6 @@ func uninstallJustDeploy() {
 		fmt.Printf("Error removing JustDeploy data directory: %v\n", err)
 	}
 
-	// Remove database file
-	err = os.Remove(internal.DATABASE_FILE_PATH)
-	if err != nil && !os.IsNotExist(err) {
-		fmt.Printf("Error removing database file: %v\n", err)
-	}
-
 	// Remove cert docker folder
 	err = os.RemoveAll(internal.CERT_DOCKER_FOLDER)
 	if err != nil && !os.IsNotExist(err) {

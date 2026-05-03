@@ -1,208 +1,340 @@
 package adapter
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/domain"
+	_ "modernc.org/sqlite"
 )
 
 type DatabaseAdapter struct {
+	db *sql.DB
 }
 
 func NewDatabaseAdapter() *DatabaseAdapter {
 	return &DatabaseAdapter{}
 }
 
-func (d *DatabaseAdapter) databaseFileIsCreated() bool {
-	_, err := os.Stat(internal.DATABASE_FILE_PATH)
-	if err == nil {
-		return true
-	}
-	if os.IsNotExist(err) {
-		return false
-	}
-	log.Printf("Error checking if file exists: %v", err)
-	return false
-}
+const schema = `
+CREATE TABLE IF NOT EXISTS server (
+	id           TEXT PRIMARY KEY,
+	name         TEXT NOT NULL DEFAULT '',
+	ip           TEXT NOT NULL DEFAULT '',
+	port         TEXT NOT NULL DEFAULT '',
+	domain       TEXT NOT NULL DEFAULT '',
+	password     TEXT,
+	ssh_key      TEXT,
+	email        TEXT NOT NULL DEFAULT '',
+	status       TEXT NOT NULL DEFAULT '',
+	use_https    INTEGER NOT NULL DEFAULT 0,
+	created_date TEXT NOT NULL DEFAULT ''
+);
 
-func (d *DatabaseAdapter) createFoldeJustDeployFolderIfDontExist() error {
-	err := os.MkdirAll(internal.JUSTDEPLOY_FOLDER, 0755)
-	if err != nil && !os.IsExist(err) {
-		return err
-	}
-	fmt.Println("Directory created successfully")
-	return nil
-}
+CREATE TABLE IF NOT EXISTS services (
+	id              TEXT PRIMARY KEY,
+	name            TEXT NOT NULL DEFAULT '',
+	full_name       TEXT NOT NULL DEFAULT '',
+	type            TEXT NOT NULL DEFAULT '',
+	status          TEXT NOT NULL DEFAULT '',
+	url             TEXT NOT NULL DEFAULT '',
+	image_name      TEXT NOT NULL DEFAULT '',
+	image_url       TEXT NOT NULL DEFAULT '',
+	docker_hub_url  TEXT NOT NULL DEFAULT '',
+	current_path    TEXT NOT NULL DEFAULT '',
+	envs            TEXT NOT NULL DEFAULT '[]',
+	cmd             TEXT NOT NULL DEFAULT '[]',
+	expose_settings TEXT NOT NULL DEFAULT '{}',
+	last_commit     TEXT NOT NULL DEFAULT '{}'
+);
 
-func (d *DatabaseAdapter) writeDeployConfigInDataBaseFile(databaseModels domain.DatabaseModelsType) error {
-	fileContent, err := json.MarshalIndent(databaseModels, "", "  ")
+CREATE TABLE IF NOT EXISTS settings (
+	id                  INTEGER PRIMARY KEY CHECK (id = 1),
+	admin_email         TEXT NOT NULL DEFAULT '',
+	admin_password_hash TEXT NOT NULL DEFAULT '',
+	jwt_secret          TEXT NOT NULL DEFAULT '',
+	github_token        TEXT NOT NULL DEFAULT '',
+	github_app_settings TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE TABLE IF NOT EXISTS logs (
+	id         INTEGER PRIMARY KEY AUTOINCREMENT,
+	service_id TEXT NOT NULL,
+	date       TEXT NOT NULL,
+	message    TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_logs_service_id ON logs(service_id);
+`
+
+func (d *DatabaseAdapter) Init() {
+	if err := os.MkdirAll(internal.JUSTDEPLOY_FOLDER, 0755); err != nil {
+		log.Fatalf("failed to create config directory: %v", err)
+	}
+
+	db, err := sql.Open("sqlite", internal.DATABASE_SQLITE_PATH)
 	if err != nil {
-		log.Fatalf("Error marshaling to JSON: %v", err)
+		log.Fatalf("failed to open sqlite database: %v", err)
 	}
 
-	err = os.WriteFile(internal.DATABASE_FILE_PATH, fileContent, 0644)
-	fmt.Println(err)
+	db.SetMaxOpenConns(1)
+
+	if _, err := db.Exec("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;"); err != nil {
+		log.Fatalf("failed to set sqlite pragmas: %v", err)
+	}
+
+	if _, err := db.Exec(schema); err != nil {
+		log.Fatalf("failed to create tables: %v", err)
+	}
+
+	if _, err := db.Exec(`INSERT OR IGNORE INTO settings (id) VALUES (1)`); err != nil {
+		log.Fatalf("failed to initialize settings row: %v", err)
+	}
+
+	d.db = db
+}
+
+// --- Server ---
+
+func (d *DatabaseAdapter) GetServer() domain.Server {
+	row := d.db.QueryRow(`SELECT id, name, ip, port, domain, password, ssh_key, email, status, use_https, created_date FROM server LIMIT 1`)
+
+	var s domain.Server
+	var password, sshKey sql.NullString
+	var useHttps int
+	var createdDate string
+
+	err := row.Scan(&s.Id, &s.Name, &s.Ip, &s.Port, &s.Domain, &password, &sshKey, &s.Email, &s.Status, &useHttps, &createdDate)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.Server{}
+	}
+	if err != nil {
+		log.Printf("GetServer scan error: %v", err)
+		return domain.Server{}
+	}
+
+	if password.Valid {
+		s.Password = &password.String
+	}
+	if sshKey.Valid {
+		s.SshKey = &sshKey.String
+	}
+	s.UseHttps = useHttps == 1
+
+	if createdDate != "" {
+		_ = s.CreatedDate.UnmarshalText([]byte(createdDate))
+	}
+
+	return s
+}
+
+func (d *DatabaseAdapter) SaveServer(s domain.Server) error {
+	var createdDate string
+	if !s.CreatedDate.IsZero() {
+		b, _ := s.CreatedDate.MarshalText()
+		createdDate = string(b)
+	}
+
+	useHttps := 0
+	if s.UseHttps {
+		useHttps = 1
+	}
+
+	_, err := d.db.Exec(`
+		INSERT INTO server (id, name, ip, port, domain, password, ssh_key, email, status, use_https, created_date)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			name=excluded.name, ip=excluded.ip, port=excluded.port,
+			domain=excluded.domain, password=excluded.password, ssh_key=excluded.ssh_key,
+			email=excluded.email, status=excluded.status, use_https=excluded.use_https,
+			created_date=excluded.created_date
+	`, s.Id, s.Name, s.Ip, s.Port, s.Domain, s.Password, s.SshKey, s.Email, s.Status, useHttps, createdDate)
 	return err
 }
 
-func (d *DatabaseAdapter) readDeployConfigInDataBaseFile() domain.DatabaseModelsType {
-	databaseModels := domain.DatabaseModelsType{}
-
-	file, err := os.ReadFile(internal.DATABASE_FILE_PATH)
-
-	if err != nil {
-		log.Fatalf("Error for read the database file: %v", err)
-	}
-
-	err = json.Unmarshal(file, &databaseModels)
-	if err != nil {
-		log.Fatalf("Error unmarshaling JSON: %v", err)
-	}
-	return databaseModels
+func (d *DatabaseAdapter) DeleteServer(s domain.Server) error {
+	_, err := d.db.Exec(`DELETE FROM server WHERE id = ?`, s.Id)
+	return err
 }
 
-func (d *DatabaseAdapter) Init() {
-	if !d.databaseFileIsCreated() {
-		d.createFoldeJustDeployFolderIfDontExist()
-		databaseData := domain.DatabaseModelsType{
-			Server:   domain.Server{},
-			Services: []domain.Service{},
-			Settings: domain.Settings{},
-		}
-		d.writeDeployConfigInDataBaseFile(databaseData)
-	}
-}
-
-func (d *DatabaseAdapter) DeleteServer(server domain.Server) error {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	databaseModels.Server = domain.Server{}
-	return d.writeDeployConfigInDataBaseFile(databaseModels)
-}
-
-func (d *DatabaseAdapter) SaveServer(newServer domain.Server) error {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	databaseModels.Server = newServer
-
-	return d.writeDeployConfigInDataBaseFile(databaseModels)
-}
-
-func (d *DatabaseAdapter) GetServer() domain.Server {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	return databaseModels.Server
-}
-
-// Services
-func (d *DatabaseAdapter) SaveService(service domain.Service) error {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	serviceExists := false
-
-	for i, s := range databaseModels.Services {
-		if s.Id == service.Id {
-			databaseModels.Services[i] = service
-			serviceExists = true
-			break
-		}
-	}
-
-	if !serviceExists {
-		databaseModels.Services = append(databaseModels.Services, service)
-	}
-
-	return d.writeDeployConfigInDataBaseFile(databaseModels)
-}
+// --- Services ---
 
 func (d *DatabaseAdapter) GetServices() []domain.Service {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	return databaseModels.Services
+	rows, err := d.db.Query(`SELECT id, name, full_name, type, status, url, image_name, image_url, docker_hub_url, current_path, envs, cmd, expose_settings, last_commit FROM services`)
+	if err != nil {
+		log.Printf("GetServices query error: %v", err)
+		return nil
+	}
+	defer rows.Close()
+
+	services := []domain.Service{}
+	for rows.Next() {
+		s, err := scanService(rows)
+		if err != nil {
+			log.Printf("GetServices scan error: %v", err)
+			continue
+		}
+		services = append(services, s)
+	}
+	return services
 }
 
 func (d *DatabaseAdapter) GetServiceById(id string) (*domain.Service, error) {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	for _, s := range databaseModels.Services {
-		if s.Id == id {
-			return &s, nil
-		}
+	row := d.db.QueryRow(`SELECT id, name, full_name, type, status, url, image_name, image_url, docker_hub_url, current_path, envs, cmd, expose_settings, last_commit FROM services WHERE id = ?`, id)
+	s, err := scanService(row)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, errors.New("service not found")
 	}
-	return &domain.Service{}, errors.New("service not found")
+	if err != nil {
+		return nil, err
+	}
+	return &s, nil
+}
+
+func (d *DatabaseAdapter) SaveService(s domain.Service) error {
+	envs, _ := json.Marshal(s.Envs)
+	cmd, _ := json.Marshal(s.Cmd)
+	expose, _ := json.Marshal(s.ExposeSettings)
+	commit, _ := json.Marshal(s.LastCommit)
+
+	_, err := d.db.Exec(`
+		INSERT INTO services (id, name, full_name, type, status, url, image_name, image_url, docker_hub_url, current_path, envs, cmd, expose_settings, last_commit)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			name=excluded.name, full_name=excluded.full_name, type=excluded.type,
+			status=excluded.status, url=excluded.url, image_name=excluded.image_name,
+			image_url=excluded.image_url, docker_hub_url=excluded.docker_hub_url,
+			current_path=excluded.current_path, envs=excluded.envs, cmd=excluded.cmd,
+			expose_settings=excluded.expose_settings, last_commit=excluded.last_commit
+	`, s.Id, s.Name, s.FullName, s.Type, s.Status, s.Url, s.ImageName, s.ImageUrl,
+		s.DockerHubUrl, s.CurrentPath, string(envs), string(cmd), string(expose), string(commit))
+	return err
 }
 
 func (d *DatabaseAdapter) DeleteServiceById(id string) error {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	var newServices = []domain.Service{}
-	for _, s := range databaseModels.Services {
-		if s.Id != id {
-			newServices = append(newServices, s)
-		}
-	}
-
-	databaseModels.Services = newServices
-	return d.writeDeployConfigInDataBaseFile(databaseModels)
-}
-
-// Logs
-func (d *DatabaseAdapter) CreateDeployLogsFileIfNot(deployId string) error {
-	filePath := internal.JUSTDEPLOY_FOLDER + "/" + deployId + ".log"
-	if _, err := os.Stat(filePath); err == nil {
-		return nil
-	}
-	_, err := os.Create(filePath)
+	_, err := d.db.Exec(`DELETE FROM services WHERE id = ?`, id)
 	return err
 }
 
-func (d *DatabaseAdapter) SaveLogs(deployId string, logs []domain.Logs) error {
-	file, err := os.OpenFile(internal.JUSTDEPLOY_FOLDER+"/"+deployId+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+// --- Settings ---
+
+func (d *DatabaseAdapter) GetSettings() domain.Settings {
+	row := d.db.QueryRow(`SELECT admin_email, admin_password_hash, jwt_secret, github_token, github_app_settings FROM settings WHERE id = 1`)
+
+	var appSettingsJSON string
+	var s domain.Settings
+
+	err := row.Scan(&s.AdminEmail, &s.AdminPasswordHash, &s.JwtSecret, &s.GithubToken, &appSettingsJSON)
+	if err != nil {
+		log.Printf("GetSettings scan error: %v", err)
+		return domain.Settings{}
+	}
+
+	if appSettingsJSON != "" && appSettingsJSON != "{}" {
+		_ = json.Unmarshal([]byte(appSettingsJSON), &s.GithubAppSettings)
+	}
+
+	return s
+}
+
+func (d *DatabaseAdapter) SaveSettings(s domain.Settings) error {
+	appSettings, _ := json.Marshal(s.GithubAppSettings)
+
+	_, err := d.db.Exec(`
+		UPDATE settings SET
+			admin_email=?, admin_password_hash=?, jwt_secret=?, github_token=?, github_app_settings=?
+		WHERE id = 1
+	`, s.AdminEmail, s.AdminPasswordHash, s.JwtSecret, s.GithubToken, string(appSettings))
+	return err
+}
+
+func (d *DatabaseAdapter) SaveInstallationToken(installationId string, token string) error {
+	_, err := d.db.Exec(`UPDATE settings SET github_token=? WHERE id = 1`, token)
+	return err
+}
+
+// --- Logs ---
+
+func (d *DatabaseAdapter) CreateDeployLogsFileIfNot(serviceId string) error {
+	return nil
+}
+
+func (d *DatabaseAdapter) SaveLogs(serviceId string, logs []domain.Logs) error {
+	tx, err := d.db.Begin()
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer tx.Rollback()
 
-	fileContent, err := json.MarshalIndent(logs, "", "  ")
-	if err != nil {
-		log.Fatalf("Error marshaling to JSON: %v", err)
+	if _, err := tx.Exec(`DELETE FROM logs WHERE service_id = ?`, serviceId); err != nil {
+		return err
 	}
 
-	file.Truncate(0)
-	_, err = file.Write(fileContent)
-	return err
+	stmt, err := tx.Prepare(`INSERT INTO logs (service_id, date, message) VALUES (?, ?, ?)`)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, l := range logs {
+		if _, err := stmt.Exec(serviceId, l.Date, l.Message); err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
-func (d *DatabaseAdapter) GetLogs(deployId string) ([]domain.Logs, error) {
-	file, err := os.ReadFile(internal.JUSTDEPLOY_FOLDER + "/" + deployId + ".log")
+func (d *DatabaseAdapter) GetLogs(serviceId string) ([]domain.Logs, error) {
+	rows, err := d.db.Query(`SELECT date, message FROM logs WHERE service_id = ? ORDER BY id ASC`, serviceId)
 	if err != nil {
-		return []domain.Logs{}, err
+		return nil, err
 	}
+	defer rows.Close()
 
 	var logs []domain.Logs
-	err = json.Unmarshal(file, &logs)
-	if err != nil {
-		return []domain.Logs{}, err
+	for rows.Next() {
+		var l domain.Logs
+		if err := rows.Scan(&l.Date, &l.Message); err != nil {
+			return nil, err
+		}
+		logs = append(logs, l)
 	}
 	return logs, nil
 }
 
-func (d *DatabaseAdapter) DeleteLogFile(deployId string) error {
-	return os.Remove(internal.JUSTDEPLOY_FOLDER + "/" + deployId + ".log")
+func (d *DatabaseAdapter) DeleteLogFile(serviceId string) error {
+	_, err := d.db.Exec(`DELETE FROM logs WHERE service_id = ?`, serviceId)
+	return err
 }
 
-// Setting
-func (d *DatabaseAdapter) GetSettings() domain.Settings {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	return databaseModels.Settings
+// --- helpers ---
+
+type scanner interface {
+	Scan(dest ...any) error
 }
 
-func (d *DatabaseAdapter) SaveSettings(settings domain.Settings) error {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	databaseModels.Settings = settings
-	return d.writeDeployConfigInDataBaseFile(databaseModels)
-}
+func scanService(row scanner) (domain.Service, error) {
+	var s domain.Service
+	var envsJSON, cmdJSON, exposeJSON, commitJSON string
 
-func (d *DatabaseAdapter) SaveInstallationToken(installationId string, token string) error {
-	databaseModels := d.readDeployConfigInDataBaseFile()
-	databaseModels.Settings.GithubToken = token
-	return d.writeDeployConfigInDataBaseFile(databaseModels)
+	err := row.Scan(
+		&s.Id, &s.Name, &s.FullName, &s.Type, &s.Status, &s.Url,
+		&s.ImageName, &s.ImageUrl, &s.DockerHubUrl, &s.CurrentPath,
+		&envsJSON, &cmdJSON, &exposeJSON, &commitJSON,
+	)
+	if err != nil {
+		return domain.Service{}, err
+	}
+
+	_ = json.Unmarshal([]byte(envsJSON), &s.Envs)
+	_ = json.Unmarshal([]byte(cmdJSON), &s.Cmd)
+	_ = json.Unmarshal([]byte(exposeJSON), &s.ExposeSettings)
+	_ = json.Unmarshal([]byte(commitJSON), &s.LastCommit)
+
+	return s, nil
 }
