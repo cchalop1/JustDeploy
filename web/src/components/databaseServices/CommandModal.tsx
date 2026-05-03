@@ -37,6 +37,9 @@ export default function CommandModal({
   const databaseServices = preConfiguredServices.filter(
     (s) => s.type === "database"
   );
+  const analyticsServices = preConfiguredServices.filter(
+    (s) => s.type === "analytics"
+  );
   console.log(serverInfo?.server);
 
   return (
@@ -98,6 +101,17 @@ export default function CommandModal({
             <Plus className="w-5" />
             <span className="h-4">Add new databases</span>
           </CommandItem>
+        </CommandGroup>
+        <CommandSeparator />
+
+        <CommandGroup heading="Analytics">
+          {analyticsServices.map((s) => (
+            <NewServiceItem
+              key={s.name}
+              service={s}
+              onSelect={(serviceName) => createDatabaseToDeploy(serviceName)}
+            />
+          ))}
         </CommandGroup>
       </CommandList>
     </CommandDialog>

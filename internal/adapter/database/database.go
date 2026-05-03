@@ -146,23 +146,23 @@ var servicesConfigMap = map[string]ServicesConfig{
 			Cmd:   []string{"ollama", "run", "qwen2.5"},
 		},
 	},
-	// "Umami": {
-	// 	DefaultPort: 3000,
-	// 	Name:        "Umami",
-	// 	Type:        "database",
-	// 	Icon:        "https://umami.is/logo-icon-dark.svg",
-	// 	Env: []dto.Env{
-	// 		{Name: "DATABASE_URL", Value: "postgresql://umami:umami@localhost:5432/umami", IsSecret: false},
-	// 		{Name: "HASH_SALT", Value: "", IsSecret: true},
-	// 	},
-	// 	Config: container.Config{
-	// 		Image: "ghcr.io/umami-software/umami:postgresql-latest",
-	// 		Env: []string{
-	// 			"DATABASE_URL=$DATABASE_URL",
-	// 			"HASH_SALT=$HASH_SALT",
-	// 		},
-	// 	},
-	// },
+	"Umami": {
+		DefaultPort: 3000,
+		Name:        "Umami",
+		Type:        "analytics",
+		Icon:        "https://umami.is/logo-icon-dark.svg",
+		Env: []dto.Env{
+			{Name: "DATABASE_URL", Value: "postgresql://user:password@<postgres-service-name>:5432/umami", IsSecret: false},
+			{Name: "APP_SECRET", Value: "", IsSecret: true},
+		},
+		Config: container.Config{
+			Image: "ghcr.io/umami-software/umami:postgresql-latest",
+			Env: []string{
+				"DATABASE_URL=$DATABASE_URL",
+				"APP_SECRET=$APP_SECRET",
+			},
+		},
+	},
 }
 
 func GetListOfDatabasesServices() []ServicesConfig {
