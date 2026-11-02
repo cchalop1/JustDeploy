@@ -4,6 +4,7 @@ import {
 } from "@/services/getServicesApi";
 import { useEffect, useState } from "react";
 
+import { useNotification } from "@/hooks/useNotifications";
 import CommandModal from "./CommandModal";
 import { githubIsConnectedApi } from "@/services/githubIsConnected";
 import { GithubRepo, getGithubRepos } from "@/services/getGithubRepos";
@@ -19,6 +20,7 @@ export default function AddService({
   setLoading,
   fetchServices,
 }: AddServiceProps) {
+  const notif = useNotification();
   const [preConfiguredServices, setPreConfiguredServices] = useState<
     Array<ServiceDto>
   >([]);
@@ -38,7 +40,7 @@ export default function AddService({
     setIsGithubConnected(isConnected);
     if (isConnected) {
       const repos = await getGithubRepos();
-      setGithubRepos(repos);
+      setGithubRepos(repos || []);
     }
   }
 
@@ -54,7 +56,7 @@ export default function AddService({
       await fetchServices();
     } catch (error) {
       console.error("Failed to create repo:", error);
-      // You might want to add error handling/notification here
+      notif.error({title:"Creation failed",content:error instanceof Error ? error.message : "Creation failed"});
     } finally {
       setLoading(false);
     }
@@ -72,15 +74,15 @@ export default function AddService({
       await fetchServices();
     } catch (error) {
       console.error("Failed to create database:", error);
-      // You might want to add error handling/notification here
+      notif.error({title:"Creation failed",content:error instanceof Error ? error.message : "Creation failed"});
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    getServices();
-    fetchIsGithubConnected();
+    getServices().catch((error: unknown) => console.error("Service templates unavailable", error));
+    fetchIsGithubConnected().catch((error: unknown) => console.error("GitHub repositories unavailable", error));
 
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {

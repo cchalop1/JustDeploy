@@ -13,7 +13,9 @@ func StartAppHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		deployId := c.Param("id")
 
-		application.StartApplication(deployService, deployId)
-		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is stoped"})
+		if err := application.StartApplication(deployService, deployId); err != nil {
+			return operationError(err)
+		}
+		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application started"})
 	}
 }

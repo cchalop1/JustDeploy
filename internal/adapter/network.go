@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"time"
 )
 
 type NetworkAdapter struct{}
@@ -15,11 +17,10 @@ func NewNetworkAdapter() *NetworkAdapter {
 
 // GetServerURL renvoie l'URL complète incluant le port.
 func (n *NetworkAdapter) GetServerURL(port string) (string, error) {
-	ip, err := n.GetCurrentIP()
-	if err != nil {
-		return "", err
+	if url := os.Getenv("JUSTDEPLOY_PUBLIC_URL"); url != "" {
+		return url, nil
 	}
-	return fmt.Sprintf("http://%s:%s", ip, port), nil
+	return "http://127.0.0.1:" + port, nil
 }
 
 // ipifyResponse correspond au JSON retourné par ipify.org
@@ -29,13 +30,13 @@ type ipifyResponse struct {
 
 // GetCurrentIP fait une requête à ipify pour récupérer l'IP publique au format JSON.
 func (n *NetworkAdapter) GetCurrentIP() (string, error) {
-	resp, err := http.Get("https://api.ipify.org?format=json")
+	resp, err := (&http.Client{Timeout: 10 * time.Second}).Get("https://api.ipify.org?format=json")
 	if err != nil {
 		return "", fmt.Errorf("échec de la requête ipify: %w", err)
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 4096))
 	if err != nil {
 		return "", fmt.Errorf("lecture de la réponse ipify: %w", err)
 	}

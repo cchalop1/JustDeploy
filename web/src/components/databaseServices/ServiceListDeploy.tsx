@@ -1,7 +1,5 @@
 import { Service } from "@/services/getServicesByDeployId";
 import { useEffect, useState } from "react";
-import { Card } from "../ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import ModalDeleteConfirmation from "../modals/ModalDeleteConfirmation";
 import { deleteServiceByIdApi } from "@/services/deleteServiceApi";
 import DatabaseServiceCard from "./DatabaseServiceCard";
@@ -24,7 +22,7 @@ export default function ServiceListDeploy({
 
   useEffect(() => {
     fetchServiceList(deployId);
-  }, [deployId]);
+  }, [deployId, fetchServiceList]);
 
   async function deleteService() {
     const serviceId = serviceToDelete?.id;
@@ -45,10 +43,10 @@ export default function ServiceListDeploy({
     <>
       <ModalDeleteConfirmation
         open={serviceToDelete !== null}
-        content="This action is irreversible. Deleting this service will remove all data associated with it."
+        content="This action is irreversible. The container will be removed. Data volumes are retained for recovery."
         title="Are you sure you want to delete this service?"
         onConfirm={deleteService}
-        setOpen={() => {}}
+        setOpen={(open) => { if (!open) setServiceToDelete(null); }}
         textConfirm="Delete"
       />
       <div className="flex flex-col">

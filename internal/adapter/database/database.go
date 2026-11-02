@@ -2,7 +2,8 @@ package database
 
 import (
 	"cchalop1.com/deploy/internal/api/dto"
-	"github.com/docker/docker/api/types/container"
+	"fmt"
+	"github.com/moby/moby/api/types/container"
 )
 
 type ServicesConfig struct {
@@ -26,7 +27,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 			{Name: "POSTGRES_DB", Value: "", IsSecret: false},
 		},
 		Config: container.Config{
-			Image: "postgres:latest",
+			Image: "postgres:17",
 			Cmd:   []string{"postgres"},
 			Env: []string{
 				"POSTGRES_USER=$POSTGRES_USER",
@@ -45,7 +46,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 			{Name: "MONGO_INITDB_ROOT_PASSWORD", Value: "", IsSecret: true},
 		},
 		Config: container.Config{
-			Image: "mongo",
+			Image: "mongo:8",
 			Env: []string{
 				"MONGO_INITDB_ROOT_USERNAME=$MONGO_INITDB_ROOT_USERNAME",
 				"MONGO_INITDB_ROOT_PASSWORD=$MONGO_INITDB_ROOT_PASSWORD",
@@ -61,7 +62,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 			{Name: "REDIS_PASSWORD", Value: "", IsSecret: true},
 		},
 		Config: container.Config{
-			Image: "redis:latest",
+			Image: "redis:7.4",
 			Cmd:   []string{"--requirepass", "$REDIS_PASSWORD"},
 		},
 	},
@@ -110,7 +111,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 		Env:         []dto.Env{},
 		Config: container.Config{
 			Image: "ollama/ollama",
-			Cmd:   []string{"ollama", "run", "gemma3"},
+			Cmd:   []string{"serve"},
 		},
 	},
 	"Llama3.2": {
@@ -121,7 +122,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 		Env:         []dto.Env{},
 		Config: container.Config{
 			Image: "ollama/ollama",
-			Cmd:   []string{"ollama", "run", "llama3.2"},
+			Cmd:   []string{"serve"},
 		},
 	},
 	"Mistral": {
@@ -132,7 +133,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 		Env:         []dto.Env{},
 		Config: container.Config{
 			Image: "ollama/ollama",
-			Cmd:   []string{"ollama", "run", "mistral"},
+			Cmd:   []string{"serve"},
 		},
 	},
 	"Qwen2.5": {
@@ -143,7 +144,7 @@ var servicesConfigMap = map[string]ServicesConfig{
 		Env:         []dto.Env{},
 		Config: container.Config{
 			Image: "ollama/ollama",
-			Cmd:   []string{"ollama", "run", "qwen2.5"},
+			Cmd:   []string{"serve"},
 		},
 	},
 	"Umami": {
@@ -177,7 +178,7 @@ func GetListOfDatabasesServices() []ServicesConfig {
 func GetServiceByName(name string) (ServicesConfig, error) {
 	service, ok := servicesConfigMap[name]
 	if !ok {
-		return ServicesConfig{}, nil
+		return ServicesConfig{}, fmt.Errorf("unknown service template %q", name)
 	}
 	return service, nil
 }

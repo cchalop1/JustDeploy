@@ -11,6 +11,7 @@ import NewServiceItem from "./NewServiceItem";
 import { ServiceDto } from "@/services/getServicesApi";
 import { redirectToGithubAppRegistration } from "@/services/createGithubApp";
 import { GithubRepo } from "@/services/getGithubRepos";
+import { useState } from "react";
 import { useInfo } from "@/hooks/useInfo";
 
 type CommandModalProps = {
@@ -40,17 +41,18 @@ export default function CommandModal({
   const analyticsServices = preConfiguredServices.filter(
     (s) => s.type === "analytics"
   );
-  console.log(serverInfo?.server);
+  const [connectionError, setConnectionError] = useState("");
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
+      {connectionError && <p role="alert" className="p-3 text-red-600">{connectionError}</p>}
       <CommandInput placeholder="Search a github repos or a services to deploy on your server ..." />
       <CommandList onSelect={() => setOpen(false)}>
         <CommandGroup heading="Github repositories">
           {!isGithubConnected && serverInfo?.server.ip && (
             <CommandItem
               onSelect={() =>
-                redirectToGithubAppRegistration(serverInfo?.server.ip)
+                redirectToGithubAppRegistration().catch((e: unknown) => setConnectionError(e instanceof Error ? e.message : "GitHub connection failed"))
               }
               className="flex gap-3"
             >

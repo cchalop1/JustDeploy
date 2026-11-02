@@ -71,3 +71,11 @@ Both are tightly integrated, with a unified build process using a `Makefile`.
 ## 3. Build System
 
 The project uses a `Makefile` to streamline development and CI builds.
+
+## Security and persistence
+
+State is stored in SQLite (`JUSTDEPLOY_DATA_DIR/database.db`, defaulting to the legacy HOME config directory outside Docker). Service runtime metadata stores the connection group, branch, Dockerfile, data volumes and settings revision. Additive schema migration preserves service rows.
+
+All mutating deployments share an operation mutex. Global deployment preserves unchanged running services; targeted redeployment fetches only the selected repository. Image construction happens before replacement, data mounts are retained, and the previous container is kept until startup checks pass. The previous container is restarted on failure.
+
+Administrative remote access requires TLS (direct or through explicitly trusted reverse proxies). First setup requires a one-time server token. GitHub push deliveries are authenticated over the raw payload and deduplicated persistently. See [SECURITY-UPGRADE.md](SECURITY-UPGRADE.md) for migration, operational limits and verification.

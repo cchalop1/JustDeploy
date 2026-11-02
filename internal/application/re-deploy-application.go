@@ -1,71 +1,69 @@
 package application
 
 import (
-	"errors"
-	"fmt"
-	"path/filepath"
-
+	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/api/service"
+	"cchalop1.com/deploy/internal/domain"
+	"errors"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
-func ReDeployApplication(deployService *service.DeployService, serviceName string) error {
-	var err error
-
-	settings := deployService.DatabaseAdapter.GetSettings()
-	if settings.GithubToken == "" {
-		return errors.New("GitHub token not found. Please configure GitHub integration in settings")
+func ReDeployApplication(ds *service.DeployService, id string) error {
+	if !ds.Operation.TryLock() {
+		return domain.ErrConflict
 	}
-
-	// Check if token is valid, renew it if necessary
-	githubToken := settings.GithubToken
-	appSettings := settings.GithubAppSettings
-
-	// Check if token is valid before using it
-	if !deployService.GithubAdapter.IsTokenValid(githubToken) {
-		// Token is invalid or expired, renew it
-		newToken, err := renewGithubToken(deployService, appSettings)
+	defer ds.Operation.Unlock()
+	return redeployService(ds, id)
+}
+func redeployService(ds *service.DeployService, id string) error {
+	s, err := ds.DatabaseAdapter.GetServiceById(id)
+	if err != nil {
+		return err
+	}
+	if s.Type != "github_repo" {
+		return deployOneService(ds, *s, ds.DatabaseAdapter.GetServer().Domain)
+	}
+	settings, err := ds.DatabaseAdapter.ReadSettings()
+	if err != nil {
+		return err
+	}
+	token := settings.GithubToken
+	if token == "" {
+		return errors.New("GitHub integration is not configured")
+	}
+	if !ds.GithubAdapter.IsTokenValid(token) {
+		token, err = renewGithubToken(ds, settings.GithubAppSettings)
 		if err != nil {
-			return errors.New("Failed to renew GitHub token: " + err.Error())
-		}
-		githubToken = newToken
-
-		// Update the settings with the new token
-		settings.GithubToken = newToken
-		err = deployService.DatabaseAdapter.SaveSettings(settings)
-		if err != nil {
-			return errors.New("Failed to save new GitHub token: " + err.Error())
+			return err
 		}
 	}
-
-	services := GetServices(deployService)
-
-	for _, s := range services {
-		if s.Name == serviceName {
-			tempDir := deployService.FilesystemAdapter.GetTempDir()
-			repoPath := filepath.Join(tempDir, s.Name)
-
-			s.CurrentPath = repoPath
-
-			err = deployService.GitAdapter.CloneRepository(s.FullName, s.CurrentPath, githubToken)
-			if err != nil {
-				return err
-			}
-
-			// Mettre à jour les informations du commit après le clonage
-			err = UpdateServiceCommitInfo(deployService, &s)
-			if err != nil {
-				// Log l'erreur mais ne pas faire échouer le redéploiement
-				fmt.Printf("Warning: failed to update commit info for service %s: %v\n", s.Name, err)
-			}
-
-			err = deployService.DatabaseAdapter.SaveService(s)
-			if err != nil {
-				return err
-			}
-			break
+	dir, err := ds.FilesystemAdapter.CreateWorkspace()
+	if err != nil {
+		return err
+	}
+	keep := false
+	defer func() {
+		if !keep {
+			_ = os.RemoveAll(dir)
+		}
+	}()
+	if err := ds.GitAdapter.CloneRepositoryBranch(s.FullName, dir, token, s.Branch); err != nil {
+		return err
+	}
+	previous := s.CurrentPath
+	s.CurrentPath = dir
+	if err := deployOneService(ds, *s, ds.DatabaseAdapter.GetServer().Domain); err != nil {
+		return err
+	}
+	keep = true
+	// Deploy persisted the successful workspace. Previous workspace cleanup is restricted to generated directories.
+	workspaces := filepath.Join(internal.JUSTDEPLOY_FOLDER, "workspaces")
+	if filepath.Dir(previous) == workspaces && strings.HasPrefix(filepath.Base(previous), "source-") && previous != dir {
+		if err := os.RemoveAll(previous); err != nil {
+			return err
 		}
 	}
-
-	err = DeployApplication(deployService)
-	return err
+	return nil
 }

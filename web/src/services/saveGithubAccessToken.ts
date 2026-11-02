@@ -1,7 +1,7 @@
 import { callApi } from "./api";
 
 export async function saveGithubAccessToken(
-  installationId: string
+  installationId: string, state: string
 ): Promise<void> {
-  await callApi<void>(`/github/save-access-token/${installationId}`, "POST");
+  await callApi<void>(`/github/save-access-token/${encodeURIComponent(installationId)}`, "POST", {state});
 }

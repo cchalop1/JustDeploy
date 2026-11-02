@@ -22,6 +22,11 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
+# Work only in a private installation directory; never write predictable root-owned files in /tmp.
+install_work_dir=$(mktemp -d) || exit 1
+trap 'rm -rf "$install_work_dir"' EXIT
+cd "$install_work_dir" || exit 1
+
 # Define the release URL and the binary file name
 release_url="https://api.github.com/repos/cchalop1/JustDeploy/releases/latest"
 zip_file="justdeploy.zip"
@@ -34,23 +39,7 @@ check_existing_installation() {
   if [ -f "/usr/local/bin/$binary_file" ]; then
     echo "🔄 JustDeploy is already installed. Preparing for reinstallation..."
     
-    # Check if the service is running and stop it
-    if systemctl is-active --quiet justdeploy.service; then
-      echo "🛑 Stopping JustDeploy service..."
-      sudo systemctl stop justdeploy.service
-      echo "✅ JustDeploy service stopped."
-    fi
-    
-    # Disable the service
-    if systemctl is-enabled --quiet justdeploy.service; then
-      echo "🔧 Disabling JustDeploy service..."
-      sudo systemctl disable justdeploy.service
-      echo "✅ JustDeploy service disabled."
-    fi
-    
-    echo "🗑️ Removing existing JustDeploy binary..."
-    sudo rm -f /usr/local/bin/$binary_file
-    
+    # Leave the running installation intact until the replacement is downloaded and verified.
     # Return true (0) to indicate reinstallation is needed
     return 0
   else
@@ -75,8 +64,8 @@ install_prerequisites() {
   # Check if Nixpacks is installed
   if ! command -v nixpacks &> /dev/null; then
     echo "📦 Installing Nixpacks..."
-    curl -sSL https://nixpacks.com/install.sh | bash
-    echo "✅ Nixpacks installed successfully."
+    echo "Nixpacks is optional. Install a verified release manually to build repositories without a Dockerfile."
+    echo "Dockerfile builds work without Nixpacks."
   else
     echo "✅ Nixpacks is already installed."
   fi
@@ -153,8 +142,7 @@ install_docker_compose() {
 }
 
 # Check for existing installation first
-check_existing_installation
-is_reinstall=$?
+if check_existing_installation; then is_reinstall=0; else is_reinstall=1; fi
 
 # Install prerequisites
 install_prerequisites
@@ -176,12 +164,15 @@ else
 fi
 
 # Get the latest release download URL for the specific platform
-response=$(curl -s $release_url)
+response=$(curl -fsSL "$release_url") || exit 1
 download_url=$(echo $response | grep -o "https://github.com/cchalop1/JustDeploy/releases/download/[^ ]*/$zip_file" | head -n 1)
 
 # Download the binary
 echo "📥 Downloading JustDeploy binary..."
-curl -L -o $zip_file $download_url
+curl -fL --proto '=https' --tlsv1.2 -o "$zip_file" "$download_url" || exit 1
+checksum_url="${download_url%/*}/SHA256SUMS"
+curl -fL --proto '=https' --tlsv1.2 -o SHA256SUMS "$checksum_url" || exit 1
+grep "  $zip_file$" SHA256SUMS | sha256sum -c - || exit 1
 
 # Unzip binary file
 echo "📦 Extracting binary..."
@@ -190,8 +181,11 @@ unzip -o $zip_file
 # Make the binary executable
 chmod +x ./bin/$binary_file_arch
 
+# Stop only after verification, immediately before replacing the binary.
+if systemctl is-active --quiet justdeploy.service; then systemctl stop justdeploy.service || exit 1; fi
+
 # Move the binary to a system directory (e.g., /usr/local/bin)
-sudo mv ./bin/$binary_file_arch /usr/local/bin/$binary_file
+sudo install -m 755 "./bin/$binary_file_arch" "/usr/local/bin/$binary_file" || exit 1
 
 # Clean up downloaded files
 rm $zip_file
@@ -205,7 +199,7 @@ fi
 
 # Create systemd service file
 echo "🔧 Creating systemd service for JustDeploy..."
-cat > /tmp/justdeploy.service << EOF
+cat > "$install_work_dir/justdeploy.service" << EOF
 [Unit]
 Description=JustDeploy Service
 After=network.target
@@ -213,6 +207,12 @@ After=network.target
 [Service]
 Type=simple
 ExecStart=/usr/local/bin/$binary_file
+Environment=JUSTDEPLOY_DATA_DIR=/var/lib/justdeploy
+Environment=JUSTDEPLOY_LISTEN_ADDR=127.0.0.1
+EnvironmentFile=-/etc/justdeploy.env
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal
@@ -222,8 +222,14 @@ StandardError=journal
 WantedBy=multi-user.target
 EOF
 
+# Preserve existing state before switching from the legacy root HOME directory.
+if [ -d /root/.config/justdeploy ] && [ ! -e /var/lib/justdeploy ]; then
+  sudo cp -a /root/.config/justdeploy /var/lib/justdeploy || exit 1
+fi
+sudo install -d -m 700 /var/lib/justdeploy
+
 # Move service file to systemd directory
-sudo mv /tmp/justdeploy.service /etc/systemd/system/
+sudo mv "$install_work_dir/justdeploy.service" /etc/systemd/system/
 
 # Reload systemd to recognize the new service
 sudo systemctl daemon-reload

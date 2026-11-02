@@ -2,7 +2,7 @@ import { useContext } from "react";
 import {
   NotificationContext,
   NotificationContextProps,
-} from "@/contexts/Notifications";
+} from "@/contexts/notification-context";
 
 export const useNotification = (): NotificationContextProps => {
   const context = useContext(NotificationContext);

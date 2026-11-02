@@ -1,19 +1,22 @@
 package application
 
-import "cchalop1.com/deploy/internal/api/service"
+import (
+	"cchalop1.com/deploy/internal/api/service"
+	"cchalop1.com/deploy/internal/domain"
+)
 
-func StartApplication(deployService *service.DeployService, deployId string) error {
-	// deploy, err := deployService.DatabaseAdapter.GetDeployById(deployId)
-	// if err != nil {
-	// 	return err
-	// }
-	// server, err := deployService.DatabaseAdapter.GetServerById(deploy.ServerId)
-	// if err != nil {
-	// 	return err
-	// }
-	// deployService.DockerAdapter.ConnectClient(server)
-	// deployService.DockerAdapter.Start(deploy.GetDockerName())
-	// deploy.Status = "Runing"
-	// deployService.DatabaseAdapter.UpdateDeploy(deploy)
-	return nil
+func StartApplication(ds *service.DeployService, id string) error {
+	if !ds.Operation.TryLock() {
+		return domain.ErrConflict
+	}
+	defer ds.Operation.Unlock()
+	s, err := ds.DatabaseAdapter.GetServiceById(id)
+	if err != nil {
+		return err
+	}
+	if err := ds.DockerAdapter.Start(s.GetDockerName()); err != nil {
+		return err
+	}
+	s.Status = "Running"
+	return ds.DatabaseAdapter.SaveService(*s)
 }

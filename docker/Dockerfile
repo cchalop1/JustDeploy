@@ -1,50 +1,27 @@
-FROM oven/bun:latest as frontend-builder
-
+FROM oven/bun:1.3.10 AS frontend-builder
 WORKDIR /app/web
-
-COPY web/package.json web/bun.lockb ./
-
-RUN bun install
-
+COPY web/package.json web/bun.lock ./
+RUN bun install --frozen-lockfile
 COPY web/ ./
+RUN rm -f .env.development && bun run build --mode production
 
-RUN rm -f .env.development
-
-RUN bun run build --mode production
-
-FROM golang:1.23-alpine as go-builder
-
+FROM golang:1.26.10-alpine3.24 AS go-builder
 WORKDIR /app
-
-# Add build argument for version
 ARG VERSION=v0.0.0
-
 COPY go.mod go.sum ./
-
 RUN go mod download
-
 COPY . .
+COPY --from=frontend-builder /app/web/dist /app/internal/web/dist
+RUN CGO_ENABLED=0 go build -trimpath -ldflags "-X cchalop1.com/deploy/internal/application.Version=${VERSION}" -o /app/justdeploy ./cmd/just-deploy
 
-COPY --from=frontend-builder /app/web/dist /app/web/dist
-
-RUN mkdir -p /app/internal/web/dist
-RUN cp -R /app/web/dist /app/internal/web/
-
-RUN mkdir -p bin
-RUN go build -ldflags "-X cchalop1.com/deploy/internal/application.Version=${VERSION}" -o bin/justdeploy ./cmd/just-deploy/main.go
-
-FROM alpine:latest
-
+FROM alpine:3.22
 WORKDIR /app
-
-RUN apk add --no-cache ca-certificates tzdata bash curl docker tar git
-
-RUN curl -sSL https://nixpacks.com/install.sh | bash
-
-COPY --from=go-builder /app/bin/justdeploy /usr/local/bin/justdeploy
-
-RUN mkdir -p /app/data
-
+RUN apk add --no-cache ca-certificates tzdata bash curl docker-cli tar git
+# Nixpacks is optional. Install a verified, versioned binary on the host or supply
+# a derived image; the runtime never downloads and executes an unversioned script.
+COPY --from=go-builder /app/justdeploy /usr/local/bin/justdeploy
+ENV JUSTDEPLOY_DATA_DIR=/app/data JUSTDEPLOY_LISTEN_ADDR=0.0.0.0
+RUN mkdir -p /app/data && chmod 700 /app/data
+VOLUME ["/app/data"]
 EXPOSE 5915
-
-ENTRYPOINT ["justdeploy"] 
+ENTRYPOINT ["justdeploy"]

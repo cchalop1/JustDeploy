@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 
@@ -72,10 +73,23 @@ CREATE INDEX IF NOT EXISTS idx_logs_service_id ON logs(service_id);
 `
 
 func (d *DatabaseAdapter) Init() {
-	if err := os.MkdirAll(internal.JUSTDEPLOY_FOLDER, 0755); err != nil {
+	if err := os.MkdirAll(internal.JUSTDEPLOY_FOLDER, 0700); err != nil {
 		log.Fatalf("failed to create config directory: %v", err)
 	}
 
+	if err := os.Chmod(internal.JUSTDEPLOY_FOLDER, 0700); err != nil {
+		log.Fatal(err)
+	}
+	f, err := os.OpenFile(internal.DATABASE_SQLITE_PATH, os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := f.Chmod(0600); err != nil {
+		log.Fatal(err)
+	}
+	if err := f.Close(); err != nil {
+		log.Fatal(err)
+	}
 	db, err := sql.Open("sqlite", internal.DATABASE_SQLITE_PATH)
 	if err != nil {
 		log.Fatalf("failed to open sqlite database: %v", err)
@@ -95,6 +109,35 @@ func (d *DatabaseAdapter) Init() {
 		log.Fatalf("failed to initialize settings row: %v", err)
 	}
 
+	// Add metadata without rewriting existing service rows.
+	rows, err := db.Query("PRAGMA table_info(services)")
+	if err != nil {
+		log.Fatal(err)
+	}
+	found := false
+	for rows.Next() {
+		var cid, notnull, pk int
+		var name, typ string
+		var def any
+		if err := rows.Scan(&cid, &name, &typ, &notnull, &def, &pk); err != nil {
+			log.Fatal(err)
+		}
+		if name == "runtime_settings" {
+			found = true
+		}
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	rows.Close()
+	if !found {
+		if _, err := db.Exec("ALTER TABLE services ADD COLUMN runtime_settings TEXT NOT NULL DEFAULT '{}'"); err != nil {
+			log.Fatal(err)
+		}
+	}
+	if _, err := db.Exec(`CREATE TABLE IF NOT EXISTS webhook_deliveries (id TEXT PRIMARY KEY, created_at INTEGER NOT NULL)`); err != nil {
+		log.Fatal(err)
+	}
 	d.db = db
 }
 
@@ -164,10 +207,16 @@ func (d *DatabaseAdapter) DeleteServer(s domain.Server) error {
 // --- Services ---
 
 func (d *DatabaseAdapter) GetServices() []domain.Service {
-	rows, err := d.db.Query(`SELECT id, name, full_name, type, status, url, image_name, image_url, docker_hub_url, current_path, envs, cmd, expose_settings, last_commit FROM services`)
+	services, err := d.ReadServices()
 	if err != nil {
-		log.Printf("GetServices query error: %v", err)
-		return nil
+		log.Printf("services unavailable: %v", err)
+	}
+	return services
+}
+func (d *DatabaseAdapter) ReadServices() ([]domain.Service, error) {
+	rows, err := d.db.Query(`SELECT id, name, full_name, type, status, url, image_name, image_url, docker_hub_url, current_path, envs, cmd, expose_settings, last_commit, runtime_settings FROM services`)
+	if err != nil {
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -175,19 +224,18 @@ func (d *DatabaseAdapter) GetServices() []domain.Service {
 	for rows.Next() {
 		s, err := scanService(rows)
 		if err != nil {
-			log.Printf("GetServices scan error: %v", err)
-			continue
+			return nil, err
 		}
 		services = append(services, s)
 	}
-	return services
+	return services, rows.Err()
 }
 
 func (d *DatabaseAdapter) GetServiceById(id string) (*domain.Service, error) {
-	row := d.db.QueryRow(`SELECT id, name, full_name, type, status, url, image_name, image_url, docker_hub_url, current_path, envs, cmd, expose_settings, last_commit FROM services WHERE id = ?`, id)
+	row := d.db.QueryRow(`SELECT id, name, full_name, type, status, url, image_name, image_url, docker_hub_url, current_path, envs, cmd, expose_settings, last_commit, runtime_settings FROM services WHERE id = ?`, id)
 	s, err := scanService(row)
 	if errors.Is(err, sql.ErrNoRows) {
-		return nil, errors.New("service not found")
+		return nil, domain.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
@@ -195,23 +243,45 @@ func (d *DatabaseAdapter) GetServiceById(id string) (*domain.Service, error) {
 	return &s, nil
 }
 
-func (d *DatabaseAdapter) SaveService(s domain.Service) error {
+type sqlExecutor interface {
+	Exec(string, ...any) (sql.Result, error)
+}
+
+func (d *DatabaseAdapter) SaveService(s domain.Service) error { return saveService(d.db, s) }
+func (d *DatabaseAdapter) SaveServices(services []domain.Service) error {
+	tx, err := d.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	for _, s := range services {
+		if err := saveService(tx, s); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+func saveService(db sqlExecutor, s domain.Service) error {
 	envs, _ := json.Marshal(s.Envs)
 	cmd, _ := json.Marshal(s.Cmd)
 	expose, _ := json.Marshal(s.ExposeSettings)
 	commit, _ := json.Marshal(s.LastCommit)
+	runtimeSettings, err := json.Marshal(s.ServiceRuntime)
+	if err != nil {
+		return err
+	}
 
-	_, err := d.db.Exec(`
-		INSERT INTO services (id, name, full_name, type, status, url, image_name, image_url, docker_hub_url, current_path, envs, cmd, expose_settings, last_commit)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	_, err = db.Exec(`
+		INSERT INTO services (id, name, full_name, type, status, url, image_name, image_url, docker_hub_url, current_path, envs, cmd, expose_settings, last_commit, runtime_settings)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
 			name=excluded.name, full_name=excluded.full_name, type=excluded.type,
 			status=excluded.status, url=excluded.url, image_name=excluded.image_name,
 			image_url=excluded.image_url, docker_hub_url=excluded.docker_hub_url,
 			current_path=excluded.current_path, envs=excluded.envs, cmd=excluded.cmd,
-			expose_settings=excluded.expose_settings, last_commit=excluded.last_commit
+			expose_settings=excluded.expose_settings, last_commit=excluded.last_commit, runtime_settings=excluded.runtime_settings
 	`, s.Id, s.Name, s.FullName, s.Type, s.Status, s.Url, s.ImageName, s.ImageUrl,
-		s.DockerHubUrl, s.CurrentPath, string(envs), string(cmd), string(expose), string(commit))
+		s.DockerHubUrl, s.CurrentPath, string(envs), string(cmd), string(expose), string(commit), string(runtimeSettings))
 	return err
 }
 
@@ -223,6 +293,14 @@ func (d *DatabaseAdapter) DeleteServiceById(id string) error {
 // --- Settings ---
 
 func (d *DatabaseAdapter) GetSettings() domain.Settings {
+	s, err := d.ReadSettings()
+	if err != nil {
+		log.Printf("settings unavailable: %v", err)
+	}
+	return s
+}
+
+func (d *DatabaseAdapter) ReadSettings() (domain.Settings, error) {
 	row := d.db.QueryRow(`SELECT admin_email, admin_password_hash, jwt_secret, github_token, github_app_settings FROM settings WHERE id = 1`)
 
 	var appSettingsJSON string
@@ -230,15 +308,16 @@ func (d *DatabaseAdapter) GetSettings() domain.Settings {
 
 	err := row.Scan(&s.AdminEmail, &s.AdminPasswordHash, &s.JwtSecret, &s.GithubToken, &appSettingsJSON)
 	if err != nil {
-		log.Printf("GetSettings scan error: %v", err)
-		return domain.Settings{}
+		return domain.Settings{}, err
 	}
 
 	if appSettingsJSON != "" && appSettingsJSON != "{}" {
-		_ = json.Unmarshal([]byte(appSettingsJSON), &s.GithubAppSettings)
+		if err := json.Unmarshal([]byte(appSettingsJSON), &s.GithubAppSettings); err != nil {
+			return s, err
+		}
 	}
 
-	return s
+	return s, nil
 }
 
 func (d *DatabaseAdapter) SaveSettings(s domain.Settings) error {
@@ -320,21 +399,27 @@ type scanner interface {
 
 func scanService(row scanner) (domain.Service, error) {
 	var s domain.Service
-	var envsJSON, cmdJSON, exposeJSON, commitJSON string
+	var envsJSON, cmdJSON, exposeJSON, commitJSON, runtimeJSON string
 
 	err := row.Scan(
 		&s.Id, &s.Name, &s.FullName, &s.Type, &s.Status, &s.Url,
 		&s.ImageName, &s.ImageUrl, &s.DockerHubUrl, &s.CurrentPath,
-		&envsJSON, &cmdJSON, &exposeJSON, &commitJSON,
+		&envsJSON, &cmdJSON, &exposeJSON, &commitJSON, &runtimeJSON,
 	)
 	if err != nil {
 		return domain.Service{}, err
 	}
 
-	_ = json.Unmarshal([]byte(envsJSON), &s.Envs)
-	_ = json.Unmarshal([]byte(cmdJSON), &s.Cmd)
-	_ = json.Unmarshal([]byte(exposeJSON), &s.ExposeSettings)
-	_ = json.Unmarshal([]byte(commitJSON), &s.LastCommit)
+	for _, field := range []struct {
+		data   string
+		target any
+	}{
+		{envsJSON, &s.Envs}, {cmdJSON, &s.Cmd}, {exposeJSON, &s.ExposeSettings}, {commitJSON, &s.LastCommit}, {runtimeJSON, &s.ServiceRuntime},
+	} {
+		if err := json.Unmarshal([]byte(field.data), field.target); err != nil {
+			return s, fmt.Errorf("invalid service metadata: %w", err)
+		}
+	}
 
 	return s, nil
 }

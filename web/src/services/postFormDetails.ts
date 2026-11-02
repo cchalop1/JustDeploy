@@ -2,6 +2,7 @@ import { callApi } from "./api";
 
 export type Env = {
   name: string;
+  isSecret?: boolean;
   value: string;
 };
 

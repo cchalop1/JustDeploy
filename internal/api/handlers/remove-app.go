@@ -13,7 +13,9 @@ func RemoveApplicationHandler(deployService *service.DeployService) echo.Handler
 	return func(c echo.Context) error {
 		deployId := c.Param("id")
 
-		application.RemoveApplicationById(deployService, deployId)
+		if err := application.RemoveApplicationById(deployService, deployId); err != nil {
+			return operationError(err)
+		}
 
 		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is removed"})
 	}

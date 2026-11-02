@@ -1,10 +1,14 @@
 package adapter
 
 import (
+	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
+	"time"
 )
 
 type GitAdapter struct{}
@@ -20,27 +24,39 @@ type CommitInfo struct {
 	Date    string `json:"date"`
 }
 
-func (g *GitAdapter) CloneRepository(repoUrl string, destPath string, token string) error {
-	if repoUrl == "" || destPath == "" {
-		return fmt.Errorf("repository URL and destination path cannot be empty")
+func (g *GitAdapter) CloneRepository(repo, dest, token string) error {
+	return g.CloneRepositoryBranch(repo, dest, token, "")
+}
+func (g *GitAdapter) CloneRepositoryBranch(repo, dest, token, branch string) error {
+	if !regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9_.-]+$`).MatchString(repo) || strings.Contains(repo, "..") || dest == "" {
+		return fmt.Errorf("invalid repository")
 	}
-
-	cloneUrl := fmt.Sprintf("https://github.com/%s", repoUrl)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+	args := []string{"clone", "--depth", "1"}
+	if branch != "" {
+		if err := exec.CommandContext(ctx, "git", "check-ref-format", "--branch", branch).Run(); err != nil {
+			return fmt.Errorf("invalid branch")
+		}
+		args = append(args, "--branch", branch)
+	}
+	args = append(args, "--", "https://github.com/"+repo+".git", dest)
+	cmd := exec.CommandContext(ctx, "git", args...)
+	env := []string{}
+	for _, v := range os.Environ() {
+		if !strings.HasPrefix(v, "GIT_") {
+			env = append(env, v)
+		}
+	}
+	cmd.Env = append(env, "GIT_TERMINAL_PROMPT=0")
 	if token != "" {
-		cloneUrl = fmt.Sprintf("https://oauth2:%s@github.com/%s", token, repoUrl)
+		header := "AUTHORIZATION: basic " + base64.StdEncoding.EncodeToString([]byte("x-access-token:"+token))
+		cmd.Env = append(cmd.Env, "GIT_CONFIG_COUNT=1", "GIT_CONFIG_KEY_0=http.https://github.com/.extraheader", "GIT_CONFIG_VALUE_0="+header)
 	}
-
-	fmt.Println("Cloning repository", cloneUrl, "to", destPath)
-
-	cmd := exec.Command("git", "clone", cloneUrl, destPath)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
+	// Git error output may contain credentials supplied by a remote; return a bounded, secret-free error.
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to clone repository: %w", err)
+		return fmt.Errorf("git clone failed: %w", err)
 	}
-
-	fmt.Println("Cloning successful!")
 	return nil
 }
 
@@ -98,4 +114,14 @@ func (g *GitAdapter) GetLastCommitInfo(repoPath string) (*CommitInfo, error) {
 // GetCommitGithubUrl génère l'URL GitHub pour un commit spécifique
 func (g *GitAdapter) GetCommitGithubUrl(repoFullName string, commitHash string) string {
 	return fmt.Sprintf("https://github.com/%s/commit/%s", repoFullName, commitHash)
+}
+
+func (g *GitAdapter) GetBranch(path string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	output, err := exec.CommandContext(ctx, "git", "-C", path, "branch", "--show-current").Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(output)), nil
 }

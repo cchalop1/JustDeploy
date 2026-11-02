@@ -12,7 +12,7 @@ import (
 	"cchalop1.com/deploy/internal"
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/domain"
-	"cchalop1.com/deploy/internal/utils"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -44,6 +44,9 @@ func (fs *FilesystemAdapter) GetFullPathToProject(path string) string {
 }
 
 func (fs *FilesystemAdapter) CleanPath(path string) string {
+	if path == "" {
+		return ""
+	}
 	if path[len(path)-1] != '/' {
 		return path + "/"
 	}
@@ -61,11 +64,11 @@ func (fs *FilesystemAdapter) GetCurrentPath() string {
 func (fs *FilesystemAdapter) FindDockerFile(pathToFolder string) bool {
 	entries, err := os.ReadDir(pathToFolder)
 	if err != nil {
-		panic("Error to read the directory you have")
+		return false
 	}
 
 	for _, e := range entries {
-		if e.Name() == "Dockerfile" || strings.HasPrefix(e.Name(), "Dockerfile.") {
+		if e.Name() == "Dockerfile" {
 			return true
 		}
 	}
@@ -75,11 +78,11 @@ func (fs *FilesystemAdapter) FindDockerFile(pathToFolder string) bool {
 func (fs *FilesystemAdapter) FindDockerComposeFile(pathToFolder string) bool {
 	entries, err := os.ReadDir(pathToFolder)
 	if err != nil {
-		panic("Error to read the directory you have")
+		return false
 	}
 
 	for _, e := range entries {
-		if e.Name() == "docker-compose.yml" || e.Name() == "compose.yml" {
+		if e.Name() == "docker-compose.yml" || e.Name() == "compose.yml" || e.Name() == "docker-compose.yaml" || e.Name() == "compose.yaml" {
 			return true
 		}
 	}
@@ -175,12 +178,7 @@ func (fs *FilesystemAdapter) BaseDir(path string) string {
 }
 
 func (fs *FilesystemAdapter) GetDir(path string) string {
-	arr := strings.Split(path, "/")
-	if len(arr) > 1 {
-		arr = arr[:len(arr)-2] // remove the last element
-		return strings.Join(arr, "/") + "/"
-	}
-	return "/"
+	return filepath.Dir(filepath.Clean(path))
 }
 
 // Get docker compose config from the file
@@ -214,7 +212,9 @@ func parsComposeFile(pathToComposeFile string) (*composeConfig, error) {
 
 	var cfg composeConfig
 
-	yaml.Unmarshal(file, &cfg)
+	if err := yaml.Unmarshal(file, &cfg); err != nil {
+		return nil, err
+	}
 
 	return &cfg, nil
 }
@@ -294,19 +294,90 @@ func (s *ComposeServiceConfig) GetEnvironmentVariables() []dto.Env {
 	return envVars
 }
 
-func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(pathToSource string) (map[string]ComposeServiceConfig, error) {
-	// TODO: try all the compose file name like (docker-compose.yml, docker-compose.yaml, compose.yml, compose.yaml)
-	cfg, err := parsComposeFile(pathToSource + "/docker-compose.yml")
+func (fs *FilesystemAdapter) GetComposeConfigOfDeploy(path string) (map[string]ComposeServiceConfig, error) {
+	for _, name := range []string{"compose.yaml", "compose.yml", "docker-compose.yaml", "docker-compose.yml"} {
+		file := filepath.Join(path, name)
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			continue
+		} else if err != nil {
+			return nil, err
+		}
+		data, err := os.ReadFile(file)
+		if err != nil {
+			return nil, err
+		}
+		if strings.Contains(string(data), "${") {
+			return nil, errors.New("Compose variable interpolation is not supported; provide explicit environment values")
+		}
+		cfg, err := parsComposeFile(file)
+		if err != nil {
+			return nil, err
+		}
+		if len(cfg.Services) == 0 {
+			return nil, errors.New("Compose has no services")
+		}
+		// Reject unsupported options rather than silently ignoring security/storage settings.
+		var top map[string]interface{}
+		if err := yaml.Unmarshal(data, &top); err != nil {
+			return nil, err
+		}
+		for key := range top {
+			if key != "services" && key != "version" && key != "volumes" {
+				return nil, fmt.Errorf("unsupported Compose top-level setting %s", key)
+			}
+		}
+		var doc struct {
+			Services map[string]map[string]interface{} `yaml:"services"`
+			Volumes  map[string]interface{}            `yaml:"volumes"`
+			Version  string                            `yaml:"version"`
+			Networks interface{}                       `yaml:"networks"`
+		}
+		if err := yaml.Unmarshal(data, &doc); err != nil {
+			return nil, err
+		}
+		if doc.Networks != nil {
+			return nil, errors.New("custom Compose networks are not supported")
+		}
+		allowed := map[string]bool{"image": true, "build": true, "ports": true, "environment": true, "volumes": true, "command": true, "depends_on": true}
+		for name, fields := range doc.Services {
+			for key := range fields {
+				if !allowed[key] {
+					return nil, fmt.Errorf("unsupported Compose setting %s.%s", name, key)
+				}
+			}
+		}
+		for name, definition := range doc.Volumes {
+			if definition != nil {
+				if fields, ok := definition.(map[string]interface{}); !ok || len(fields) > 0 {
+					return nil, fmt.Errorf("custom/external volume %s is not supported", name)
+				}
+			}
+		}
+		return cfg.Services, nil
+	}
+	return nil, os.ErrNotExist
+}
 
+func FindDockerfile(path string) (string, error) {
+	entries, err := os.ReadDir(path)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-
-	if len(cfg.Services) == 0 {
-		return nil, errors.New("no services found in the docker-compose.yml")
+	for _, entry := range entries {
+		if entry.Name() == "Dockerfile" && !entry.IsDir() {
+			return "Dockerfile", nil
+		}
 	}
-
-	return cfg.Services, nil
+	var selected string
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasPrefix(entry.Name(), "Dockerfile.") {
+			if selected != "" {
+				return "", errors.New("multiple Dockerfiles: select one explicitly")
+			}
+			selected = entry.Name()
+		}
+	}
+	return selected, nil
 }
 
 // Get list of folders
@@ -355,6 +426,10 @@ func (fs *FilesystemAdapter) getFoldersRecursive(path string, currentDepth, maxD
 	return result, nil
 }
 
-func (f *FilesystemAdapter) GetTempDir() string {
-	return os.TempDir() + "/deploy-" + utils.GenerateRandomPassword(5)
+func (f *FilesystemAdapter) CreateWorkspace() (string, error) {
+	dir := filepath.Join(internal.JUSTDEPLOY_FOLDER, "workspaces")
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return "", err
+	}
+	return os.MkdirTemp(dir, "source-")
 }

@@ -1,43 +1,27 @@
+import { getStoredToken, removeToken } from "./authStorage";
 export const baseUrl = import.meta.env.VITE_BACKEND_URL;
-
-import { getStoredToken } from "./authStorage";
-
-export async function callApi<T>(
-  path: string,
-  method: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  body?: any
-): Promise<T> {
-  const apiUrl = baseUrl ? baseUrl : window.location.origin;
-  const fullUrl = new URL("api" + path, apiUrl).toString();
-
-  const token = getStoredToken();
-
-  const headers: HeadersInit = {
-    Accept: "application/json",
-    "Content-type": "application/json",
-  };
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+export async function callApi<T>(path: string, method: string, body?: unknown): Promise<T> {
+ const url = new URL(`/api${path}`, baseUrl || window.location.origin);
+ const token = getStoredToken();
+ const response = await fetch(url, {
+  method,
+  headers: { Accept: "application/json", "Content-Type": "application/json", ...(token ? {Authorization: `Bearer ${token}`} : {}) },
+  body: body === undefined ? undefined : JSON.stringify(body),
+ });
+ const text = await response.text();
+ let data: unknown;
+ try { data = text ? JSON.parse(text) : undefined; } catch { data = text; }
+ if (!response.ok) {
+  if (response.status === 401) { removeToken(); window.dispatchEvent(new Event("auth-changed")); }
+  let message = `Request failed (${response.status})`;
+  if (typeof data === "string" && data.length < 500) message = data;
+  else if (data && typeof data === "object") {
+   const error = data as {message?: unknown; error?: unknown};
+   if (typeof error.message === "string") message = error.message;
+   else if (typeof error.error === "string") message = error.error;
   }
-
-  const res = await fetch(fullUrl, {
-    method,
-    headers,
-    body: JSON.stringify(body),
-  });
-
-  if (res.status >= 400) {
-    if (res.status === 401) {
-      console.error("Unauthorized. Token may be invalid or expired.");
-    }
-    const body = (await res.json()) as ResponseApi;
-    throw new Error(body.message);
-  }
-  return (await res.json()) as T;
+  throw new Error(message);
+ }
+ return data as T;
 }
-
-export type ResponseApi = {
-  message: string;
-};
+export type ResponseApi = { message: string };

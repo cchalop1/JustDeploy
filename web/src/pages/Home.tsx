@@ -31,19 +31,28 @@ export default function Home() {
   const toDeploy = services.find((s) => s.status === "ready_to_deploy");
 
   const isFirstConnection = serverInfo?.firstConnection ?? false;
-  const isLoggedIn = hasToken();
+  const [isLoggedIn, setIsLoggedIn] = useState(hasToken);
+  useEffect(() => {
+    const update = () => setIsLoggedIn(hasToken());
+    window.addEventListener("auth-changed", update);
+    const timer = window.setInterval(update, 30000);
+    return () => { window.removeEventListener("auth-changed", update); window.clearInterval(timer); };
+  }, []);
 
   const [shouldShowFirstConnectionModal, setShouldShowFirstConnectionModal] = useState(false);
   const [shouldShowLoginModal, setShouldShowLoginModal] = useState(false);
 
   useEffect(() => {
     if (serverInfo === null) return;
-    if (isFirstConnection) {
+    if (isFirstConnection && !isLoggedIn) {
       setShouldShowFirstConnectionModal(true);
     } else if (!isLoggedIn) {
       setShouldShowLoginModal(true);
+    } else {
+      setShouldShowFirstConnectionModal(false);
+      setShouldShowLoginModal(false);
     }
-  }, [serverInfo]);
+  }, [serverInfo, isFirstConnection, isLoggedIn]);
 
   useEffect(() => {
     if (!shouldShowFirstConnectionModal && !shouldShowLoginModal && isLoggedIn) {
@@ -52,7 +61,7 @@ export default function Home() {
         setShowWelcome(true);
       }
     }
-  }, [shouldShowFirstConnectionModal, shouldShowLoginModal]);
+  }, [shouldShowFirstConnectionModal, shouldShowLoginModal, isLoggedIn]);
 
   function dismissWelcome() {
     localStorage.setItem(WELCOME_DISMISSED_KEY, "1");
@@ -76,15 +85,15 @@ export default function Home() {
   }
 
   async function fetchServices() {
-    const services = await getServicesApi();
-    setServices(services);
+    try { setServices(await getServicesApi()); } catch (error) { console.error("Services unavailable", error); }
   }
 
   useEffect(() => {
-    window.addEventListener("keydown", (ev: globalThis.KeyboardEvent) => {
+    const onKeyDown = (ev: globalThis.KeyboardEvent) => {
       if (ev.key === "Escape") setServiceSelected(null);
-    });
-    return () => window.removeEventListener("keydown", () => {});
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
   const githubRepoServices = services.filter((s) => s.type === "github_repo");
@@ -94,6 +103,7 @@ export default function Home() {
     <div className="bg-grid-image h-screen">
       {serviceSelected && (
         <ModalServiceSettings
+          key={serviceSelected.id}
           service={serviceSelected}
           onClose={() => setServiceSelected(null)}
           fetchServices={fetchServices}

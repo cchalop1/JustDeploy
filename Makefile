@@ -1,6 +1,6 @@
 BINDIR 			= ./bin
 EXECUTABLE  	= justdeploy
-GIT_TAG 		= $(shell git describe --tags --abbrev=0)
+GIT_TAG 		= $(shell git describe --tags --abbrev=0 2>/dev/null || echo dev)
 LDFLAGS         = -ldflags "-X cchalop1.com/deploy/internal/application.Version=$(GIT_TAG)"
 
 all: build-web copy-web-build build-go
@@ -23,7 +23,7 @@ build-go:
 	@go build $(LDFLAGS) -o $(BINDIR)/$(EXECUTABLE) ./cmd/just-deploy/main.go
 
 build-web:
-	@cd web && bun install && bun run build
+	@cd web && bun install --frozen-lockfile && bun run build
 
 copy-web-build:
 	rm -rf internal/web/dist

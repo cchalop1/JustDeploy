@@ -9,20 +9,14 @@ import (
 )
 
 func CreateCurrentServer(deployService *service.DeployService, port string) (domain.Server, error) {
-	currentIp, err := deployService.NetworkAdapter.GetCurrentIP()
-
-	if err != nil {
-		return domain.Server{}, err
-	}
-
 	server := deployService.DatabaseAdapter.GetServer()
-
 	if server.Id != "" {
 		return server, nil
 	}
-
+	// Public IP discovery is advisory; an unavailable external service must not prevent local setup.
+	currentIp, _ := deployService.NetworkAdapter.GetCurrentIP()
 	server = domain.Server{
-		Id:          utils.GenerateRandomPassword(5),
+		Id:          utils.GenerateRandomPassword(16),
 		Name:        "Local Server",
 		Ip:          currentIp,
 		Port:        port,
@@ -30,7 +24,5 @@ func CreateCurrentServer(deployService *service.DeployService, port string) (dom
 		Status:      "Installing",
 	}
 
-	deployService.DatabaseAdapter.SaveServer(server)
-
-	return server, nil
+	return server, deployService.DatabaseAdapter.SaveServer(server)
 }

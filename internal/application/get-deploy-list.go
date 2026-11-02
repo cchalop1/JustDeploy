@@ -5,28 +5,11 @@ import (
 	"cchalop1.com/deploy/internal/api/service"
 )
 
-func GetDeployList(deployService *service.DeployService) []dto.DeployDto {
-	// deployList := deployService.DatabaseAdapter.GetDeploys()
-	// deployListDto := make([]dto.DeployDto, len(deployList))
-
-	// for i, v := range deployList {
-	// 	server, err := deployService.DatabaseAdapter.GetServerById(v.ServerId)
-	// 	if err != nil {
-	// 		continue
-	// 	}
-	// 	deployListDto[i] = dto.DeployDto{
-	// 		Id:           v.Id,
-	// 		Name:         v.Name,
-	// 		Server:       server.ToServerDto(),
-	// 		EnableTls:    v.EnableTls,
-	// 		Email:        v.Email,
-	// 		Envs:         v.Envs,
-	// 		PathToSource: v.PathToSource,
-	// 		Status:       v.Status,
-	// 		Url:          v.Url,
-	// 	}
-	// }
-
-	// return deployListDto
-	return nil
+func GetDeployList(ds *service.DeployService) []dto.DeployDto {
+	result := []dto.DeployDto{}
+	server := ds.DatabaseAdapter.GetServer()
+	for _, s := range ds.DatabaseAdapter.GetServices() {
+		result = append(result, dto.DeployDto{Id: s.Id, Name: s.Name, Server: server.ToServerDto(), EnableTls: s.ExposeSettings.Tls, PathToSource: s.CurrentPath, Envs: s.Envs, Status: s.Status, Url: s.Url})
+	}
+	return result
 }

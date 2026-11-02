@@ -2,6 +2,7 @@ import { callApi } from "./api";
 
 type InitialSetupDto = {
   email: string;
+  setupToken: string;
   password: string;
   domain: string;
 };

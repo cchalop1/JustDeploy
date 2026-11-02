@@ -21,10 +21,13 @@ func JWTAuth(deployService *service.DeployService) echo.MiddlewareFunc {
 			}
 
 			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-			settings := deployService.DatabaseAdapter.GetSettings()
-
-			_, err := application.ValidateJWT(tokenStr, settings.JwtSecret)
+			settings, err := deployService.DatabaseAdapter.ReadSettings()
 			if err != nil {
+				return echo.NewHTTPError(http.StatusServiceUnavailable, "authentication unavailable")
+			}
+
+			email, err := application.ValidateJWT(tokenStr, settings.JwtSecret)
+			if err != nil || email != settings.AdminEmail || settings.AdminEmail == "" {
 				return c.JSON(http.StatusUnauthorized, dto.ResponseApi{
 					Message: "Invalid or expired token",
 				})

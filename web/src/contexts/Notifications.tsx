@@ -1,35 +1,8 @@
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
-import React, { createContext, useState, ReactNode } from "react";
+import React, { ReactNode } from "react";
 
-type NotificationType = "success" | "error" | "info" | "warning";
-
-export interface Notification {
-  id: string;
-  type: NotificationType;
-  title: string;
-  content: string;
-  onConfirm?: () => void;
-}
-
-type NotifFuncParams = {
-  title: string;
-  content: string;
-  onConfirm?: () => void;
-};
-
-type NotificationFunc = (params: NotifFuncParams) => void;
-
-export interface NotificationContextProps {
-  success: NotificationFunc;
-  error: NotificationFunc;
-  info: NotificationFunc;
-  warning: NotificationFunc;
-}
-
-export const NotificationContext = createContext<
-  NotificationContextProps | undefined
->(undefined);
+import {NotificationContext, NotificationFunc, NotificationType} from "./notification-context";
 
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -41,7 +14,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     title: string,
     content: string
   ) => {
-    let variant = "default";
+    let variant: "default" | "destructive" = "default";
     if (type === "error") {
       variant = "destructive";
       title = `❌ ${title}`;
@@ -55,7 +28,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
     toast({
       title,
       description: content,
-      variant: variant as any,
+      variant,
     });
   };
 

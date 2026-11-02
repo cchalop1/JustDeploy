@@ -1,43 +1,36 @@
 package application
 
 import (
-	"errors"
-
 	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
+	"errors"
 	"golang.org/x/crypto/bcrypt"
+	"net/mail"
+	"strings"
 )
 
-func SaveInitialSetup(deployService *service.DeployService, setupDto dto.InitialSetupDto) (string, error) {
-	settings := deployService.DatabaseAdapter.GetSettings()
-
-	if settings.AdminEmail != "" {
-		return "", errors.New("admin account already exists")
+func SaveInitialSetup(ds *service.DeployService, setup dto.InitialSetupDto) (string, error) {
+	email := strings.TrimSpace(setup.Email)
+	address, err := mail.ParseAddress(email)
+	if err != nil || address.Address != email {
+		return "", errors.New("a valid email is required")
 	}
-
-	hash, err := bcrypt.GenerateFromPassword([]byte(setupDto.Password), bcrypt.DefaultCost)
+	if len(setup.Password) < 12 || len(setup.Password) > 72 {
+		return "", errors.New("password must contain 12 to 72 bytes")
+	}
+	if setup.Domain != "" && !ValidDomain(setup.Domain) {
+		return "", errors.New("invalid domain")
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(setup.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
-
-	jwtSecret, err := GenerateJwtSecret()
+	secret, err := GenerateJwtSecret()
 	if err != nil {
 		return "", err
 	}
-
-	settings.AdminEmail = setupDto.Email
-	settings.AdminPasswordHash = string(hash)
-	settings.JwtSecret = jwtSecret
-
-	if err := deployService.DatabaseAdapter.SaveSettings(settings); err != nil {
+	if err := ds.DatabaseAdapter.InitializeAdmin(email, string(hash), secret, setup.Domain); err != nil {
 		return "", err
 	}
-
-	server := deployService.DatabaseAdapter.GetServer()
-	server.Domain = setupDto.Domain
-	if err := deployService.DatabaseAdapter.SaveServer(server); err != nil {
-		return "", err
-	}
-
-	return GenerateJWT(settings.AdminEmail, jwtSecret)
+	return GenerateJWT(email, secret)
 }

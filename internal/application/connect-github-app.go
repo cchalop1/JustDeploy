@@ -4,6 +4,8 @@ import (
 	"cchalop1.com/deploy/internal/adapter"
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/domain"
+	"fmt"
+	"strconv"
 )
 
 func ConnectGithubApp(deployService *service.DeployService, code string) (adapter.GitHubAppResponse, error) {
@@ -21,6 +23,9 @@ func ConnectGithubApp(deployService *service.DeployService, code string) (adapte
 }
 
 func SaveAccessTokenWithInstallationId(deployService *service.DeployService, installationId string) error {
+	if n, err := strconv.ParseInt(installationId, 10, 64); err != nil || n < 1 {
+		return fmt.Errorf("invalid installation ID")
+	}
 	settings := deployService.DatabaseAdapter.GetSettings()
 	appID := settings.GithubAppSettings.ID
 	privateKey := settings.GithubAppSettings.Pem
@@ -30,7 +35,9 @@ func SaveAccessTokenWithInstallationId(deployService *service.DeployService, ins
 		return err
 	}
 
-	err = deployService.DatabaseAdapter.SaveInstallationToken(installationId, accessToken)
+	settings.GithubToken = accessToken
+	settings.GithubAppSettings.InstallationID = installationId
+	err = deployService.DatabaseAdapter.SaveSettings(settings)
 	if err != nil {
 		return err
 	}

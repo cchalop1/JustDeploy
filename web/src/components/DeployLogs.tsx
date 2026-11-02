@@ -1,13 +1,8 @@
-import { use } from "react";
-import { getApplicationLogs } from "@/services/getApplicationLogs";
+import { useEffect, useState } from "react";
+import { getApplicationLogs, Logs } from "@/services/getApplicationLogs";
 import DisplayLogs from "./DisplayLogs";
-
-type DeployLogsProps = {
-  id: string;
-};
-
-export default function DeployLogs({ id }: DeployLogsProps) {
-  const logs = use(getApplicationLogs(id));
-
-  return <DisplayLogs logs={logs} />;
+export default function DeployLogs({id}:{id:string}){
+ const [logs,setLogs]=useState<Logs[]>([]);const [error,setError]=useState("");
+ useEffect(()=>{let active=true;getApplicationLogs(id).then((data)=>{if(active)setLogs(data)}).catch((e:unknown)=>{if(active)setError(e instanceof Error ? e.message : "Logs unavailable")});return()=>{active=false}},[id]);
+ return error ? <p role="alert">{error}</p> : <DisplayLogs logs={logs}/>;
 }

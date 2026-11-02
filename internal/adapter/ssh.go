@@ -1,82 +1,89 @@
 package adapter
 
 import (
-	"fmt"
-	"log"
-	"os"
-
 	"cchalop1.com/deploy/internal/api/dto"
+	"errors"
+	"fmt"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/knownhosts"
+	"net"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
 )
 
-type SshAdapter struct {
-	client *ssh.Client
-}
+type SshAdapter struct{ client *ssh.Client }
 
-func NewSshAdapter() *SshAdapter {
-	// Initialize and return a new instance if needed
-	return &SshAdapter{}
-}
-
-func (s *SshAdapter) getAuthMethode(connectConfig dto.ConnectNewServerDto) []ssh.AuthMethod {
-	if connectConfig.Password != nil {
-		return []ssh.AuthMethod{
-			ssh.Password(*connectConfig.Password),
+func NewSshAdapter() *SshAdapter { return &SshAdapter{} }
+func (s *SshAdapter) Connect(config dto.ConnectNewServerDto) error {
+	auth := []ssh.AuthMethod{}
+	if config.Password != nil {
+		auth = append(auth, ssh.Password(*config.Password))
+	} else {
+		if config.SshKey == nil {
+			return errors.New("SSH password or private key required")
 		}
+		signer, err := ssh.ParsePrivateKey([]byte(*config.SshKey))
+		if err != nil {
+			return fmt.Errorf("invalid SSH key: %w", err)
+		}
+		auth = append(auth, ssh.PublicKeys(signer))
 	}
-	signer, err := ssh.ParsePrivateKey([]byte(*connectConfig.SshKey))
+	path := os.Getenv("JUSTDEPLOY_KNOWN_HOSTS")
+	if path == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return err
+		}
+		path = filepath.Join(home, ".ssh", "known_hosts")
+	}
+	verify, err := knownhosts.New(path)
 	if err != nil {
-		log.Fatalf("Failed to parse private key: %s", err)
+		return fmt.Errorf("load trusted SSH hosts: %w", err)
 	}
-	return []ssh.AuthMethod{
-		ssh.PublicKeys(signer),
-	}
+	s.client, err = ssh.Dial("tcp", net.JoinHostPort(config.Ip, "22"), &ssh.ClientConfig{User: config.User, Auth: auth, HostKeyCallback: verify, Timeout: 15 * time.Second})
+	return err
 }
-
-func (s *SshAdapter) Connect(connectConfig dto.ConnectNewServerDto) error {
-	config := &ssh.ClientConfig{
-		User:            connectConfig.User,
-		Auth:            s.getAuthMethode(connectConfig),
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
-
-	client, err := ssh.Dial("tcp", connectConfig.Ip+":22", config)
-	if err != nil {
-		return err
-	}
-	s.client = client
-	return nil
-}
-
 func (s *SshAdapter) CloseConnection() {
-	defer s.client.Close()
+	if s.client != nil {
+		_ = s.client.Close()
+	}
 }
-
 func (s *SshAdapter) RunCommand(command string) (string, error) {
-	log.Println("Run SSH : $ ", command)
+	if s.client == nil {
+		return "", errors.New("SSH not connected")
+	}
 	session, err := s.client.NewSession()
 	if err != nil {
 		return "", err
 	}
-
 	defer session.Close()
-
+	timer := time.AfterFunc(2*time.Minute, func() { _ = session.Close() })
+	defer timer.Stop()
 	output, err := session.CombinedOutput(command)
 	return string(output), err
 }
-
-func (s *SshAdapter) SaveRemoteFileContentToLocalFile(remoteFilePath string, localFilePath string) error {
-	catCommand := fmt.Sprintf("cat %s", remoteFilePath)
-	content, err := s.RunCommand(catCommand)
-	if err != nil {
-		return fmt.Errorf("failed to execute 'cat' command: %v", err)
+func (s *SshAdapter) SaveRemoteFileContentToLocalFile(remote, local string) error {
+	if strings.ContainsRune(remote, 0) {
+		return errors.New("invalid remote path")
 	}
-
-	err = os.WriteFile(localFilePath, []byte(content), 0644)
+	quoted := "'" + strings.ReplaceAll(remote, "'", "'\"'\"'") + "'"
+	content, err := s.RunCommand("cat -- " + quoted)
 	if err != nil {
-		return fmt.Errorf("failed to write content to local file: %v", err)
+		return err
 	}
-
-	fmt.Println("File content saved successfully.")
-	return nil
+	file, err := os.OpenFile(local, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		return err
+	}
+	if err := file.Chmod(0600); err != nil {
+		file.Close()
+		return err
+	}
+	if _, err := file.WriteString(content); err != nil {
+		file.Close()
+		return err
+	}
+	return file.Close()
 }

@@ -17,9 +17,10 @@ export default function ModalFirstConnection({
   serverIp,
   onClose = () => {},
 }: ModalFirstConnectionProps) {
-  const { serverInfo } = useInfo();
+  const { serverInfo, fetchServerInfo } = useInfo();
 
   const [domain, setDomain] = useState<string>("");
+  const [setupToken, setSetupToken] = useState("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -36,8 +37,8 @@ export default function ModalFirstConnection({
       return;
     }
 
-    if (!password.trim()) {
-      notif.warning({ title: "Missing password", content: "Please enter a password." });
+    if (password.length < 12 || new TextEncoder().encode(password).length > 72) {
+      notif.warning({ title: "Missing password", content: "Use a password of at least 12 characters (maximum 72 bytes)." });
       return;
     }
 
@@ -54,13 +55,14 @@ export default function ModalFirstConnection({
     setIsSubmitting(true);
 
     try {
-      const { token } = await saveInitialSetup({ email, password, domain });
+      const { token } = await saveInitialSetup({ email, password, domain, setupToken });
       saveToken(token);
+      await fetchServerInfo();
       notif.success({ title: "Setup complete", content: "Admin account created successfully." });
       onClose();
     } catch (error) {
       console.error("Error saving initial setup:", error);
-      notif.error({ title: "Setup failed", content: "Failed to create admin account. Please try again." });
+      notif.error({ title: "Setup failed", content: error instanceof Error ? error.message : "Setup failed" });
     } finally {
       setIsSubmitting(false);
     }
@@ -78,6 +80,11 @@ export default function ModalFirstConnection({
           <div className="mb-6 space-y-4">
             <p className="text-gray-600 text-sm">Create your admin account to get started.</p>
 
+            <div>
+              <Label htmlFor="setup-token">Setup token</Label>
+              <Input id="setup-token" type="password" autoComplete="off" value={setupToken} onChange={(e) => setSetupToken(e.target.value)} />
+              <p className="text-sm text-gray-600">Use the setup token shown in the server's data directory.</p>
+            </div>
             <div>
               <Label className="text-sm font-medium">Email</Label>
               <Input

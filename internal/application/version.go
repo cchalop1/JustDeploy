@@ -3,6 +3,7 @@ package application
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"cchalop1.com/deploy/internal/api/dto"
 )
@@ -21,7 +22,7 @@ type GitHubRelease struct {
 }
 
 func CheckIsNewVersion() bool {
-	resp, err := http.Get("https://api.github.com/repos/cchalop1/JustDeploy/releases/latest")
+	resp, err := (&http.Client{Timeout: 5 * time.Second}).Get("https://api.github.com/repos/cchalop1/JustDeploy/releases/latest")
 	if err != nil {
 		return false
 	}

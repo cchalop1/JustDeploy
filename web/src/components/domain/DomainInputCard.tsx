@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useId } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
@@ -22,6 +22,7 @@ export default function DomainInputCard({
   label = "Domain",
   placeholder = "Enter domain (e.g., example.com)",
 }: DomainInputCardProps) {
+  const inputId = useId();
   const [showInfoCard, setShowInfoCard] = useState<boolean>(false);
 
   function handleDomainChange(value: string) {
@@ -30,9 +31,10 @@ export default function DomainInputCard({
 
   return (
     <div className={`mb-4 relative ${className}`}>
-      <Label className="mb-1">{label}</Label>
+      <Label htmlFor={inputId} className="mb-1">{label || "Domain"}</Label>
       <div className="flex items-center">
         <Input
+          id={inputId}
           value={domain}
           onChange={(e) => handleDomainChange(e.target.value)}
           placeholder={placeholder}
@@ -40,6 +42,7 @@ export default function DomainInputCard({
         />
         <Button
           type="button"
+          aria-label="Domain configuration help"
           variant="ghost"
           className="ml-2 p-2 h-10 mb-2"
           onClick={() => setShowInfoCard(!showInfoCard)}
@@ -72,8 +75,8 @@ export default function DomainInputCard({
                   your domain:
                 </p>
                 <code className="bg-blue-100 px-2 py-1 rounded font-mono text-blue-900 block my-2">
-                  *.{domain + "." || "example.com."} →{" "}
-                  {domain + "." || "example.com."}
+                  *.{(domain || "example.com") + "."} →{" "}
+                  {(domain || "example.com") + "."}
                 </code>
                 <p>
                   This allows subdomains to work with your server automatically.
@@ -82,6 +85,7 @@ export default function DomainInputCard({
             </div>
             <Button
               variant="ghost"
+              aria-label="Close domain help"
               className="p-1 h-6 w-6"
               onClick={() => setShowInfoCard(false)}
             >

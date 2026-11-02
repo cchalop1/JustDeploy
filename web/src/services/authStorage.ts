@@ -1,17 +1,15 @@
-const TOKEN_STORAGE_KEY = "auth_token";
-
-export function saveToken(token: string): void {
-  localStorage.setItem(TOKEN_STORAGE_KEY, token);
-}
-
+const KEY = "auth_token";
+// Remove the legacy persistent credential. Sessions now end with the browser tab.
+localStorage.removeItem(KEY);
+export function saveToken(token: string): void { sessionStorage.setItem(KEY, token); window.dispatchEvent(new Event("auth-changed")); }
 export function getStoredToken(): string | null {
-  return localStorage.getItem(TOKEN_STORAGE_KEY);
+ const token = sessionStorage.getItem(KEY);
+ if (!token) return null;
+ try {
+  const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"))) as {exp?:number};
+  if (!payload.exp || payload.exp * 1000 <= Date.now()) { removeToken(); return null; }
+ } catch { removeToken(); return null; }
+ return token;
 }
-
-export function removeToken(): void {
-  localStorage.removeItem(TOKEN_STORAGE_KEY);
-}
-
-export function hasToken(): boolean {
-  return getStoredToken() !== null;
-}
+export function removeToken(): void { sessionStorage.removeItem(KEY); }
+export function hasToken(): boolean { return getStoredToken() !== null; }
