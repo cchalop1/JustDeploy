@@ -1,18 +1,31 @@
 package application
 
-import (
-	"fmt"
+import "cchalop1.com/deploy/internal/api/service"
 
-	"cchalop1.com/deploy/internal/api/dto"
-	"cchalop1.com/deploy/internal/api/service"
-)
+type GithubPushEvent struct {
+	Ref        string `json:"ref"`
+	Deleted    bool   `json:"deleted"`
+	Repository struct {
+		FullName string `json:"full_name"`
+	} `json:"repository"`
+}
 
-func ManageGithubEvent(deployService *service.DeployService, githubEvent dto.GithubEvent) error {
-	var err error
-	fmt.Println(githubEvent)
-
-	if githubEvent.Ref == "refs/heads/main" {
-		err = ReDeployApplication(deployService, githubEvent.Repository.Name)
+// Caller holds Operation; never dispatch unverified events to this method.
+func ManageVerifiedGithubEvent(ds *service.DeployService, event GithubPushEvent) error {
+	services, err := ds.DatabaseAdapter.ReadServices()
+	if err != nil {
+		return err
 	}
-	return err
+	for _, s := range services {
+		branch := s.Branch
+		if branch == "" {
+			branch = "main"
+		}
+		if s.Type == "github_repo" && s.FullName == event.Repository.FullName && event.Ref == "refs/heads/"+branch {
+			if err := redeployService(ds, s.Id); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

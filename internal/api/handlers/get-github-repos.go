@@ -17,7 +17,10 @@ import (
 // @Router /api/v1/github/repos [get]
 func GetGithubRepos(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		repos := application.GetGithubRepos(deployService)
+		repos, err := application.GetGithubRepos(deployService)
+		if err != nil {
+			return echo.NewHTTPError(502, "GitHub repositories unavailable; retry later")
+		}
 		return c.JSON(http.StatusOK, repos)
 	}
 }

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Variables
 DOCKER_IMAGE="cchalop1/justdeploy"
@@ -6,7 +7,7 @@ GIT_TAG=$(git describe --tags --abbrev=0 || echo "latest")
 CI_MODE=false
 
 # Check if running in CI mode
-if [[ "$1" == "--ci" ]]; then
+if [[ "${1:-}" == "--ci" ]]; then
     CI_MODE=true
 fi
 

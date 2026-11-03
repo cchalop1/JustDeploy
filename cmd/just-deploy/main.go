@@ -72,6 +72,14 @@ func main() {
 	gitAdapter := adapter.NewGitAdapter()
 
 	databaseAdapter.Init()
+	defer databaseAdapter.Close()
+	if err := application.EnsureBootstrapToken(databaseAdapter); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if databaseAdapter.GetSettings().AdminEmail == "" {
+		fmt.Println("Initial setup requires the token in", internal.JUSTDEPLOY_FOLDER+"/setup-token")
+	}
 
 	deployService := service.DeployService{
 		DatabaseAdapter:   databaseAdapter,
@@ -82,12 +90,16 @@ func main() {
 		GitAdapter:        gitAdapter,
 	}
 
-	deployService.DockerAdapter.ConnectClient()
+	if err := deployService.DockerAdapter.ConnectClient(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	server, err := application.CreateCurrentServer(&deployService, port)
 
 	if err != nil {
-		fmt.Println("Current Server is already created:", err)
+		fmt.Fprintln(os.Stderr, "Failed to initialize server:", err)
+		os.Exit(1)
 	}
 
 	api.InitValidator(app)

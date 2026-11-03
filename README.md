@@ -34,6 +34,10 @@ Before getting started, your server need to be debian base or have docker.
 
 ---
 
+## Security upgrade and access
+
+Read [SECURITY-UPGRADE.md](SECURITY-UPGRADE.md) before installation or upgrade. Administration requires HTTPS for remote access; initial setup requires the server's setup token. The runtime data directory must be mounted persistently. Go 1.26.10 and Bun 1.3.10 are used for builds; Docker Engine 25 or newer is required.
+
 ## Installation
 
 To install JustDeploy on your server, run the following command:
@@ -48,7 +52,7 @@ If you prefer, you can also run JustDeploy in Docker. With the following command
 
 ```bash
 docker run -d --name justdeploy \
-  -p 5915:5915 \
+  -p 127.0.0.1:5915:5915 \
   -v /var/lib/justdeploy:/app/data \
   -v /var/run/docker.sock:/var/run/docker.sock \
   --restart=unless-stopped \

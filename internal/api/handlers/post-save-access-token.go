@@ -20,6 +20,13 @@ import (
 // @Router /api/v1/github/save-token/{installationId} [post]
 func PostSaveAccessTokenHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		if !deployService.Operation.TryLock() {
+			return echo.NewHTTPError(409, "another operation is in progress")
+		}
+		defer deployService.Operation.Unlock()
+		if err := consumeGithubState(c); err != nil {
+			return err
+		}
 		installationId := c.Param("installationId")
 		if installationId == "" {
 			return c.JSON(http.StatusBadRequest, "Installation ID is required")

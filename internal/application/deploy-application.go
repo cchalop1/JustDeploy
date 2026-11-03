@@ -1,196 +1,124 @@
 package application
 
 import (
-	"errors"
-	"fmt"
-	"path/filepath"
-
 	"cchalop1.com/deploy/internal/adapter"
-	"cchalop1.com/deploy/internal/api/dto"
 	"cchalop1.com/deploy/internal/api/service"
 	"cchalop1.com/deploy/internal/domain"
+	"errors"
+	"fmt"
+	"os"
 )
 
-// buildServiceDomain constructs the appropriate domain for a service based on its ExposeSettings.
-//
-// The domain is constructed as follows:
-// - If ExposeSettings.SubDomain is empty: domain will be just the baseDomain (e.g. "example.com")
-// - If ExposeSettings.SubDomain is provided: domain will be subdomain.baseDomain (e.g. "api.example.com")
-//
-// This allows services to be deployed either at the root domain or at a subdomain, consistent
-// with how Service.SetUrl handles domain construction.
-func buildServiceDomain(service domain.Service, baseDomain string) string {
-	subDomain := service.ExposeSettings.SubDomain
-
-	if subDomain == "" {
-		return baseDomain // No subdomain - deploy at root domain (e.g. "example.com")
+func buildServiceDomain(s domain.Service, base string) string {
+	if !s.ExposeSettings.IsExposed {
+		return ""
 	}
-
-	return subDomain + "." + baseDomain // With subdomain (e.g. "api.example.com")
+	if s.ExposeSettings.SubDomain == "" {
+		return base
+	}
+	return s.ExposeSettings.SubDomain + "." + base
 }
-
-func deployGithubService(deployService *service.DeployService, serviceToDeploy domain.Service, baseDomain string) error {
-	// Stop any existing instance of the service
-	deployService.DockerAdapter.Stop(serviceToDeploy.GetDockerName())
-
-	serviceToDeploy.Status = "Deploying"
-	deployService.DatabaseAdapter.SaveService(serviceToDeploy)
-
-	fmt.Println("service to deploy : ", serviceToDeploy, baseDomain)
-	pathToDir, err := filepath.Abs(serviceToDeploy.CurrentPath)
-
+func ensureRouter(ds *service.DeployService) error {
+	server := ds.DatabaseAdapter.GetServer()
+	if !ValidDomain(server.Domain) {
+		return errors.New("configure a valid server domain before exposing a service")
+	}
+	if err := ds.DockerAdapter.PullTreafikImage(); err != nil {
+		return err
+	}
+	return ds.DockerAdapter.RunRouterWithServer(server)
+}
+func deployOneService(ds *service.DeployService, s domain.Service, base string) error {
+	if err := ValidateService(s); err != nil {
+		return err
+	}
+	if s.ExposeSettings.IsExposed {
+		if err := ensureRouter(ds); err != nil {
+			return err
+		}
+	}
+	switch s.Type {
+	case "github_repo":
+		info, err := os.Stat(s.CurrentPath)
+		if err != nil || !info.IsDir() {
+			return errors.New("source workspace is unavailable; redeploy this repository to fetch it again")
+		}
+		logs := domain.LogCollector{}
+		dockerfile, err := adapter.FindDockerfile(s.CurrentPath)
+		if err != nil {
+			return err
+		}
+		if s.Dockerfile != "" {
+			dockerfile = s.Dockerfile
+		}
+		if dockerfile != "" {
+			s.Dockerfile = dockerfile
+			err = ds.DockerAdapter.BuildImage(s, &logs)
+		} else {
+			err = ds.DockerAdapter.BuildNixpacksImage(s, &logs)
+		}
+		// Persist only the latest bounded build logs and redact known service credentials.
+		for _, env := range s.Envs {
+			if len(env.Value) >= 4 {
+				logs.Redact(env.Value)
+			}
+		}
+		settings := ds.DatabaseAdapter.GetSettings()
+		logs.Redact(settings.GithubToken)
+		if logErr := storeBuildLog(ds, s.Id, logs); logErr != nil {
+			return errors.Join(err, logErr)
+		}
+		if err != nil {
+			return fmt.Errorf("build failed (previous container retained): %w", err)
+		}
+	case "database", "llm", "analytics", "image":
+		if err := ds.DockerAdapter.EnsureImage(s.ImageName); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("unsupported service type %q", s.Type)
+	}
+	server := ds.DatabaseAdapter.GetServer()
+	if err := ds.DockerAdapter.RunImageWithTLS(s, buildServiceDomain(s, base), server.UseHttps); err != nil {
+		return err
+	}
+	if s.Type == "github_repo" {
+		if err := UpdateServiceCommitInfo(ds, &s); err != nil {
+			return err
+		}
+	}
+	s.Status = "Running"
+	s.ExposeSettings.Tls = server.UseHttps
+	s.SetUrl(base)
+	return ds.DatabaseAdapter.SaveService(s)
+}
+func DeployApplication(ds *service.DeployService) error {
+	if !ds.Operation.TryLock() {
+		return domain.ErrConflict
+	}
+	defer ds.Operation.Unlock()
+	services, err := ds.DatabaseAdapter.ReadServices()
 	if err != nil {
 		return err
 	}
-
-	pathToDir = adapter.NewFilesystemAdapter().CleanPath(pathToDir)
-
-	isFolder := adapter.NewFilesystemAdapter().IsFolder(pathToDir)
-
-	if !isFolder {
-		fmt.Println("Is not a folder")
-		pathToDir = adapter.NewFilesystemAdapter().GetDir(pathToDir)
-	}
-
-	portEnv := make([]dto.Env, 1)
-	serviceToDeploy.Envs = append(portEnv, serviceToDeploy.Envs...)
-
-	logs := domain.LogCollector{}
-
-	// Build the appropriate image based on whether a Dockerfile exists
-	isDockerfile := deployService.FilesystemAdapter.FindDockerFile(serviceToDeploy.CurrentPath)
-	if isDockerfile {
-		err = deployService.DockerAdapter.BuildImage(serviceToDeploy, &logs)
-	} else {
-		err = deployService.DockerAdapter.BuildNixpacksImage(serviceToDeploy, &logs)
-	}
-
-	fmt.Println("logs : ", logs)
-
-	fmt.Println("serviceToDeploy : ", serviceToDeploy)
-	fmt.Println("logs : ", logs)
-
-	StoreBuildLog(serviceToDeploy.Id, logs)
-
-	if err != nil {
-		fmt.Println("error building image: ", err)
-		return fmt.Errorf("error building image: %w", err)
-	}
-
-	// Mettre à jour les informations du commit après le build réussi
-	err = UpdateServiceCommitInfo(deployService, &serviceToDeploy)
-	if err != nil {
-		fmt.Printf("Warning: failed to update commit info for service %s: %v\n", serviceToDeploy.Name, err)
-		// Ne pas faire échouer le déploiement si la mise à jour du commit échoue
-	}
-
-	// Construct the domain for the service based on ExposeSettings
-	serviceDomain := buildServiceDomain(serviceToDeploy, baseDomain)
-
-	// Get the server to check HTTPS settings
-	server := deployService.DatabaseAdapter.GetServer()
-
-	// Run the container with the appropriate domain and TLS settings
-	err = deployService.DockerAdapter.RunImageWithTLS(serviceToDeploy, serviceDomain, server.UseHttps)
-
-	if err != nil {
-		return fmt.Errorf("error running Docker image: %w", err)
-	}
-
-	// Update and save service status
-	serviceToDeploy.Status = "Running"
-
-	// Set the service URL - use baseDomain as SetUrl will handle subdomain logic internally
-	serviceToDeploy.SetUrl(baseDomain)
-
-	deployService.DatabaseAdapter.SaveService(serviceToDeploy)
-
-	return nil
-}
-
-func deployDatabaseService(deployService *service.DeployService, dbService domain.Service) error {
-	// Stop any existing instance of the service
-	deployService.DockerAdapter.Stop(dbService.GetDockerName())
-
-	fmt.Printf("Deploying database service: %s\n", dbService.GetDockerName())
-
-	// Get the server to get HTTPS settings
-	server := deployService.DatabaseAdapter.GetServer()
-
-	// Deploy the database service (we pass empty domain since databases don't need external exposure)
-	err := deployService.DockerAdapter.RunImageWithTLS(dbService, "", server.UseHttps)
-
-	if err != nil {
-		dbService.Status = "Error"
-		deployService.DatabaseAdapter.SaveService(dbService)
-		return fmt.Errorf("error running database container: %w", err)
-	}
-
-	// Update and save service status
-	dbService.Status = "Running"
-	deployService.DatabaseAdapter.SaveService(dbService)
-
-	return nil
-}
-
-// deployOneService routes the service deployment to the appropriate handler based on service type
-func deployOneService(deployService *service.DeployService, serviceToDeploy domain.Service, baseDomain string) error {
-	fmt.Printf("Initiating deployment of service: %s (type: %s)\n", serviceToDeploy.Name, serviceToDeploy.Type)
-
-	switch serviceToDeploy.Type {
-	case "database":
-		// For database services, no domain/subdomain is needed
-		return deployDatabaseService(deployService, serviceToDeploy)
-	case "llm":
-		return deployDatabaseService(deployService, serviceToDeploy)
-	case "github_repo":
-		// For GitHub repos, we use the domain/subdomain pattern
-		return deployGithubService(deployService, serviceToDeploy, baseDomain)
-	default:
-		// For backward compatibility or other service types, default to GitHub repo deployment
-		fmt.Printf("Unspecified service type '%s', defaulting to GitHub repo deployment\n", serviceToDeploy.Type)
-		return deployGithubService(deployService, serviceToDeploy, baseDomain)
-	}
-}
-
-func DeployApplication(deployService *service.DeployService) error {
-	services := deployService.DatabaseAdapter.GetServices()
-
-	server := deployService.DatabaseAdapter.GetServer()
-
-	// Check if Traefik router is running, if not, pull and run it
-	routerRunning, err := deployService.DockerAdapter.CheckRouterIsRunning()
-	if err != nil {
-		return fmt.Errorf("error checking if router is running: %w", err)
-	}
-
-	if !routerRunning {
-		err = deployService.DockerAdapter.PullTreafikImage()
-		if err != nil {
-			return fmt.Errorf("error pulling Traefik image: %w", err)
-		}
-
-		err = deployService.DockerAdapter.RunRouterWithServer(server)
-		if err != nil {
-			return fmt.Errorf("error running Traefik router: %w", err)
-		}
-	} else {
-		fmt.Println("Traefik router is already running")
-	}
-
-	if server.Domain == "" {
-		return errors.New("server does not have domain")
-	}
-
-	for _, service := range services {
-		fmt.Printf("Deploying service: %s\n", service.Name)
-		err = deployOneService(deployService, service, server.Domain)
-		if err != nil {
-			service.Status = "Error"
-			deployService.DatabaseAdapter.SaveService(service)
-			return fmt.Errorf("error deploying service: %w", err)
+	server := ds.DatabaseAdapter.GetServer()
+	// Start stateful dependencies first. Already running dependencies are never recreated by a global app deploy.
+	for _, github := range []bool{false, true} {
+		for _, s := range services {
+			if (s.Type == "github_repo") != github {
+				continue
+			}
+			running, err := ds.DockerAdapter.IsServiceRunning(s.GetDockerName())
+			if err != nil {
+				return err
+			}
+			if running && s.Status != "ready_to_deploy" {
+				continue
+			}
+			if err := deployOneService(ds, s, server.Domain); err != nil {
+				return fmt.Errorf("deploy %s: %w", s.Name, err)
+			}
 		}
 	}
-
 	return nil
 }

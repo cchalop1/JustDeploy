@@ -250,7 +250,7 @@ func TestEnvToSlice(t *testing.T) {
 			},
 		},
 		{
-			name: "filter out env vars with empty value",
+			name: "preserve explicit empty env value",
 			envVars: []dto.Env{
 				{
 					Name:  "DATABASE_URL",
@@ -262,6 +262,7 @@ func TestEnvToSlice(t *testing.T) {
 				},
 			},
 			expected: []string{
+				"DATABASE_URL=",
 				"PORT=8080",
 			},
 		},
@@ -286,7 +287,7 @@ func TestEnvToSlice(t *testing.T) {
 					Value: "8080",
 				},
 			},
-			expected: []string{},
+			expected: []string{"PORT="},
 		},
 	}
 

@@ -1,4 +1,4 @@
-import { Notification } from "@/contexts/Notifications";
+import { Notification } from "@/contexts/notification-context";
 
 type NotifProps = {
   notification: Notification;

@@ -9,7 +9,10 @@ import (
 )
 
 func Login(deployService *service.DeployService, loginDto dto.LoginDto) (string, error) {
-	settings := deployService.DatabaseAdapter.GetSettings()
+	settings, err := deployService.DatabaseAdapter.ReadSettings()
+	if err != nil {
+		return "", errors.New("authentication unavailable")
+	}
 
 	if settings.AdminEmail == "" {
 		return "", errors.New("no admin account configured")

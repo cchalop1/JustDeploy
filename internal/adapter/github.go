@@ -8,7 +8,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type GithubRepo struct {
@@ -79,7 +79,7 @@ func (g *GithubAdapter) GetInstallationToken(appID int, privateKey string, insta
 	req.Header.Set("Authorization", "Bearer "+jwtToken)
 	req.Header.Set("Accept", "application/vnd.github+json")
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: 30 * time.Second}
 	res, err := client.Do(req)
 	if err != nil {
 		return "", err
@@ -107,7 +107,7 @@ func (g *GithubAdapter) GetRepos(token string) ([]GithubRepo, error) {
 	req.Header.Set("Authorization", "token "+token)
 	req.Header.Set("Accept", "application/vnd.github+json")
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: 30 * time.Second}
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -162,7 +162,7 @@ func generateJWT(appID int, privateKey string) (string, error) {
 
 func (g *GithubAdapter) FinalizeGithubAppCreation(code string) (GitHubAppResponse, error) {
 	apiUrl := "https://api.github.com/app-manifests/" + code + "/conversions"
-	res, err := http.Post(apiUrl, "application/vnd.github+json", nil)
+	res, err := (&http.Client{Timeout: 30 * time.Second}).Post(apiUrl, "application/vnd.github+json", nil)
 	if err != nil {
 		return GitHubAppResponse{}, err
 	}
@@ -197,7 +197,7 @@ func (g *GithubAdapter) GetInstallationID(appID int, privateKey string) (int, er
 	req.Header.Set("Authorization", "Bearer "+jwtToken)
 	req.Header.Set("Accept", "application/vnd.github+json")
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: 30 * time.Second}
 	res, err := client.Do(req)
 	if err != nil {
 		return 0, err
@@ -217,7 +217,7 @@ func (g *GithubAdapter) GetInstallationID(appID int, privateKey string) (int, er
 		return 0, fmt.Errorf("no installations found for this app")
 	}
 
-	fmt.Println(installations)
+	// Do not log installation or token details.
 	return installations[0].ID, nil
 }
 
@@ -240,7 +240,7 @@ func (g *GithubAdapter) IsTokenValid(token string) bool {
 	req.Header.Set("Authorization", "token "+token)
 	req.Header.Set("Accept", "application/vnd.github+json")
 
-	client := &http.Client{}
+	client := &http.Client{Timeout: 30 * time.Second}
 	res, err := client.Do(req)
 	if err != nil {
 		return false

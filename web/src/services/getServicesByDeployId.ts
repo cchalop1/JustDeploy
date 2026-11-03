@@ -4,11 +4,16 @@ import { Env } from "./postFormDetails";
 export type ServiceExposeSettings = {
   isExposed: boolean;
   subDomain: string;
+  exposePort: string;
+  tls: boolean;
 };
 
 export type Service = {
   id: string;
   type: string;
+  projectId: string;
+  revision: number;
+  branch: string;
   url: string;
   name: string;
   envs: Array<Env>;

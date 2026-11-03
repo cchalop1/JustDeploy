@@ -1,11 +1,10 @@
 import path from "path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import { reactClickToComponent } from "vite-plugin-react-click-to-component";
-import Inspect from "vite-plugin-inspect";
 
 export default defineConfig({
-  plugins: [react(), reactClickToComponent(), Inspect()],
+  plugins: [react()],
+  server: { host: "127.0.0.1" },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

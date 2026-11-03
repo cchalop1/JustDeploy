@@ -13,7 +13,9 @@ func StopAppHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id := c.Param("id")
 
-		application.StopApplication(deployService, id)
-		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application is stoped"})
+		if err := application.StopApplication(deployService, id); err != nil {
+			return operationError(err)
+		}
+		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Application stopped"})
 	}
 }

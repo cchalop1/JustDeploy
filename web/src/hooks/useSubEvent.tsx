@@ -6,9 +6,9 @@ export default function useSubEvent<T>(eventPath: string) {
 
   useEffect(() => {
     const source = eventSubscription(eventPath);
-    source.onmessage = (e: MessageEvent<T>) => {
+    source.onmessage = (e: MessageEvent<string>) => {
       console.log(e);
-      setSubEvent(JSON.parse<T>(e.data));
+      setSubEvent(JSON.parse(e.data) as T);
     };
 
     source.onerror = (e) => {

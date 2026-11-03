@@ -22,7 +22,7 @@ func PostDeployHandler(deployService *service.DeployService) echo.HandlerFunc {
 		err := application.DeployApplication(deployService)
 
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, dto.ResponseApi{Message: err.Error()})
+			return operationError(err)
 		}
 
 		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Deployed"})

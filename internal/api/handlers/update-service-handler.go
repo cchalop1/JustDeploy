@@ -34,7 +34,7 @@ func UpdateServiceHandler(deployService *service.DeployService) echo.HandlerFunc
 		service, err := application.UpdateService(deployService, serviceToUpdate)
 
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, dto.ResponseApi{Message: err.Error()})
+			return operationError(err)
 		}
 
 		return c.JSON(http.StatusOK, service)

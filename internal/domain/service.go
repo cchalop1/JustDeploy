@@ -13,7 +13,22 @@ type ServiceExposeSettings struct {
 	ExposePort string `json:"exposePort"`
 }
 
+type ServiceRuntime struct {
+	Revision   uint64          `json:"revision"`
+	ProjectID  string          `json:"projectId"`
+	Branch     string          `json:"branch"`
+	Dockerfile string          `json:"dockerfile,omitempty"`
+	Volumes    []ServiceVolume `json:"volumes,omitempty"`
+}
+
+type ServiceVolume struct {
+	Name   string `json:"name"`
+	Target string `json:"target"`
+}
+
 type Service struct {
+	ServiceRuntime
+
 	Id       string    `json:"id"`
 	Type     string    `json:"type"`
 	Url      string    `json:"url"`
@@ -43,6 +58,7 @@ func (s *Service) GetDockerName() string {
 
 func (s *Service) SetUrl(serverDomain string) {
 	if !s.ExposeSettings.IsExposed {
+		s.Url = ""
 		return
 	}
 

@@ -1,53 +1,30 @@
-import SpinnerIcon from "@/assets/SpinnerIcon";
-import { finalizeGithubAppCreation } from "@/services/createGithubApp";
-import { saveGithubAccessToken } from "@/services/saveGithubAccessToken";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import { checkGithubState, finalizeGithubAppCreation, newGithubState } from "@/services/createGithubApp";
+import { saveGithubAccessToken } from "@/services/saveGithubAccessToken";
+import SpinnerIcon from "@/assets/SpinnerIcon";
 export default function GithubRedirect() {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  async function handleGithubAppCreation(code: string) {
-    const res = await finalizeGithubAppCreation(code);
-    console.log(res);
-
-    const originalUrl = window.location.origin + "/github/auth/redirect";
-    const stateValue = encodeURIComponent(originalUrl);
-    const installUrl = `https://github.com/apps/${res.slug}/installations/new?state=${stateValue}`;
-
-    console.log("Redirecting to:", installUrl);
-    window.open(installUrl, "_self");
+ const location = useLocation(); const navigate = useNavigate();
+ const started = useRef(false); const [error,setError] = useState("");
+ useEffect(() => {
+  if (started.current) return;
+  started.current = true;
+  async function complete() {
+   const params = new URLSearchParams(location.search);
+   const state = checkGithubState(params.get("state"));
+   const code = params.get("code"); const installation = params.get("installation_id");
+   // Remove one-time codes from history before making network requests.
+   window.history.replaceState(null,"",location.pathname);
+   if (code) {
+    const {slug} = await finalizeGithubAppCreation(code,state);
+    const installState = await newGithubState();
+    const url = new URL(`https://github.com/apps/${encodeURIComponent(slug)}/installations/new`);
+    url.searchParams.set("state",installState); window.location.assign(url.toString());
+   } else if (installation) {
+    await saveGithubAccessToken(installation,state); sessionStorage.removeItem("github-state"); navigate("/",{replace:true});
+   } else { throw new Error("GitHub did not return a code or installation."); }
   }
-
-  async function handleSaveAccessToken(installationId: string) {
-    try {
-      await saveGithubAccessToken(installationId);
-      navigate("/");
-    } catch (error) {
-      console.error("Failed to save access token:", error);
-    }
-  }
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const code = params.get("code");
-    const installationId = params.get("installation_id");
-
-    if (code) {
-      console.log("Detected code: ", code);
-      handleGithubAppCreation(code);
-    }
-
-    if (installationId) {
-      console.log("Detected installation_id:", installationId);
-      handleSaveAccessToken(installationId);
-    }
-  }, [location, navigate]);
-
-  return (
-    <div>
-      <SpinnerIcon color="text-black"></SpinnerIcon>
-    </div>
-  );
+  complete().catch((e:unknown) => setError(e instanceof Error ? e.message : "GitHub connection failed"));
+ },[location.search,location.pathname,navigate]);
+ return error ? <div role="alert" className="p-8">{error} <a href="/">Return home</a></div> : <SpinnerIcon color="text-black" />;
 }

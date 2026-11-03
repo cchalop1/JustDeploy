@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"cchalop1.com/deploy/internal/api/dto"
@@ -17,12 +18,13 @@ func GenerateEnvValues(envs []dto.Env) []dto.Env {
 		newEnv := dto.Env{
 			Name:     env.Name,
 			IsSecret: env.IsSecret,
+			Value:    env.Value,
 		}
 
 		if env.IsSecret {
 			// Generate a random string for secret variables
 			newEnv.Value = GenerateRandomPassword(12)
-		} else {
+		} else if env.Value == "" {
 			// Use lowercase name for non-secret variables
 			newEnv.Value = strings.ToLower(env.Name)
 		}
@@ -38,7 +40,7 @@ func GenerateEnvValues(envs []dto.Env) []dto.Env {
 func EnvToSlice(envVars []dto.Env) []string {
 	envSlice := make([]string, 0, len(envVars))
 	for _, value := range envVars {
-		if value.Name != "" && value.Value != "" {
+		if value.Name != "" {
 			envSlice = append(envSlice, fmt.Sprintf("%s=%s", value.Name, value.Value))
 		}
 	}
@@ -46,15 +48,20 @@ func EnvToSlice(envVars []dto.Env) []string {
 }
 
 func ReplaceEnvVariablesInCmd(cmd []string, envs []dto.Env) []string {
-	for i, c := range cmd {
-		if strings.Contains(c, "$") {
-			for _, env := range envs {
-				// find the $varble in the cmd in env to put in the env.Value in cmd
-				if strings.Contains(c, "$"+env.Name) {
-					cmd[i] = strings.Replace(c, "$"+env.Name, env.Value, 1)
-				}
-			}
-		}
+	result := append([]string{}, cmd...)
+	values := map[string]string{}
+	for _, env := range envs {
+		values[env.Name] = env.Value
 	}
-	return cmd
+	pattern := regexp.MustCompile(`\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)`)
+	for i, c := range result {
+		result[i] = pattern.ReplaceAllStringFunc(c, func(match string) string {
+			name := strings.Trim(strings.TrimPrefix(match, "$"), "{}")
+			if value, ok := values[name]; ok {
+				return value
+			}
+			return match
+		})
+	}
+	return result
 }

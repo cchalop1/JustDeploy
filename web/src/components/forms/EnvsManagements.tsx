@@ -28,6 +28,7 @@ export default function EnvsManagements({ envs, setEnvs, canEdit }: EnvsManageme
         <div key={idx} className="flex items-center gap-2">
           <input
             className="flex-1 min-w-0 h-8 px-2.5 rounded-md border border-gray-200 bg-gray-50 font-mono text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            aria-label={`Variable ${idx + 1} name`}
             placeholder="KEY"
             readOnly={!canEdit}
             autoComplete="off"
@@ -36,6 +37,8 @@ export default function EnvsManagements({ envs, setEnvs, canEdit }: EnvsManageme
           />
           <input
             className="flex-1 min-w-0 h-8 px-2.5 rounded-md border border-gray-200 bg-gray-50 font-mono text-xs text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            aria-label={`Variable ${idx + 1} value`}
+            type={env.isSecret ? "password" : "text"}
             placeholder="value"
             readOnly={!canEdit}
             autoComplete="off"
@@ -44,6 +47,8 @@ export default function EnvsManagements({ envs, setEnvs, canEdit }: EnvsManageme
           />
           {canEdit && (
             <button
+              aria-label={`Remove variable ${idx + 1}`}
+              type="button"
               onClick={() => removeEnv(idx)}
               className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
             >

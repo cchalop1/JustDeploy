@@ -20,6 +20,13 @@ import (
 // @Router /api/v1/github/connect/{code} [post]
 func PostConnectGithubAppHandler(deployService *service.DeployService) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		if !deployService.Operation.TryLock() {
+			return echo.NewHTTPError(409, "another operation is in progress")
+		}
+		defer deployService.Operation.Unlock()
+		if err := consumeGithubState(c); err != nil {
+			return err
+		}
 		code := c.Param("code")
 		if code == "" {
 			return c.JSON(http.StatusBadRequest, "Code is required")
@@ -30,6 +37,6 @@ func PostConnectGithubAppHandler(deployService *service.DeployService) echo.Hand
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		return c.JSON(http.StatusOK, res)
+		return c.JSON(http.StatusOK, map[string]string{"slug": res.Slug})
 	}
 }

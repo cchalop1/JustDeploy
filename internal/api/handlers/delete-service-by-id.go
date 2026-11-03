@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"cchalop1.com/deploy/internal/api/service"
@@ -16,8 +15,7 @@ func DeleteServiceHandler(deployService *service.DeployService) echo.HandlerFunc
 		err := application.DeleteService(deployService, serviceId)
 
 		if err != nil {
-			fmt.Println(err)
-			return c.String(http.StatusInternalServerError, "error")
+			return operationError(err)
 		}
 
 		return c.JSON(http.StatusOK, true)
