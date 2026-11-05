@@ -1,5 +1,5 @@
 import { callApi } from "./api";
-import { ServiceDto } from "./getServicesApi";
+import { Service } from "./getServicesByDeployId";
 
 export type CreateRepoRequest = {
   repoUrl: string;
@@ -7,6 +7,6 @@ export type CreateRepoRequest = {
 
 export async function createRepoApi(
   body: CreateRepoRequest
-): Promise<ServiceDto> {
-  return await callApi<ServiceDto>("/repo/create", "POST", body);
+): Promise<Service> {
+  return await callApi<Service>("/repo/create", "POST", body);
 }

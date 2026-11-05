@@ -36,7 +36,7 @@ Before getting started, your server need to be debian base or have docker.
 
 ## Security upgrade and access
 
-Read [SECURITY-UPGRADE.md](SECURITY-UPGRADE.md) before installation or upgrade. Administration requires HTTPS for remote access; initial setup requires the server's setup token. The runtime data directory must be mounted persistently. Go 1.26.10 and Bun 1.3.10 are used for builds; Docker Engine 25 or newer is required.
+Read [SECURITY-UPGRADE.md](SECURITY-UPGRADE.md) before installation or upgrade. Administration requires HTTPS for remote access. Create the first administrator account from the web interface. The runtime data directory must be mounted persistently. Go 1.26.10 and Bun 1.3.10 are used for builds; Docker Engine 25 or newer is required.
 
 ## Installation
 
@@ -63,15 +63,19 @@ docker run -d --name justdeploy \
 
 ## Usage
 
-After installation, JustDeploy runs on your server and you can access it by clicking on the URL displayed at the end of the installation process. You can then access the web interface from your local computer.
+After installation, the installer waits for the API to respond and prints your next steps:
 
-With this, you'll be able to:
+1. On your computer, open an SSH tunnel using the command printed by the installer. Typically: `ssh -N -L 5915:127.0.0.1:5915 root@YOUR_VPS_IP`.
+2. Keep that terminal open and visit `http://localhost:5915`.
+3. Create your administrator account with your email and password. No domain is required.
+4. Choose **Create a database** for a private service, or **Deploy my application** to connect GitHub and select a repository.
+5. Review the service's environment variables and port, then click **Save and deploy**. Pending dependencies in its connection group are deployed first; unrelated groups are left alone.
 
-- Connect your GitHub account
-- Set up new databases in just one click
-- Manage and configure environments for your applications
-- Deploy your project to any VPS of your choice without being locked into a particular provider
-- Enjoy zero-config deployment as JustDeploy extracts information from your GitHub repo to deploy your full-stack application
+Private databases do not require GitHub or a domain. They are reachable by service name from applications in the same connection group; their credentials remain in the service settings.
+
+For GitHub integration, first configure public HTTPS access to the administration interface using the [HTTPS instructions](SECURITY-UPGRADE.md#administration-and-first-setup), then reopen JustDeploy at that address. The tunnel alone does not make GitHub callbacks or webhooks publicly reachable.
+
+To expose an application, configure the server domain in Global settings, point the application hostname (or a wildcard) to the VPS, allow inbound ports 80 and 443, and enable HTTPS for deployed services. This application routing is separate from the administration interface's HTTPS configuration. After deployment, use **Open my application** to check the public URL. Container startup checks do not verify public DNS or HTTP reachability.
 
 ---
 

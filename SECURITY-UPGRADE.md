@@ -26,7 +26,7 @@ The native API binds to `127.0.0.1` by default. Set `JUSTDEPLOY_LISTEN_ADDR` to 
 
 For Docker, publish the administration port on the host loopback only (`-p 127.0.0.1:5915:5915`), and configure the actual proxy peer CIDR as seen by the container. Do not use a trust-all CIDR. For local setup, an SSH tunnel to the loopback API can be used.
 
-The first admin requires the random token stored in `<data-dir>/setup-token`, plus a valid email and a password of 12–72 bytes. Read it over a trusted server session and enter it in the setup form. It is deleted after successful initialization. Creation is atomic; a second request cannot overwrite the account. Existing administrators do not need a new setup token.
+The first administrator account is created from the web interface using a valid email and a password of 12–72 bytes. Anyone who can reach the unconfigured instance can create this account, so complete initial setup before making the administration interface publicly accessible. Creation is atomic; a second request cannot overwrite the account. Existing administrator accounts are preserved.
 
 JWTs expire after eight hours; browser storage is per-tab. `POST /api/logout`, authenticated with the current bearer token, revokes all sessions. Upgrading signs out browsers that used the old persistent storage.
 

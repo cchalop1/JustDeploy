@@ -29,3 +29,13 @@ func PostDeployHandler(deployService *service.DeployService) echo.HandlerFunc {
 
 	}
 }
+
+// PostDeployServiceHandler deploys a service and its connection group.
+func PostDeployServiceHandler(ds *service.DeployService) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if err := application.DeployServiceGroup(ds, c.Param("id")); err != nil {
+			return operationError(err)
+		}
+		return c.JSON(http.StatusOK, dto.ResponseApi{Message: "Deployed"})
+	}
+}

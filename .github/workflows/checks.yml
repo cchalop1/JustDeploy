@@ -26,6 +26,10 @@ jobs:
           bun run build
       - name: Embed frontend
         run: cp -R web/dist/. internal/web/dist/
+      - name: Installer onboarding checks
+        run: |
+          bash -n install.sh
+          python3 tests/install_onboarding_test.py
       - name: Go checks
         run: |
           go vet ./...

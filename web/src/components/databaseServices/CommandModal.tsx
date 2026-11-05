@@ -12,9 +12,10 @@ import { ServiceDto } from "@/services/getServicesApi";
 import { redirectToGithubAppRegistration } from "@/services/createGithubApp";
 import { GithubRepo } from "@/services/getGithubRepos";
 import { useState } from "react";
-import { useInfo } from "@/hooks/useInfo";
+import { baseUrl } from "@/services/api";
 
 type CommandModalProps = {
+  category?: "all" | "application" | "database";
   open: boolean;
   setOpen: (open: boolean) => void;
   preConfiguredServices: Array<ServiceDto>;
@@ -25,6 +26,7 @@ type CommandModalProps = {
 };
 
 export default function CommandModal({
+  category = "all",
   open,
   setOpen,
   preConfiguredServices,
@@ -33,7 +35,7 @@ export default function CommandModal({
   createDatabaseToDeploy,
   createRepoToDeploy,
 }: CommandModalProps) {
-  const { serverInfo } = useInfo();
+  const isHttps = new URL(baseUrl || window.location.origin).protocol === "https:";
   const llmServices = preConfiguredServices.filter((s) => s.type === "llm");
   const databaseServices = preConfiguredServices.filter(
     (s) => s.type === "database"
@@ -46,10 +48,18 @@ export default function CommandModal({
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
       {connectionError && <p role="alert" className="p-3 text-red-600">{connectionError}</p>}
-      <CommandInput placeholder="Search a github repos or a services to deploy on your server ..." />
-      <CommandList onSelect={() => setOpen(false)}>
-        <CommandGroup heading="Github repositories">
-          {!isGithubConnected && serverInfo?.server.ip && (
+      <CommandInput placeholder="Search repositories or service templates…" />
+      {category !== "database" && !isHttps && (
+        <div className="p-4 text-sm space-y-2 border-b">
+          <p className="font-semibold">Set up public HTTPS before connecting GitHub</p>
+          <p>Point an administration domain to your VPS, configure an HTTPS reverse proxy to 127.0.0.1:5915, then reopen JustDeploy at that HTTPS address.</p>
+          <a href="https://github.com/cchalop1/JustDeploy/blob/main/SECURITY-UPGRADE.md#administration-and-first-setup" target="_blank" rel="noreferrer" className="underline">Read the HTTPS setup instructions</a>
+          <p>You can deploy a private database now without this step.</p>
+        </div>
+      )}
+      <CommandList>
+        {category !== "database" && <CommandGroup heading="GitHub repositories">
+          {!isGithubConnected && isHttps && (
             <CommandItem
               onSelect={() =>
                 redirectToGithubAppRegistration().catch((e: unknown) => setConnectionError(e instanceof Error ? e.message : "GitHub connection failed"))
@@ -71,11 +81,11 @@ export default function CommandModal({
                 <span className="h-4">{repo.name}</span>
               </CommandItem>
             ))}
-        </CommandGroup>
+        </CommandGroup>}
         <CommandSeparator />
 
         {/* LLM Models Section */}
-        <CommandGroup heading="LLM Models">
+        {category === "all" && <CommandGroup heading="LLM Models">
           {llmServices.map((s) => (
             <NewServiceItem
               key={s.name}
@@ -83,10 +93,10 @@ export default function CommandModal({
               onSelect={(serviceName) => createDatabaseToDeploy(serviceName)}
             />
           ))}
-        </CommandGroup>
+        </CommandGroup>}
         <CommandSeparator />
 
-        <CommandGroup heading="Other databases">
+        {category !== "application" && <CommandGroup heading="Databases">
           {databaseServices.map((s) => (
             <NewServiceItem
               key={s.name}
@@ -103,10 +113,10 @@ export default function CommandModal({
             <Plus className="w-5" />
             <span className="h-4">Add new databases</span>
           </CommandItem>
-        </CommandGroup>
+        </CommandGroup>}
         <CommandSeparator />
 
-        <CommandGroup heading="Analytics">
+        {category === "all" && <CommandGroup heading="Analytics">
           {analyticsServices.map((s) => (
             <NewServiceItem
               key={s.name}
@@ -114,7 +124,7 @@ export default function CommandModal({
               onSelect={(serviceName) => createDatabaseToDeploy(serviceName)}
             />
           ))}
-        </CommandGroup>
+        </CommandGroup>}
       </CommandList>
     </CommandDialog>
   );

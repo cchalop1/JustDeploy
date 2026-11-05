@@ -73,12 +73,8 @@ func main() {
 
 	databaseAdapter.Init()
 	defer databaseAdapter.Close()
-	if err := application.EnsureBootstrapToken(databaseAdapter); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
 	if databaseAdapter.GetSettings().AdminEmail == "" {
-		fmt.Println("Initial setup requires the token in", internal.JUSTDEPLOY_FOLDER+"/setup-token")
+		fmt.Println("Create your admin account in the web interface to complete initial setup.")
 	}
 
 	deployService := service.DeployService{

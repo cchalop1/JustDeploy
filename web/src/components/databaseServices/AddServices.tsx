@@ -9,16 +9,21 @@ import CommandModal from "./CommandModal";
 import { githubIsConnectedApi } from "@/services/githubIsConnected";
 import { GithubRepo, getGithubRepos } from "@/services/getGithubRepos";
 import { createRepoApi } from "@/services/createRepoApi";
+import { Service } from "@/services/getServicesByDeployId";
 import { createDatabaseApi } from "@/services/createDatabaseApi";
 
 type AddServiceProps = {
   setLoading: (loading: boolean) => void;
-  fetchServices: () => void;
+  fetchServices: () => Promise<void>;
+  firstService?: boolean;
+  onCreated?: (service: Service) => void;
 };
 
 export default function AddService({
   setLoading,
   fetchServices,
+  firstService = false,
+  onCreated,
 }: AddServiceProps) {
   const notif = useNotification();
   const [preConfiguredServices, setPreConfiguredServices] = useState<
@@ -26,8 +31,7 @@ export default function AddService({
   >([]);
   const [isGithubConnected, setIsGithubConnected] = useState(false);
   const [githubRepos, setGithubRepos] = useState<Array<GithubRepo>>([]);
-  const text =
-    "Connect a github repos or create a new service. You can also press";
+  const [category, setCategory] = useState<"all" | "application" | "database">("all");
   const [openCommandModal, setOpenCommandModal] = useState(false);
 
   async function getServices() {
@@ -49,11 +53,12 @@ export default function AddService({
       setLoading(true);
       setOpenCommandModal(false);
 
-      await createRepoApi({
+      const created = await createRepoApi({
         repoUrl,
       });
 
       await fetchServices();
+      onCreated?.(created);
     } catch (error) {
       console.error("Failed to create repo:", error);
       notif.error({title:"Creation failed",content:error instanceof Error ? error.message : "Creation failed"});
@@ -67,11 +72,12 @@ export default function AddService({
       setLoading(true);
       setOpenCommandModal(false);
 
-      await createDatabaseApi({
+      const created = await createDatabaseApi({
         databaseName,
       });
 
       await fetchServices();
+      onCreated?.(created);
     } catch (error) {
       console.error("Failed to create database:", error);
       notif.error({title:"Creation failed",content:error instanceof Error ? error.message : "Creation failed"});
@@ -87,6 +93,7 @@ export default function AddService({
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        setCategory("all");
         setOpenCommandModal((open) => !open);
       }
     };
@@ -96,19 +103,25 @@ export default function AddService({
 
   return (
     <>
-      <div
-        onClick={() => setOpenCommandModal(true)}
-        className="hover:shadow-md text-gray-600 hover:text-black bg-white cursor-pointer pt-5 pb-6 pl-5 pr-5 w-80 h-36 rounded-xl border border-dashed border-gray-500 hover:border-black"
-      >
-        <div className="font-bold text-xl mb-1">Click here</div>
-        <div>
-          {text}{" "}
-          <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            <span className="text-xs">⌘</span>K
-          </kbd>
+      {firstService ? (
+        <div className="flex flex-wrap justify-center gap-4">
+          <button type="button" onClick={() => { setCategory("application"); setOpenCommandModal(true); }} className="text-left bg-white rounded-xl border p-6 w-72 hover:shadow-md">
+            <span className="block text-lg font-semibold">Deploy my application</span>
+            <span className="text-sm text-gray-600">Connect GitHub and choose a repository. Public HTTPS access is required.</span>
+          </button>
+          <button type="button" onClick={() => { setCategory("database"); setOpenCommandModal(true); }} className="text-left bg-white rounded-xl border p-6 w-72 hover:shadow-md">
+            <span className="block text-lg font-semibold">Create a database</span>
+            <span className="text-sm text-gray-600">Start with a private database. No domain or GitHub account required.</span>
+          </button>
         </div>
-      </div>
+      ) : (
+        <button type="button" onClick={() => { setCategory("all"); setOpenCommandModal(true); }} className="text-left hover:shadow-md bg-white p-5 w-80 min-h-36 rounded-xl border border-dashed border-gray-500">
+          <span className="block font-bold text-xl mb-1">Add a service</span>
+          <span>Choose a GitHub repository or a service template. Shortcut: ⌘ / Ctrl + K.</span>
+        </button>
+      )}
       <CommandModal
+        category={category}
         open={openCommandModal}
         setOpen={setOpenCommandModal}
         preConfiguredServices={preConfiguredServices}

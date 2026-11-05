@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import AddService from "@/components/databaseServices/AddServices";
-import ModalWelcome from "@/components/modals/ModalWelcome";
 import ModalServiceSettings from "@/components/modals/ModalServiceSettings";
 import ProjectPageHeader from "@/components/project/ProjectPageHeader";
 import ServiceCard from "@/components/ServiceCard";
@@ -16,8 +15,6 @@ import { deployApi } from "@/services/deployApi";
 import { useInfo } from "@/hooks/useInfo";
 import { hasToken } from "@/services/authStorage";
 
-const WELCOME_DISMISSED_KEY = "welcome_dismissed";
-
 export default function Home() {
   const notif = useNotification();
   const { serverInfo } = useInfo();
@@ -26,7 +23,7 @@ export default function Home() {
   const [services, setServices] = useState<Service[]>([]);
   const [isGlobalSettingsModalOpen, setIsGlobalSettingsModalOpen] = useState(false);
   const [serviceIsLoading, setServiceIsCreating] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [servicesLoaded, setServicesLoaded] = useState(false);
 
   const toDeploy = services.find((s) => s.status === "ready_to_deploy");
 
@@ -57,16 +54,8 @@ export default function Home() {
   useEffect(() => {
     if (!shouldShowFirstConnectionModal && !shouldShowLoginModal && isLoggedIn) {
       fetchServices();
-      if (!localStorage.getItem(WELCOME_DISMISSED_KEY)) {
-        setShowWelcome(true);
-      }
     }
   }, [shouldShowFirstConnectionModal, shouldShowLoginModal, isLoggedIn]);
-
-  function dismissWelcome() {
-    localStorage.setItem(WELCOME_DISMISSED_KEY, "1");
-    setShowWelcome(false);
-  }
 
   async function deploy() {
     notif.info({ title: "Deploying project", content: "This may take a few minutes..." });
@@ -85,7 +74,12 @@ export default function Home() {
   }
 
   async function fetchServices() {
-    try { setServices(await getServicesApi()); } catch (error) { console.error("Services unavailable", error); }
+    try {
+      const items = await getServicesApi();
+      setServices(items);
+      setServicesLoaded(true);
+      setServiceSelected((selected) => selected ? items.find((item) => item.id === selected.id) || null : null);
+    } catch (error) { console.error("Services unavailable", error); }
   }
 
   useEffect(() => {
@@ -100,11 +94,12 @@ export default function Home() {
   const otherServices = services.filter((s) => s.type !== "github_repo");
 
   return (
-    <div className="bg-grid-image h-screen">
+    <div className="bg-grid-image min-h-screen">
       {serviceSelected && (
         <ModalServiceSettings
           key={serviceSelected.id}
           service={serviceSelected}
+          onConfigureServer={() => setIsGlobalSettingsModalOpen(true)}
           onClose={() => setServiceSelected(null)}
           fetchServices={fetchServices}
         />
@@ -114,7 +109,6 @@ export default function Home() {
       )}
       {shouldShowFirstConnectionModal && (
         <ModalFirstConnection
-          serverIp={serverInfo?.server?.ip || ""}
           onClose={() => {
             setShouldShowFirstConnectionModal(false);
             fetchServices();
@@ -134,11 +128,18 @@ export default function Home() {
         onClickSettings={() => setIsGlobalSettingsModalOpen(!isGlobalSettingsModalOpen)}
         toDeploy={!!toDeploy}
       />
-      {showWelcome && <ModalWelcome onClose={dismissWelcome} />}
-      <div className="flex flex-col justify-center items-center h-3/5">
-        {!shouldShowFirstConnectionModal && !shouldShowLoginModal && (
-          <div className="flex flex-col items-center gap-6 mt-3">
-            <div className="flex gap-3">
+      <div className="flex flex-col justify-center items-center min-h-[60vh] px-4 pb-12">
+        {isLoggedIn && !shouldShowFirstConnectionModal && !shouldShowLoginModal && (
+          <div className="flex flex-col items-center gap-6 mt-3 w-full">
+            {!servicesLoaded && <p role="status">Loading your services…</p>}
+            {servicesLoaded && services.length === 0 && (
+              <section className="text-center max-w-xl space-y-3">
+                <p className="text-sm text-gray-500">Account ready · Next: your first service</p>
+                <h1 className="text-3xl font-bold">Deploy your first service</h1>
+                <p className="text-gray-600">Choose an application or a private database. Review its settings, then deploy from the same screen.</p>
+              </section>
+            )}
+            <div className="flex flex-wrap justify-center gap-3">
               {githubRepoServices.map((service) => (
                 <ServiceCard
                   key={service.id}
@@ -147,7 +148,7 @@ export default function Home() {
                 />
               ))}
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap justify-center gap-3">
               {otherServices.map((service) => (
                 <ServiceCard
                   key={service.id}
@@ -156,7 +157,12 @@ export default function Home() {
                 />
               ))}
               {serviceIsLoading && <ServiceCardLoading />}
-              <AddService fetchServices={fetchServices} setLoading={setServiceIsCreating} />
+              {servicesLoaded && <AddService
+                fetchServices={fetchServices}
+                setLoading={setServiceIsCreating}
+                firstService={services.length === 0}
+                onCreated={setServiceSelected}
+              />}
             </div>
           </div>
         )}
