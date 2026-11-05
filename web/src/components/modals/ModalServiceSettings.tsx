@@ -13,18 +13,19 @@ import ServiceCommitInfo from "../ServiceCommitInfo";
 
 type ModalServiceSettingsProps = {
   service: Service;
+  onConfigureServer?: () => void;
   onClose: () => void;
   fetchServices: () => Promise<void>;
 };
 
 function statusColor(status: string) {
-  if (status === "running") return "bg-green-100 text-green-700";
+  if (status.toLowerCase() === "running") return "bg-green-100 text-green-700";
   if (status === "error" || status === "failed") return "bg-red-100 text-red-600";
   if (status === "ready_to_deploy") return "bg-blue-50 text-blue-600";
   return "bg-gray-100 text-gray-500";
 }
 
-export default function ModalServiceSettings({ service, onClose, fetchServices }: ModalServiceSettingsProps) {
+export default function ModalServiceSettings({ service, onClose, fetchServices, onConfigureServer }: ModalServiceSettingsProps) {
   const notif = useNotification();
   const [isDeleting, setIsDeleting] = useState(false);
   const [tab, setTab] = useState<"settings" | "logs">("settings");
@@ -83,10 +84,9 @@ export default function ModalServiceSettings({ service, onClose, fetchServices }
         </div>
 
         <div className="px-5 overflow-y-auto max-h-[60vh]">
-          {tab === "settings" && (
-            <>
+          <div hidden={tab !== "settings"}>
               <ServiceCommitInfo serviceId={service.id} />
-              <ServiceDeploySettings service={service} fetchServices={fetchServices} />
+              <ServiceDeploySettings service={service} fetchServices={fetchServices} onConfigureServer={onConfigureServer} />
 
               {/* Danger zone */}
               <div className="pt-4 pb-2 border-t border-gray-100 mt-2">
@@ -102,8 +102,7 @@ export default function ModalServiceSettings({ service, onClose, fetchServices }
                   {isDeleting ? "Deleting…" : "Delete service"}
                 </button>
               </div>
-            </>
-          )}
+          </div>
 
           {tab === "logs" && (
             <div className="py-4">

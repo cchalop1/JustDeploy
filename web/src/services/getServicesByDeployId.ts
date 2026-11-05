@@ -14,6 +14,7 @@ export type Service = {
   projectId: string;
   revision: number;
   branch: string;
+  dockerfile?: string;
   url: string;
   name: string;
   envs: Array<Env>;

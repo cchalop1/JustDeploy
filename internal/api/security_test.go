@@ -14,7 +14,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -50,25 +49,19 @@ func request(app *Application, path string, body any, headers map[string]string)
 	app.Echo.ServeHTTP(rec, req)
 	return rec
 }
-func TestSetupRequiresTokenAndValidCredentials(t *testing.T) {
-	app, ds := testApplication(t)
-	if err := application.EnsureBootstrapToken(ds.DatabaseAdapter); err != nil {
-		t.Fatal(err)
-	}
+func TestSetupRequiresValidCredentialsAndCannotOverwriteAdmin(t *testing.T) {
+	app, _ := testApplication(t)
 	body := map[string]string{"email": "admin@example.com", "password": "secure-password-123", "domain": "example.com"}
-	if rec := request(app, "/api/setup", body, nil); rec.Code != 403 {
-		t.Fatalf("setup without token: %d %s", rec.Code, rec.Body.String())
-	}
-	token, err := os.ReadFile(filepath.Join(internal.JUSTDEPLOY_FOLDER, "setup-token"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	body["setupToken"] = strings.TrimSpace(string(token))
 	body["email"] = ""
 	if rec := request(app, "/api/setup", body, nil); rec.Code != 400 {
 		t.Fatalf("empty email accepted: %d", rec.Code)
 	}
 	body["email"] = "admin@example.com"
+	body["password"] = "short"
+	if rec := request(app, "/api/setup", body, nil); rec.Code != 400 {
+		t.Fatalf("short password accepted: %d", rec.Code)
+	}
+	body["password"] = "secure-password-123"
 	if rec := request(app, "/api/setup", body, nil); rec.Code != 200 {
 		t.Fatalf("setup: %d %s", rec.Code, rec.Body.String())
 	}
@@ -79,6 +72,33 @@ func TestSetupRequiresTokenAndValidCredentials(t *testing.T) {
 		t.Fatalf("deploy route unprotected: %d", rec.Code)
 	}
 }
+func TestConcurrentSetupOnlyOneRequestCreatesAdmin(t *testing.T) {
+	app, ds := testApplication(t)
+	var wg sync.WaitGroup
+	results := make(chan int, 2)
+	for _, email := range []string{"one@example.com", "two@example.com"} {
+		wg.Add(1)
+		go func(email string) {
+			defer wg.Done()
+			results <- request(app, "/api/setup", map[string]string{
+				"email": email, "password": "secure-password-123",
+			}, nil).Code
+		}(email)
+	}
+	wg.Wait()
+	close(results)
+	statuses := map[int]int{}
+	for code := range results {
+		statuses[code]++
+	}
+	if statuses[http.StatusOK] != 1 || statuses[http.StatusConflict] != 1 {
+		t.Fatalf("expected one successful setup and one conflict: %v", statuses)
+	}
+	if ds.DatabaseAdapter.GetSettings().AdminEmail == "" {
+		t.Fatal("admin was not persisted")
+	}
+}
+
 func TestConcurrentAdminCreationOnlyOneWins(t *testing.T) {
 	_, ds := testApplication(t)
 	var wg sync.WaitGroup

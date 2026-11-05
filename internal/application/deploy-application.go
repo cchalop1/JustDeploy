@@ -93,6 +93,16 @@ func deployOneService(ds *service.DeployService, s domain.Service, base string) 
 	return ds.DatabaseAdapter.SaveService(s)
 }
 func DeployApplication(ds *service.DeployService) error {
+	return deployServices(ds, "")
+}
+
+// DeployServiceGroup deploys the saved workspace and pending dependencies in the
+// selected service's connection group without affecting other projects.
+func DeployServiceGroup(ds *service.DeployService, id string) error {
+	return deployServices(ds, id)
+}
+
+func deployServices(ds *service.DeployService, id string) error {
 	if !ds.Operation.TryLock() {
 		return domain.ErrConflict
 	}
@@ -101,10 +111,28 @@ func DeployApplication(ds *service.DeployService) error {
 	if err != nil {
 		return err
 	}
+	group := ""
+	if id != "" {
+		selected, err := ds.DatabaseAdapter.GetServiceById(id)
+		if err != nil {
+			return err
+		}
+		group = selected.ProjectID
+		if group == "" {
+			group = selected.Id
+		}
+	}
 	server := ds.DatabaseAdapter.GetServer()
 	// Start stateful dependencies first. Already running dependencies are never recreated by a global app deploy.
 	for _, github := range []bool{false, true} {
 		for _, s := range services {
+			serviceGroup := s.ProjectID
+			if serviceGroup == "" {
+				serviceGroup = s.Id
+			}
+			if id != "" && serviceGroup != group {
+				continue
+			}
 			if (s.Type == "github_repo") != github {
 				continue
 			}

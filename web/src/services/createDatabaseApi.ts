@@ -1,5 +1,5 @@
 import { callApi } from "./api";
-import { ServiceDto } from "./getServicesApi";
+import { Service } from "./getServicesByDeployId";
 
 export type CreateDatabaseRequest = {
   databaseName: string;
@@ -7,6 +7,6 @@ export type CreateDatabaseRequest = {
 
 export async function createDatabaseApi(
   body: CreateDatabaseRequest
-): Promise<ServiceDto> {
-  return await callApi<ServiceDto>("/database/create", "POST", body);
+): Promise<Service> {
+  return await callApi<Service>("/database/create", "POST", body);
 }

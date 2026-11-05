@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Check if the OS is Linux
 if [ "$(uname -s)" != "Linux" ]; then
@@ -54,8 +55,8 @@ install_prerequisites() {
   echo "🔍 Checking for required packages..."
   if ! command -v unzip &> /dev/null; then
     echo "📦 Installing unzip..."
-    sudo apt-get update
-    sudo apt-get install -y unzip
+    apt-get update
+    apt-get install -y unzip
     echo "✅ unzip installed successfully."
   else
     echo "✅ unzip is already installed."
@@ -87,10 +88,10 @@ install_docker() {
     fi
     
     # Update package index
-    sudo apt-get update
+    apt-get update
     
     # Install packages to allow apt to use a repository over HTTPS
-    sudo apt-get install -y \
+    apt-get install -y \
       apt-transport-https \
       ca-certificates \
       curl \
@@ -98,26 +99,26 @@ install_docker() {
       lsb-release
     
     # Add Docker's official GPG key
-    curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
     
     # Set up the stable repository
     echo \
       "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') \
-      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
     
     # Update apt package index again
-    sudo apt-get update
+    apt-get update
     
     # Install Docker Engine
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+    apt-get install -y docker-ce docker-ce-cli containerd.io
     
     # Add current user to docker group to run docker without sudo
-    sudo groupadd -f docker
-    sudo usermod -aG docker $USER
+    groupadd -f docker
+    usermod -aG docker "${USER:-root}"
     
     # Enable and start Docker service
-    sudo systemctl enable docker
-    sudo systemctl start docker
+    systemctl enable docker
+    systemctl start docker
     
     echo "✅ Docker has been installed successfully."
     echo "💡 NOTE: You may need to log out and log back in for the docker group changes to take effect."
@@ -134,8 +135,8 @@ install_docker_compose() {
     
     # Install Docker Compose
     COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
-    sudo curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
+    curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
     
     echo "✅ Docker Compose has been installed successfully."
   fi
@@ -152,6 +153,10 @@ platform=$(uname -s | tr '[:upper:]' '[:lower:]')
 
 # Check and install Docker and Docker Compose if needed
 install_docker
+if ! docker info > /dev/null 2>&1; then
+  echo "❌ Docker is installed but its daemon is not ready. Check: systemctl status docker"
+  exit 1
+fi
 install_docker_compose
 
 # Determine the appropriate binary based on architecture
@@ -185,7 +190,7 @@ chmod +x ./bin/$binary_file_arch
 if systemctl is-active --quiet justdeploy.service; then systemctl stop justdeploy.service || exit 1; fi
 
 # Move the binary to a system directory (e.g., /usr/local/bin)
-sudo install -m 755 "./bin/$binary_file_arch" "/usr/local/bin/$binary_file" || exit 1
+install -m 755 "./bin/$binary_file_arch" "/usr/local/bin/$binary_file" || exit 1
 
 # Clean up downloaded files
 rm $zip_file
@@ -224,19 +229,19 @@ EOF
 
 # Preserve existing state before switching from the legacy root HOME directory.
 if [ -d /root/.config/justdeploy ] && [ ! -e /var/lib/justdeploy ]; then
-  sudo cp -a /root/.config/justdeploy /var/lib/justdeploy || exit 1
+  cp -a /root/.config/justdeploy /var/lib/justdeploy || exit 1
 fi
-sudo install -d -m 700 /var/lib/justdeploy
+install -d -m 700 /var/lib/justdeploy
 
 # Move service file to systemd directory
-sudo mv "$install_work_dir/justdeploy.service" /etc/systemd/system/
+mv "$install_work_dir/justdeploy.service" /etc/systemd/system/
 
 # Reload systemd to recognize the new service
-sudo systemctl daemon-reload
+systemctl daemon-reload
 
 # Enable and start the service
-sudo systemctl enable justdeploy.service
-sudo systemctl start justdeploy.service
+systemctl enable justdeploy.service
+systemctl start justdeploy.service
 
 if [ $is_reinstall -eq 0 ]; then
   echo "✅ JustDeploy service has been reinstalled and started"
@@ -244,37 +249,56 @@ else
   echo "✅ JustDeploy service has been installed and started"
 fi
 
-# Display startup logs to show server IP
-echo "📋 Displaying JustDeploy startup logs (showing server IP):"
-echo "----------------------------------------------------------------"
-sleep 3  # Give the service a moment to start
-sudo journalctl -u justdeploy.service -n 20 --no-pager
-echo "----------------------------------------------------------------"
-echo "💡 You can continue to monitor logs with: sudo journalctl -u justdeploy.service -f"
+# Wait for a real API response before reporting a successful installation.
+echo "🔍 Waiting for the JustDeploy API..."
+api_ready=false
+local_scheme=http
+for attempt in {1..30}; do
+  if systemctl is-active --quiet justdeploy.service; then
+    if curl --noproxy '*' -fsS --max-time 2 http://127.0.0.1:5915/api/info > /dev/null 2>&1; then
+      api_ready=true
+      break
+    fi
+    # Existing installations may use direct TLS. This loopback probe sends no credentials.
+    if curl --noproxy '*' -kfsS --max-time 2 https://127.0.0.1:5915/api/info > /dev/null 2>&1; then
+      api_ready=true
+      local_scheme=https
+      break
+    fi
+  fi
+  sleep 1
+done
+if [ "$api_ready" != true ]; then
+  echo "❌ JustDeploy did not become ready. Installation has not been confirmed."
+  echo "Inspect the error on your VPS: journalctl -u justdeploy.service -n 50 --no-pager"
+  exit 1
+fi
 
-# Print summary
+# Prefer the server address used for this SSH connection, including on NAT hosts.
+server_address=""
+if [ -n "${SSH_CONNECTION:-}" ]; then
+  read -r client_address client_port server_address server_port <<< "$SSH_CONNECTION"
+fi
+if [ -z "$server_address" ]; then
+  server_addresses=$(hostname -I 2>/dev/null || true)
+  read -r server_address _ <<< "$server_addresses"
+fi
+server_address=${server_address:-YOUR_VPS_IP}
+
 echo ""
-if [ $is_reinstall -eq 0 ]; then
-  echo "🎉 Reinstallation Summary:"
+echo "✅ Docker ready · JustDeploy API ready"
+echo ""
+echo "Next: open JustDeploy from your computer"
+echo "1. Run this command in a terminal on your computer (keep it open):"
+printf '   ssh -N -L 5915:127.0.0.1:5915 %q\n' "${SUDO_USER:-root}@$server_address"
+if [ "$local_scheme" = http ]; then
+  echo "2. Open http://localhost:5915 in your browser."
 else
-  echo "🎉 Installation Summary:"
+  echo "2. Open your configured HTTPS administration URL (direct TLS detected)."
 fi
-echo "------------------------"
-echo "✅ JustDeploy installed at: /usr/local/bin/$binary_file"
-echo "✅ Systemd service created: justdeploy.service"
-if command -v docker &> /dev/null; then
-  echo "✅ Docker is installed"
-fi
-if command -v docker-compose &> /dev/null; then
-  echo "✅ Docker Compose is installed"
-fi
-if command -v unzip &> /dev/null; then
-  echo "✅ Unzip installed (prerequisite)"
-fi
-if command -v nixpacks &> /dev/null; then
-  echo "✅ Nixpacks installed (prerequisite)"
-fi
+echo "3. Create your admin account on first use, or sign in with your existing account."
+echo "4. Choose your first service."
 echo ""
-echo "🚀 JustDeploy is now running as a system service!"
-echo "💡 Access the web interface using the URL shown in the service logs above"
-echo ""
+echo "Private databases need no domain. GitHub integration requires public HTTPS access."
+echo "HTTPS setup: https://github.com/cchalop1/JustDeploy/blob/main/SECURITY-UPGRADE.md#administration-and-first-setup"
+echo "Logs: journalctl -u justdeploy.service -f"
